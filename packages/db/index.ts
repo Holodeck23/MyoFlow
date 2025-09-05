@@ -1,3 +1,13 @@
-// Database package placeholder
-// Prisma client will be set up during Phase 1 authentication sprint
-export const DB_PACKAGE_VERSION = '0.0.0'
+import { PrismaClient } from '@prisma/client'
+
+declare global {
+  var prisma: PrismaClient | undefined
+}
+
+export const prisma = global.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma
+}
+
+export * from '@prisma/client'

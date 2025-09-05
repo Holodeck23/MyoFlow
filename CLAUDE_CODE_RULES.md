@@ -50,6 +50,7 @@ pnpm build      # Must pass
 - ❌ Changing dependencies without explicit discussion
 - ❌ Modifying configuration files without clear justification
 - ❌ Adding new features while fixing bugs (or vice versa)
+- ❌ Feature drift - implementing more than the single branch purpose
 
 ### **REQUIRED CONFIRMATIONS**
 Before making any change, Claude must confirm:
@@ -108,10 +109,11 @@ If you notice unrelated issues:
 - Adding cheerleading language → STOP, stick to facts
 
 ### **IF SCOPE CREEP HAPPENS:**
-1. Acknowledge the scope drift
+1. Acknowledge the scope drift immediately
 2. Revert any unrelated changes
 3. Refocus on the single branch purpose
 4. Document additional issues for separate branches
+5. Remember: "Feature drift" violates the one branch = one purpose rule
 
 ## 🎯 SUCCESS METRICS
 
