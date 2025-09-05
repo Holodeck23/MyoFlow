@@ -20,6 +20,7 @@
       }
     ],
     "paths": {
+      "@/*": ["./apps/web/*"],
       "@myoflow/ui": ["./packages/ui"],
       "@myoflow/lib": ["./packages/lib"],
       "@myoflow/db": ["./packages/db"]
