@@ -1,24 +1,36 @@
 import { NextAuthOptions } from 'next-auth'
-import EmailProvider from 'next-auth/providers/email'
+import GoogleProvider from 'next-auth/providers/google'
+import CredentialsProvider from 'next-auth/providers/credentials'
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
+    // Google OAuth
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || 'dummy',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy',
+    }),
+    // Email demo authentication
+    CredentialsProvider({
+      id: 'email-demo',
+      name: 'Email',
+      credentials: {
+        email: { label: "Email", type: "email" }
       },
-      from: process.env.EMAIL_FROM,
+      async authorize(credentials) {
+        // Demo authentication - just validates email format
+        if (credentials?.email && credentials.email.includes('@')) {
+          return {
+            id: credentials.email,
+            email: credentials.email,
+            name: credentials.email.split('@')[0],
+          }
+        }
+        return null
+      }
     }),
   ],
   pages: {
     signIn: '/auth/sign-in',
-    verifyRequest: '/auth/verify-request',
-    error: '/auth/error',
   },
   callbacks: {
     async session({ session, token }) {
