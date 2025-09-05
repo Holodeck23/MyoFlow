@@ -1,0 +1,15 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "clients": "Klienten",
+    "appointments": "Termine",
+    "invoices": "Rechnungen",
+    "settings": "Einstellungen"
+  },
+  "invoice": {
+    "title": "Rechnung",
+    "number": "Rechnungsnr.",
+    "date": "Datum"
+  }
+}
+

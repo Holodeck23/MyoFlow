@@ -1,0 +1,15 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "appointments": "Appointments",
+    "invoices": "Invoices",
+    "settings": "Settings"
+  },
+  "invoice": {
+    "title": "Invoice",
+    "number": "Invoice No.",
+    "date": "Date"
+  }
+}
+
