@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -66,10 +67,12 @@ export default function Dashboard() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium text-gray-900">Clients</h4>
-                <p className="text-sm text-gray-500 mt-1">Manage your client list</p>
-                <p className="text-xs text-gray-400 mt-2">Coming in Sprint 1.2</p>
+              <div className="p-4 border rounded-lg hover:bg-gray-50">
+                <Link href="/dashboard/clients" className="block">
+                  <h4 className="font-medium text-gray-900">Clients</h4>
+                  <p className="text-sm text-gray-500 mt-1">Manage your client list</p>
+                  <p className="text-xs text-green-600 mt-2">✅ Available now</p>
+                </Link>
               </div>
               
               <div className="p-4 border rounded-lg">
