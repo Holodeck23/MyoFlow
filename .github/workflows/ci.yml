@@ -70,14 +70,18 @@ jobs:
           echo "ENCRYPTION_KEY_B64=$(openssl rand -base64 32)" >> .env
           echo "INTAKE_TOKEN_SECRET=$(openssl rand -hex 32)" >> .env
           echo "NEXTAUTH_SECRET=$(openssl rand -hex 32)" >> .env
+          # Setup web app environment
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/myoflow" > apps/web/.env
+          echo "NEXTAUTH_URL=http://localhost:3000" >> apps/web/.env
+          echo "NEXTAUTH_SECRET=$(openssl rand -hex 32)" >> apps/web/.env
 
       - name: Generate Prisma client
-        run: pnpm --filter db prisma generate
+        run: pnpm --filter @myoflow/db prisma generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
       - name: Run database migrations
-        run: pnpm --filter db prisma migrate dev --name init
+        run: pnpm --filter @myoflow/db prisma migrate dev --name init
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
