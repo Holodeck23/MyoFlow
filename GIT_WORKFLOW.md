@@ -49,6 +49,7 @@ git commit -m "feat: your changes"
    - What changed?
    - Why did it change?
    - How to test it?
+   - Suggest screenshots if appropriate
 4. Wait for CI to pass ✅
 5. Merge when ready
 
