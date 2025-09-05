@@ -1,0 +1,71 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "appointments": "Appointments",
+    "services": "Services",
+    "invoices": "Invoices",
+    "vouchers": "Vouchers",
+    "products": "Products",
+    "settings": "Settings",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "signInWithEmail": "Sign in with Email",
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "revenue": "Revenue",
+    "bookings": "Bookings",
+    "newClients": "New Clients",
+    "returningClients": "Returning Clients",
+    "revenueByLocation": "Revenue by Location",
+    "serviceMix": "Service Mix",
+    "kleinunternehmer": "Small Business Threshold"
+  },
+  "clients": {
+    "title": "Clients",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "tags": "Tags",
+    "healthFlags": "Health Notes",
+    "generateIntakeLink": "Generate Intake Link",
+    "notes": "Notes"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "client": "Client",
+    "service": "Service",
+    "location": "Location",
+    "start": "Start",
+    "end": "End",
+    "status": "Status",
+    "notes": "Notes"
+  },
+  "invoices": {
+    "title": "Invoices",
+    "number": "Number",
+    "client": "Client",
+    "total": "Total",
+    "status": "Status",
+    "createdAt": "Created",
+    "generatePDF": "Generate PDF",
+    "kleinunternehmerNote": "No VAT charged according to § 6 Abs. 1 Z 27 UStG (small business regulation)."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

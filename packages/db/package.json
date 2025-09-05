@@ -1,0 +1,21 @@
+{
+  "name": "@myoflow/db",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "prisma generate",
+    "dev": "prisma generate --watch",
+    "prisma": "prisma",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio",
+    "seed": "tsx seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.0",
+    "tsx": "^4.6.0",
+    "@types/node": "^20.0.0"
+  }
+}

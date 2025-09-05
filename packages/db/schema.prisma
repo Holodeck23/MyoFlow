@@ -1,0 +1,312 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role { 
+  OWNER 
+  STAFF 
+  ACCOUNTANT 
+  AFFILIATE 
+}
+
+enum TherapistDesignation { 
+  HEILMASSEUR 
+  MEDIZINISCHER_MASSEUR 
+  GEWERBLICHER_MASSEUR 
+}
+
+enum VatStatus { 
+  KLEINUNTERNEHMER 
+  UST_10 
+  UST_13 
+  UST_20 
+}
+
+enum LocationType { 
+  HOME 
+  CLINIC 
+  MOBILE 
+  CLUB 
+}
+
+enum AppointmentStatus { 
+  BOOKED 
+  COMPLETED 
+  CANCELLED 
+  NO_SHOW 
+}
+
+enum ProductType { 
+  PHYSICAL 
+  DIGITAL 
+}
+
+enum Provider { 
+  STRIPE 
+  MANUAL 
+}
+
+enum PaymentStatus { 
+  PENDING 
+  SETTLED 
+  FAILED 
+}
+
+enum InvoiceStatus { 
+  DRAFT 
+  SENT 
+  PAID 
+  VOID 
+}
+
+enum OrderStatus { 
+  PENDING 
+  PAID 
+  REFUNDED 
+}
+
+enum ServiceCategory { 
+  MASSAGE 
+  YOGA 
+  CONSULTING 
+  OTHER 
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(OWNER)
+  createdAt DateTime @default(now())
+  Therapist Therapist?
+}
+
+model Therapist {
+  id                   String               @id @default(cuid())
+  userId               String               @unique
+  slug                 String               @unique
+  designation          TherapistDesignation
+  vatStatus            VatStatus
+  kleinunternehmer     Boolean              @default(true)
+  annualGrossCents     Int                  @default(0)
+  annualGrossCachedAt  DateTime?
+  iban                 String?
+  brandColor           String?
+  logoUrl              String?
+  createdAt            DateTime             @default(now())
+  User                 User                 @relation(fields: [userId], references: [id])
+  Locations            Location[]
+  Clients              Client[]
+  Services             Service[]
+  Appointments         Appointment[]
+  Invoices             Invoice[]
+  Vouchers             Voucher[]
+  Products             Product[]
+  Orders               Order[]
+  Consents             Consent[]
+  Notes                Note[]
+  Affiliates           Affiliate[]
+  AuditLogs            AuditLog[]
+}
+
+model Location {
+  id              String        @id @default(cuid())
+  therapistId     String
+  name            String
+  type            LocationType
+  address         String?
+  travelBufferMin Int           @default(0)
+  Therapist       Therapist     @relation(fields: [therapistId], references: [id])
+  Appointments    Appointment[]
+  
+  @@index([therapistId, type])
+}
+
+model Client {
+  id             String        @id @default(cuid())
+  therapistId    String
+  name           String
+  email          String?
+  phone          String?
+  tags           String[]      @default([])
+  healthFlagsEnc String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  Therapist      Therapist     @relation(fields: [therapistId], references: [id])
+  Notes          Note[]
+  Consents       Consent[]
+  Appointments   Appointment[]
+  Invoices       Invoice[]
+  
+  @@index([therapistId, name])
+}
+
+model Service {
+  id           String          @id @default(cuid())
+  therapistId  String
+  name         String
+  category     ServiceCategory
+  durationMin  Int
+  priceCents   Int
+  vatRate      VatStatus
+  active       Boolean         @default(true)
+  Therapist    Therapist       @relation(fields: [therapistId], references: [id])
+  Appointments Appointment[]
+  
+  @@index([therapistId, category, active])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  therapistId String
+  clientId    String
+  serviceId   String
+  locationId  String
+  start       DateTime
+  end         DateTime
+  status      AppointmentStatus @default(BOOKED)
+  notes       String?
+  Therapist   Therapist         @relation(fields: [therapistId], references: [id])
+  Client      Client            @relation(fields: [clientId], references: [id])
+  Service     Service           @relation(fields: [serviceId], references: [id])
+  Location    Location          @relation(fields: [locationId], references: [id])
+  Invoice     Invoice?
+  
+  @@index([therapistId, start])
+}
+
+model Invoice {
+  id                String        @id @default(cuid())
+  therapistId       String
+  clientId          String?
+  appointmentId     String?       @unique
+  number            String        @unique
+  status            InvoiceStatus @default(DRAFT)
+  lines             Json
+  totalGrossCents   Int
+  vatBreakdown      Json
+  kleinunternehmer  Boolean
+  pdfUrl            String?
+  createdAt         DateTime      @default(now())
+  Therapist         Therapist     @relation(fields: [therapistId], references: [id])
+  Client            Client?       @relation(fields: [clientId], references: [id])
+  Appointment       Appointment?  @relation(fields: [appointmentId], references: [id])
+  Payments          Payment[]
+  
+  @@index([therapistId, createdAt])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  provider    Provider
+  amountCents Int
+  status      PaymentStatus @default(PENDING)
+  meta        Json?
+  Invoice     Invoice       @relation(fields: [invoiceId], references: [id])
+  
+  @@index([invoiceId, status])
+}
+
+model Voucher {
+  id                 String    @id @default(cuid())
+  therapistId        String
+  code               String    @unique
+  balanceCents       Int
+  expiresAt          DateTime?
+  purchaserEmail     String?
+  redeemedByClientId String?
+  Therapist          Therapist @relation(fields: [therapistId], references: [id])
+  
+  @@index([therapistId])
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  therapistId String
+  name        String
+  type        ProductType
+  priceCents  Int
+  vatRate     VatStatus
+  stock       Int?
+  fileUrl     String?
+  active      Boolean     @default(true)
+  Therapist   Therapist   @relation(fields: [therapistId], references: [id])
+  Orders      Order[]
+  
+  @@index([therapistId, active])
+}
+
+model Order {
+  id                  String      @id @default(cuid())
+  therapistId         String
+  productId           String
+  clientEmail         String
+  amountCents         Int
+  status              OrderStatus @default(PENDING)
+  downloadToken       String?
+  attributionRefCode  String?
+  createdAt           DateTime    @default(now())
+  Therapist           Therapist   @relation(fields: [therapistId], references: [id])
+  Product             Product     @relation(fields: [productId], references: [id])
+  
+  @@index([therapistId, status, createdAt])
+}
+
+model Consent {
+  id          String    @id @default(cuid())
+  therapistId String
+  clientId    String
+  docVersion  String
+  acceptedAt  DateTime
+  ip          String?
+  payloadEnc  String
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+  Client      Client    @relation(fields: [clientId], references: [id])
+  
+  @@index([therapistId, clientId, acceptedAt])
+}
+
+model Note {
+  id          String    @id @default(cuid())
+  therapistId String
+  clientId    String
+  bodyEnc     String
+  createdAt   DateTime  @default(now())
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+  Client      Client    @relation(fields: [clientId], references: [id])
+  
+  @@index([therapistId, clientId, createdAt])
+}
+
+model Affiliate {
+  id               String    @id @default(cuid())
+  refCode          String    @unique
+  ownerTherapistId String
+  percentBps       Int       @default(2000)
+  active           Boolean   @default(true)
+  Therapist        Therapist @relation(fields: [ownerTherapistId], references: [id])
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  actorUserId String?
+  therapistId String
+  entity      String
+  entityId    String
+  action      String
+  at          DateTime  @default(now())
+  ip          String?
+  meta        Json?
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+  
+  @@index([therapistId, entity, entityId, at])
+}
