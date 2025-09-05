@@ -17,10 +17,13 @@ test.describe('Authentication', () => {
     await page.getByRole('textbox', { name: /email/i }).fill('test@example.com');
     await page.getByRole('textbox', { name: /password/i }).fill('demo');
     
-    // Submit form
-    await page.getByRole('button', { name: /sign in/i }).click();
+    // Submit form and wait for navigation
+    await Promise.all([
+      page.waitForURL('/dashboard', { timeout: 10000 }),
+      page.getByRole('button', { name: /sign in/i }).click(),
+    ]);
     
-    // Should redirect to dashboard
+    // Verify we're on the dashboard
     await expect(page).toHaveURL('/dashboard');
     await expect(page.getByText(/dashboard/i)).toBeVisible();
   });
