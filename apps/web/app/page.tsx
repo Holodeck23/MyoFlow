@@ -1,13 +1,10 @@
-import { redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]/route'
-
-export default async function HomePage() {
-  const session = await getServerSession(authOptions)
-  
-  if (!session) {
-    redirect('/auth/sign-in')
-  }
-  
-  redirect('/dashboard')
+export default function HomePage() {
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold">MyoFlow</h1>
+      <p className="text-gray-600 mt-2">
+        Austrian Therapy Practice Management System
+      </p>
+    </div>
+  )
 }

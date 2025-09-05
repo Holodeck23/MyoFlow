@@ -1,16 +1,8 @@
-// Security
-export * from './security/crypto'
-export * from './security/permissions'
-export * from './security/intakeToken'
-
-// Audit
-export * from './audit/log'
-
 // Austrian tax helpers
 export * from './at/receipt'
 
-// PDF
-export * from './pdf/receipt'
-
-// i18n
+// i18n utilities
 export * from './i18n/config'
+
+// Version
+export const MYOFLOW_LIB_VERSION = '0.0.0'
