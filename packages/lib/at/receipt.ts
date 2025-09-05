@@ -1,4 +1,5 @@
-import { VatStatus } from '@myoflow/db'
+// VatStatus will be imported from @myoflow/db once Prisma is set up
+type VatStatus = 'KLEINUNTERNEHMER' | 'UST_10' | 'UST_13' | 'UST_20'
 
 export const KLEINUNTERNEHMER_LIMIT = 5500000 // 55,000€ in cents
 
@@ -18,13 +19,13 @@ export interface VatLineItem {
 
 export function getVatRate(vatStatus: VatStatus): number {
   switch (vatStatus) {
-    case VatStatus.UST_10:
+    case 'UST_10':
       return 0.10
-    case VatStatus.UST_13:
+    case 'UST_13':
       return 0.13
-    case VatStatus.UST_20:
+    case 'UST_20':
       return 0.20
-    case VatStatus.KLEINUNTERNEHMER:
+    case 'KLEINUNTERNEHMER':
       return 0.00
     default:
       return 0.00
