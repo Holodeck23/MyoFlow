@@ -1,0 +1,71 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Klienten",
+    "appointments": "Termine",
+    "services": "Leistungen",
+    "invoices": "Rechnungen",
+    "vouchers": "Gutscheine",
+    "products": "Produkte",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signInWithEmail": "Mit E-Mail anmelden",
+    "signInWithGoogle": "Mit Google anmelden"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "revenue": "Umsatz",
+    "bookings": "Buchungen",
+    "newClients": "Neue Klienten",
+    "returningClients": "Stammklienten",
+    "revenueByLocation": "Umsatz nach Standort",
+    "serviceMix": "Service-Mix",
+    "kleinunternehmer": "Kleinunternehmergrenze"
+  },
+  "clients": {
+    "title": "Klienten",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "tags": "Tags",
+    "healthFlags": "Gesundheitshinweise",
+    "generateIntakeLink": "Aufnahme-Link generieren",
+    "notes": "Notizen"
+  },
+  "appointments": {
+    "title": "Termine",
+    "client": "Klient",
+    "service": "Leistung",
+    "location": "Standort",
+    "start": "Start",
+    "end": "Ende",
+    "status": "Status",
+    "notes": "Notizen"
+  },
+  "invoices": {
+    "title": "Rechnungen",
+    "number": "Nummer",
+    "client": "Klient",
+    "total": "Gesamt",
+    "status": "Status",
+    "createdAt": "Erstellt am",
+    "generatePDF": "PDF generieren",
+    "kleinunternehmerNote": "Gemäß § 6 Abs. 1 Z 27 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung)."
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolgreich"
+  }
+}
