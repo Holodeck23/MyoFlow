@@ -1,12 +1,3 @@
-export * from '@prisma/client'
-export { PrismaClient } from '@prisma/client'
-
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Database package placeholder
+// Prisma client will be set up during Phase 1 authentication sprint
+export const DB_PACKAGE_VERSION = '0.0.0'
