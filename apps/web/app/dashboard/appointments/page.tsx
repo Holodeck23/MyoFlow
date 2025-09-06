@@ -165,11 +165,15 @@ export default function AppointmentsPage() {
             ) : (
               <div className="divide-y divide-gray-200">
                 {appointments.map((appointment) => (
-                  <div key={appointment.id} className="p-6 hover:bg-gray-50">
+                  <Link 
+                    key={appointment.id} 
+                    href={`/dashboard/appointments/${appointment.id}`}
+                    className="block p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3">
-                          <h3 className="text-sm font-medium text-gray-900">
+                          <h3 className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">
                             {appointment.Client.name}
                           </h3>
                           <span
@@ -217,12 +221,12 @@ export default function AppointmentsPage() {
                       </div>
                       
                       <div className="ml-4 flex-shrink-0">
-                        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                          Edit
-                        </button>
+                        <div className="text-sm text-blue-600 font-medium">
+                          View Details →
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
