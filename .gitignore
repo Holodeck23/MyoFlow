@@ -8,6 +8,12 @@ coverage/
 .coverage
 .nyc_output
 
+# Playwright E2E Testing
+test-results/
+playwright-report/
+playwright/.cache/
+debug-*.png
+
 # Next.js
 .next/
 out/
