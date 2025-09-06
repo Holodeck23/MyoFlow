@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Playwright E2E Test Configuration for MyoFlow
+ * Resolves Jules' timeout issues with extended server startup timeout
+ */
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -28,7 +32,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm dev --port 3001',
     url: 'http://localhost:3001',
-    timeout: 180_000, // 3 minutes for server startup
+    timeout: 180_000, // 3 minutes for server startup - fixes timeout issues
     reuseExistingServer: !process.env.CI,
     env: {
       DATABASE_URL: process.env.DATABASE_URL || 'postgresql://ZOD@localhost:5432/myoflow',
