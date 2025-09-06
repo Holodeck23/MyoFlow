@@ -1,17 +1,18 @@
 # 📋 CLAUDE DEVELOPMENT NOTES
 
 **Project:** MyoFlow - Austrian Therapy Practice Management  
-**Session Date:** September 6, 2024  
-**Status:** Sprint 1.3 Appointment Scheduling System - COMPLETE ✅
+**Session Date:** September 6, 2025  
+**Status:** Sprint 1.5 PDF Generation & Service Rates - IN PROGRESS 🚧
 
 ---
 
 ## 🎯 **Current Session Objectives**
 
-**Primary Goal:** Phase 1 MVP Development - Sprint 1.3 Appointment Scheduling System COMPLETE  
-**Completed Branch:** `feature/appointment-scheduling` (ready for merge)  
-**Completed Sprint:** 1.3 Appointment Scheduling system with Austrian compliance  
-**Next Sprint:** 1.4 Austrian Invoice Generation system
+**Primary Goal:** Sprint 1.5 Austrian PDF Invoice Generation & Service Rate Defaults  
+**Current Branch:** `feature/pdf-generation-and-service-rates`  
+**Completed Features:** ✅ Austrian-compliant PDF generation with Puppeteer, PDF download integration  
+**In Progress:** Service rate defaults in therapist profile settings  
+**Remaining Tasks:** CSV exports for BMD/RZL/DATEV accounting software
 
 ---
 
@@ -98,10 +99,31 @@
 - ✅ E2E testing infrastructure with appointment-specific test coverage
 - ✅ Production-ready branch with TypeScript strict compliance
 
+### **Sprint 1.4 Austrian Invoice Generation System Complete:**
+- ✅ Complete Austrian tax-compliant invoice generation system
+- ✅ Professional invoice management interface with CRUD operations
+- ✅ Status workflow (DRAFT → SENT → PAID → VOID) with business rule enforcement
+- ✅ Austrian sequential numbering (YYYY-NNN format) and VAT compliance
+- ✅ Kleinunternehmer support with proper legal notices
+- ✅ Smart UX with client-appointment integration and time filtering
+- ✅ Print functionality and placeholder email system
+- ✅ Production-ready branch with comprehensive error handling
+
+### **Sprint 1.5 PDF Generation System (Current Sprint):**
+- ✅ Austrian-compliant PDF invoice generation with Puppeteer
+- ✅ Professional PDF templates with German text and Austrian formatting
+- ✅ VAT breakdown calculations and Kleinunternehmer legal notices
+- ✅ PDF download API endpoint (`/api/invoices/[id]/pdf`)
+- ✅ Frontend PDF download button integration
+- ✅ Proper MIME types, file naming, and error handling
+- ✅ TypeScript strict compliance and production build compatibility
+- 🚧 Service rate defaults in therapist profile settings (IN PROGRESS)
+- 📋 CSV exports for BMD/RZL/DATEV accounting software (PENDING)
+
 ### **Technical Debt:**
 - Minor ESLint warnings for useEffect dependencies (non-blocking)
 - Next.js config warning for transpilePackages (cosmetic)
-- Chromium authentication timing issue in E2E tests (Firefox works)
+- Puppeteer deprecation warnings (non-blocking, latest version used)
 
 ---
 
@@ -208,11 +230,19 @@
 5. ✅ Appointment conflict detection API with validation
 6. ✅ Sample appointment data and E2E test coverage
 
-### **Sprint 1.4 - Invoice Generation (Planned):**
-1. Austrian-compliant invoice templates
-2. PDF generation with Puppeteer
-3. VAT calculations and Kleinunternehmer handling
-4. Invoice numbering and storage
+### **Sprint 1.4 - Invoice Generation (COMPLETE ✅):**
+1. ✅ Austrian-compliant invoice templates with professional UI
+2. ✅ Complete invoice CRUD system with status workflow
+3. ✅ VAT calculations and Kleinunternehmer handling with legal notices
+4. ✅ Sequential invoice numbering (YYYY-NNN format) and storage
+5. ✅ Client-appointment integration with smart filtering
+
+### **Sprint 1.5 - PDF Generation & Service Rates (IN PROGRESS 🚧):**
+1. ✅ Austrian-compliant PDF generation with Puppeteer
+2. ✅ Professional PDF templates with German text and formatting
+3. ✅ PDF download API and frontend integration
+4. 🚧 Service rate defaults in therapist profile settings
+5. 📋 CSV exports for BMD/RZL/DATEV accounting software
 
 ---
 
@@ -240,21 +270,21 @@
 
 ## 🔄 **Update Log**
 
+**2025-09-06 16:30:** Sprint 1.5 Austrian PDF generation system complete - TypeScript compilation successful  
+**2025-09-06 16:15:** PDF download button integrated into invoice detail page with error handling  
+**2025-09-06 16:00:** Complete PDF API endpoint with Austrian formatting and Puppeteer integration  
+**2025-09-06 15:45:** Austrian-compliant PDF invoice templates with VAT breakdown and legal notices  
+**2025-09-06 15:30:** Started Sprint 1.5 PDF Generation - merged Sprint 1.4 invoice system  
+**2025-09-06 15:15:** Created feature branch `feature/pdf-generation-and-service-rates`  
+**2025-09-06 15:00:** Sprint 1.4 Austrian Invoice Generation System complete and documented  
 **2024-09-06 23:45:** Sprint 1.3 Appointment Scheduling System complete - ready for PR merge  
 **2024-09-06 23:30:** Clickable appointment detail cards with comprehensive Austrian formatting  
 **2024-09-06 23:00:** Appointment listing interface with professional UI and navigation  
 **2024-09-06 22:30:** Austrian holiday system integrated with all 9 Bundesländer support  
 **2024-09-06 22:00:** Complete appointment CRUD API with conflict detection implemented  
 **2024-09-06 21:50:** Started Sprint 1.3 Appointment Scheduling - created feature branch  
-**2024-09-06 21:45:** E2E testing infrastructure complete - resolved Jules' timeout issues  
-**2024-09-06 21:30:** Complete Playwright setup with 1-minute test runtime  
-**2024-09-06 21:00:** Jules assigned to E2E test coverage expansion task  
-**2024-09-05 18:00:** Sprint 1.2 Client Management System complete and merged  
-**2024-09-05 10:30:** ESLint fix applied (4th attempt) - simplified config to Next.js defaults  
-**2024-09-05 10:15:** Technical roadmap created with sprint planning  
-**2024-09-05 10:00:** CLAUDE_CODE_RULES.md operational framework established  
-**2024-09-05 09:45:** Comprehensive README documentation completed
+**2024-09-05 18:00:** Sprint 1.2 Client Management System complete and merged
 
 ---
 
-**Next Session Priority:** Sprint 1.4 Austrian Invoice Generation system implementation
+**Current Priority:** Complete Sprint 1.5 service rate defaults and CSV exports
