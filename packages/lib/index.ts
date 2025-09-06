@@ -1,8 +1,38 @@
-// Austrian tax helpers
-export * from './at/receipt'
+// Austrian tax helpers (legacy)
+export { 
+  KLEINUNTERNEHMER_LIMIT, 
+  getVatRate, 
+  vatLineItems, 
+  kleinunternehmerFooter, 
+  formatCurrency 
+} from './at/receipt'
 
-// Austrian invoicing utilities
-export * from './src/austrian-invoicing'
+// Austrian invoicing utilities (main) - export everything except conflicting formatDate
+export type {
+  InvoiceLine,
+  VATBreakdown,
+  VatRate,
+  AustrianInvoiceData
+} from './src/austrian-invoicing'
+
+export {
+  generateInvoiceNumber,
+  getVatRateDecimal,
+  calculateVatBreakdown,
+  getKleinunternehmerNotice,
+  getKleinunternehmerDisclaimer,
+  getTherapyServiceNotice,
+  formatAustrianCurrency,
+  formatEuro,
+  formatInvoiceDate,
+  formatDate,
+  calculateInvoiceTotals,
+  createInvoiceLineFromService,
+  validateInvoiceData,
+  VAT_RATES,
+  calculateVAT,
+  getNextInvoiceNumber
+} from './src/austrian-invoicing'
 
 // PDF generation
 export * from './src/pdf-generator'
