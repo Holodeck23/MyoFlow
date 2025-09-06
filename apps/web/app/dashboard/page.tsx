@@ -75,10 +75,12 @@ export default function Dashboard() {
                 </Link>
               </div>
               
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium text-gray-900">Appointments</h4>
-                <p className="text-sm text-gray-500 mt-1">Schedule and manage appointments</p>
-                <p className="text-xs text-gray-400 mt-2">Coming in Sprint 1.3</p>
+              <div className="p-4 border rounded-lg hover:bg-gray-50">
+                <Link href="/dashboard/appointments" className="block">
+                  <h4 className="font-medium text-gray-900">Appointments</h4>
+                  <p className="text-sm text-gray-500 mt-1">Schedule and manage appointments</p>
+                  <p className="text-xs text-green-600 mt-2">✅ Available now</p>
+                </Link>
               </div>
               
               <div className="p-4 border rounded-lg">

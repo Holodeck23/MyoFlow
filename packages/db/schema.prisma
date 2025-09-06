@@ -44,6 +44,38 @@ enum AppointmentStatus {
   NO_SHOW 
 }
 
+enum RecurrenceType {
+  NONE
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum BlockType {
+  HOLIDAY
+  VACATION  
+  BREAK
+  MAINTENANCE
+}
+
+enum AustrianHolidayType {
+  NATIONAL          // e.g., New Year, Christmas
+  REGIONAL          // e.g., St. Joseph's Day (some states)
+  RELIGIOUS         // e.g., Easter, Whit Monday
+  COMMEMORATION     // e.g., National Day
+}
+
+enum ReminderType {
+  EMAIL
+  SMS
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 enum ProductType { 
   PHYSICAL 
   DIGITAL 
@@ -107,6 +139,8 @@ model Therapist {
   Clients              Client[]
   Services             Service[]
   Appointments         Appointment[]
+  BusinessHours        BusinessHours[]
+  BlockedTimes         BlockedTime[]
   Invoices             Invoice[]
   Vouchers             Voucher[]
   Products             Product[]
@@ -126,6 +160,8 @@ model Location {
   travelBufferMin Int           @default(0)
   Therapist       Therapist     @relation(fields: [therapistId], references: [id])
   Appointments    Appointment[]
+  BusinessHours   BusinessHours[]
+  BlockedTimes    BlockedTime[]
   
   @@index([therapistId, type])
 }
@@ -165,22 +201,88 @@ model Service {
 }
 
 model Appointment {
-  id          String            @id @default(cuid())
-  therapistId String
-  clientId    String
-  serviceId   String
-  locationId  String
-  start       DateTime
-  end         DateTime
-  status      AppointmentStatus @default(BOOKED)
-  notes       String?
-  Therapist   Therapist         @relation(fields: [therapistId], references: [id])
-  Client      Client            @relation(fields: [clientId], references: [id])
-  Service     Service           @relation(fields: [serviceId], references: [id])
-  Location    Location          @relation(fields: [locationId], references: [id])
-  Invoice     Invoice?
+  id              String            @id @default(cuid())
+  therapistId     String
+  clientId        String
+  serviceId       String
+  locationId      String
+  start           DateTime
+  end             DateTime
+  status          AppointmentStatus @default(BOOKED)
+  notes           String?
+  recurrenceType  RecurrenceType    @default(NONE)
+  recurrenceId    String?
+  recurrenceEnd   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Therapist       Therapist         @relation(fields: [therapistId], references: [id])
+  Client          Client            @relation(fields: [clientId], references: [id])
+  Service         Service           @relation(fields: [serviceId], references: [id])
+  Location        Location          @relation(fields: [locationId], references: [id])
+  Invoice         Invoice?
+  Reminders       AppointmentReminder[]
   
   @@index([therapistId, start])
+  @@index([therapistId, recurrenceId])
+}
+
+model BusinessHours {
+  id          String    @id @default(cuid())
+  therapistId String
+  locationId  String?
+  dayOfWeek   Int       // 0 = Sunday, 1 = Monday, etc.
+  startTime   String    // Format: "09:00"
+  endTime     String    // Format: "17:00"
+  active      Boolean   @default(true)
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+  Location    Location? @relation(fields: [locationId], references: [id])
+  
+  @@unique([therapistId, locationId, dayOfWeek])
+  @@index([therapistId, active])
+}
+
+model BlockedTime {
+  id          String    @id @default(cuid())
+  therapistId String
+  locationId  String?
+  start       DateTime
+  end         DateTime
+  type        BlockType
+  title       String
+  description String?
+  active      Boolean   @default(true)
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+  Location    Location? @relation(fields: [locationId], references: [id])
+  
+  @@index([therapistId, start, end])
+}
+
+model AppointmentReminder {
+  id            String         @id @default(cuid())
+  appointmentId String
+  type          ReminderType
+  status        ReminderStatus @default(PENDING)
+  scheduledFor  DateTime
+  sentAt        DateTime?
+  errorMessage  String?
+  Appointment   Appointment    @relation(fields: [appointmentId], references: [id])
+  
+  @@index([status, scheduledFor])
+}
+
+model AustrianHoliday {
+  id          String             @id @default(cuid())
+  name        String
+  date        DateTime           // Specific date for the year
+  type        AustrianHolidayType
+  year        Int
+  stateCode   String?            // e.g., "W" for Vienna, "T" for Tyrol, null for national
+  description String?
+  active      Boolean            @default(true)
+  
+  @@unique([date, stateCode])
+  @@index([year, active])
+  @@index([stateCode, year])
 }
 
 model Invoice {
