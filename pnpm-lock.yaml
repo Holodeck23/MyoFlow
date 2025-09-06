@@ -60,7 +60,7 @@ importers:
         specifier: ^4.24.5
         version: 4.24.11(next@14.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       puppeteer:
-        specifier: ^21.5.2
+        specifier: ^21.11.0
         version: 21.11.0(typescript@5.9.2)
       react:
         specifier: ^18.2.0
@@ -79,7 +79,7 @@ importers:
         specifier: ^1.55.0
         version: 1.55.0
       '@types/node':
-        specifier: ^20.0.0
+        specifier: ^20.19.13
         version: 20.19.13
       '@types/react':
         specifier: ^18.2.0
@@ -133,6 +133,9 @@ importers:
       libsodium-wrappers:
         specifier: ^0.7.11
         version: 0.7.15
+      puppeteer:
+        specifier: ^21.11.0
+        version: 21.11.0(typescript@5.9.2)
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -4731,7 +4734,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.4
+      debug: 4.4.1
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -4860,7 +4863,7 @@ snapshots:
     dependencies:
       basic-ftp: 5.0.5
       data-uri-to-buffer: 6.0.2
-      debug: 4.3.4
+      debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
@@ -4958,14 +4961,14 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.4
+      debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.4
+      debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
@@ -5446,7 +5449,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.4
-      debug: 4.3.4
+      debug: 4.4.1
       get-uri: 6.0.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
@@ -5583,7 +5586,7 @@ snapshots:
   proxy-agent@6.3.1:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.4
+      debug: 4.4.1
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       lru-cache: 7.18.3
@@ -5827,7 +5830,7 @@ snapshots:
   socks-proxy-agent@8.0.5:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.3.4
+      debug: 4.4.1
       socks: 2.8.7
     transitivePeerDependencies:
       - supports-color
