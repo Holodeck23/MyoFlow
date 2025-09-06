@@ -163,6 +163,15 @@
 
 **Success:** €500 MRR from 10+ therapists
 
+### **Future Feature Ideas (Backlog)**
+- **Therapist Wellness Tracking** - "Car service logbook" for therapists
+  - Daily mood/energy tracking
+  - Self-care logging (received massages, rest days, exercise)
+  - Burnout prevention alerts
+  - Work-life balance metrics
+  - Professional development tracking
+  - *Rationale: Therapist wellness directly impacts client care quality*
+
 ---
 
 ## 🚨 **Known Challenges & Solutions**
