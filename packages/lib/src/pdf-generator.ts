@@ -1,24 +1,38 @@
 import puppeteer from 'puppeteer'
-import { Invoice } from './types'
 import { formatEuro, formatDate, getKleinunternehmerDisclaimer } from './austrian-invoicing'
 
-interface InvoiceWithRelations extends Invoice {
+interface InvoiceWithRelations {
+  id: string
+  number: string
+  status: string
+  totalGrossCents: number
+  lines: any
+  vatBreakdown: any
+  kleinunternehmer: boolean
+  createdAt: Date
   Client: {
     id: string
     name: string
     email: string | null
     phone: string | null
-    address: string | null
-    city: string | null
-    postalCode: string | null
-    country: string | null
-  }
+    tags: string[]
+    createdAt: Date
+    therapistId: string
+    healthFlagsEnc: string | null
+    updatedAt: Date
+  } | null
   Appointment: {
     id: string
     start: Date
     Service: {
+      id: string
       name: string
-      duration: number
+      durationMin: number
+      category: string
+      priceCents: number
+      therapistId: string
+      vatRate: string
+      active: boolean
     }
   } | null
 }
@@ -73,7 +87,9 @@ function generateInvoiceHTML(
   therapistInfo: TherapistInfo
 ): string {
   const isKU = therapistInfo.kleinunternehmer
-  const showVAT = !isKU && invoice.vatRate > 0
+  const lines = Array.isArray(invoice.lines) ? invoice.lines : []
+  const vatBreakdown = Array.isArray(invoice.vatBreakdown) ? invoice.vatBreakdown : []
+  const showVAT = !isKU && vatBreakdown.some(vat => vat.vatRate > 0)
   
   return `
     <!DOCTYPE html>
@@ -260,23 +276,20 @@ function generateInvoiceHTML(
       <div class="client-section">
         <div style="font-weight: bold; margin-bottom: 10px;">Rechnungsempfänger:</div>
         <div class="client-info">
-          <div class="bold">${invoice.Client.name}</div>
-          ${invoice.Client.address ? `<div>${invoice.Client.address}</div>` : ''}
-          ${invoice.Client.postalCode && invoice.Client.city ? 
-            `<div>${invoice.Client.postalCode} ${invoice.Client.city}${invoice.Client.country ? `, ${invoice.Client.country}` : ''}</div>` : ''}
-          ${invoice.Client.email ? `<div>E-Mail: ${invoice.Client.email}</div>` : ''}
-          ${invoice.Client.phone ? `<div>Tel: ${invoice.Client.phone}</div>` : ''}
+          <div class="bold">${invoice.Client?.name || 'Kunde'}</div>
+          ${invoice.Client?.email ? `<div>E-Mail: ${invoice.Client.email}</div>` : ''}
+          ${invoice.Client?.phone ? `<div>Tel: ${invoice.Client.phone}</div>` : ''}
         </div>
       </div>
 
       <div class="invoice-details">
         <div class="details-column">
-          <div><span class="bold">Rechnungsdatum:</span> ${formatDate(invoice.date)}</div>
-          <div><span class="bold">Leistungsdatum:</span> ${formatDate(invoice.serviceDate)}</div>
+          <div><span class="bold">Rechnungsdatum:</span> ${formatDate(invoice.createdAt)}</div>
+          <div><span class="bold">Leistungsdatum:</span> ${invoice.Appointment ? formatDate(invoice.Appointment.start) : formatDate(invoice.createdAt)}</div>
           ${invoice.Appointment ? `<div><span class="bold">Terminzeit:</span> ${formatDate(invoice.Appointment.start)}</div>` : ''}
         </div>
         <div class="details-column">
-          <div><span class="bold">Zahlungsziel:</span> ${formatDate(invoice.dueDate)}</div>
+          <div><span class="bold">Zahlungsziel:</span> ${formatDate(new Date(invoice.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))}</div>
           <div><span class="bold">Status:</span> ${getStatusLabel(invoice.status)}</div>
         </div>
       </div>
@@ -295,34 +308,36 @@ function generateInvoiceHTML(
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>${invoice.Appointment?.Service.name || 'Therapieleistung'}</td>
-            <td>${invoice.description}</td>
-            <td class="number-cell">${invoice.quantity}</td>
-            <td class="number-cell">${formatEuro(invoice.unitPrice)}</td>
-            ${showVAT ? `<td class="number-cell">${formatEuro(invoice.subtotal)}</td>` : ''}
-            ${showVAT ? `<td class="number-cell">${invoice.vatRate}%</td>` : ''}
-            ${showVAT ? `<td class="number-cell">${formatEuro(invoice.vatAmount)}</td>` : ''}
-            <td class="number-cell bold">${formatEuro(invoice.total)}</td>
-          </tr>
+          ${lines.map(line => `
+            <tr>
+              <td>${invoice.Appointment?.Service.name || 'Therapieleistung'}</td>
+              <td>${line.description}</td>
+              <td class="number-cell">${line.quantity}</td>
+              <td class="number-cell">${formatEuro(line.unitPriceCents / 100)}</td>
+              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents / (1 + (vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100)) / 100)}</td>` : ''}
+              ${showVAT ? `<td class="number-cell">${vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0}%</td>` : ''}
+              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents - (line.totalCents / (1 + (vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100))) / 100)}</td>` : ''}
+              <td class="number-cell bold">${formatEuro(line.totalCents / 100)}</td>
+            </tr>
+          `).join('')}
         </tbody>
       </table>
 
       <div class="totals-section">
         <table class="totals-table">
-          ${showVAT ? `
+          ${showVAT ? vatBreakdown.map(vat => `
             <tr>
-              <td class="label">Nettobetrag:</td>
-              <td class="amount">${formatEuro(invoice.subtotal)}</td>
+              <td class="label">Nettobetrag (${vat.vatRate}%):</td>
+              <td class="amount">${formatEuro(vat.netCents / 100)}</td>
             </tr>
             <tr>
-              <td class="label">USt (${invoice.vatRate}%):</td>
-              <td class="amount">${formatEuro(invoice.vatAmount)}</td>
+              <td class="label">USt (${vat.vatRate}%):</td>
+              <td class="amount">${formatEuro(vat.vatCents / 100)}</td>
             </tr>
-          ` : ''}
+          `).join('') : ''}
           <tr class="total-row">
             <td class="label">${showVAT ? 'Bruttobetrag:' : 'Gesamtbetrag:'}</td>
-            <td class="amount">${formatEuro(invoice.total)}</td>
+            <td class="amount">${formatEuro(invoice.totalGrossCents / 100)}</td>
           </tr>
         </table>
       </div>
@@ -332,7 +347,7 @@ function generateInvoiceHTML(
           <div class="bold">Zahlungsinformationen:</div>
           <div>IBAN: ${therapistInfo.iban}</div>
           <div>Verwendungszweck: Rechnung ${invoice.number}</div>
-          <div>Zahlungsziel: ${formatDate(invoice.dueDate)}</div>
+          <div>Zahlungsziel: ${formatDate(new Date(invoice.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))}</div>
         </div>
       ` : ''}
 
