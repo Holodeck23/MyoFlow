@@ -13,17 +13,47 @@ test.describe('Authentication', () => {
   test('should authenticate with demo credentials', async ({ page }) => {
     await page.goto('/auth/sign-in');
     
-    // Fill in demo credentials (any email with 'demo' password works)
-    await page.getByRole('textbox', { name: /email/i }).fill('test@example.com');
-    await page.getByRole('textbox', { name: /password/i }).fill('demo');
+    // Fill in demo credentials (using the documented demo credentials)
+    await page.getByRole('textbox', { name: /email/i }).fill('test@myoflow.at');
+    await page.getByRole('textbox', { name: /password/i }).fill('demo123');
     
-    // Submit form and wait for navigation
-    await Promise.all([
-      page.waitForURL('/dashboard', { timeout: 10000 }),
-      page.getByRole('button', { name: /sign in/i }).click(),
-    ]);
+    // Submit form
+    await page.getByRole('button', { name: /sign in/i }).click();
     
-    // Verify we're on the dashboard
+    // Wait for either success message or redirect
+    const successMessageLocator = page.locator('text=Sign in successful! Redirecting...');
+    const errorMessageLocator = page.locator('text=Invalid email or password');
+    
+    // Wait for either success or error message to appear
+    try {
+      await Promise.race([
+        successMessageLocator.waitFor({ timeout: 5000 }),
+        errorMessageLocator.waitFor({ timeout: 5000 })
+      ]);
+      
+      // Check if we got success message
+      if (await successMessageLocator.isVisible()) {
+        console.log('✅ Success message appeared');
+        // Wait for the redirect (the code sets a 1-second timeout)
+        await page.waitForURL('/dashboard', { timeout: 10000 });
+      } else if (await errorMessageLocator.isVisible()) {
+        const errorText = await errorMessageLocator.textContent();
+        console.log('❌ Authentication failed:', errorText);
+        throw new Error('Authentication failed with credentials');
+      }
+    } catch (error) {
+      console.log('⚠️  No success/error message appeared, checking URL directly');
+      // If no message, check if we redirected anyway
+      await page.waitForTimeout(2000);
+      const currentUrl = page.url();
+      console.log('Current URL:', currentUrl);
+      
+      if (!currentUrl.includes('/dashboard')) {
+        throw new Error('Authentication did not redirect to dashboard');
+      }
+    }
+    
+    // Final verification - should be on dashboard
     await expect(page).toHaveURL('/dashboard');
     await expect(page.getByText(/dashboard/i)).toBeVisible();
   });
