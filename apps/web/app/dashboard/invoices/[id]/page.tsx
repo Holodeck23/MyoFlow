@@ -134,8 +134,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       return
     }
 
-    // Create invoice link (using current domain)
-    const invoiceLink = `${window.location.origin}/dashboard/invoices/${invoice.id}`
+    // Create public invoice link (no authentication required)
+    const invoiceLink = `${window.location.origin}/invoice/${invoice.id}`
     
     const subject = `Invoice ${invoice.number} - MyoFlow`
     const body = `Dear ${invoice.Client.name},
