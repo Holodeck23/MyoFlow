@@ -133,7 +133,29 @@ model Therapist {
   iban                 String?
   brandColor           String?
   logoUrl              String?
+  
+  // Business Information Fields
+  businessName         String?
+  businessAddress      String?
+  businessPhone        String?
+  businessEmail        String?
+  businessWebsite      String?
+  
+  // Austrian Compliance Fields
+  uidNumber            String?
+  chamberRegistration  String?
+  invoiceFooter        String?
+  
+  // Practice Preferences
+  defaultReminderDays  Int                  @default(1)
+  enableEmailReminders Boolean              @default(true)
+  enableSmsReminders   Boolean              @default(false)
+  
+  // Profile Management
+  profileCompletedAt   DateTime?
   createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt @default(now())
+  
   User                 User                 @relation(fields: [userId], references: [id])
   Locations            Location[]
   Clients              Client[]
@@ -149,6 +171,27 @@ model Therapist {
   Notes                Note[]
   Affiliates           Affiliate[]
   AuditLogs            AuditLog[]
+  ServiceRateTemplates ServiceRateTemplate[]
+}
+
+model ServiceRateTemplate {
+  id           String          @id @default(cuid())
+  therapistId  String
+  name         String
+  category     ServiceCategory
+  durationMin  Int
+  priceCents   Int
+  vatRate      VatStatus
+  description  String?
+  isDefault    Boolean         @default(false)
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  
+  Therapist    Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  
+  @@index([therapistId, category, active])
+  @@index([therapistId, isDefault])
 }
 
 model Location {
