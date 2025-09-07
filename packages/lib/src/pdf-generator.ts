@@ -15,6 +15,10 @@ interface InvoiceWithRelations {
     name: string
     email: string | null
     phone: string | null
+    street: string | null
+    postalCode: string | null
+    city: string | null
+    country: string | null
     tags: string[]
     createdAt: Date
     therapistId: string
@@ -40,9 +44,9 @@ interface InvoiceWithRelations {
 interface TherapistInfo {
   name: string
   address: string
-  city: string
-  postalCode: string
-  country: string
+  city?: string
+  postalCode?: string
+  country?: string
   phone: string
   email: string
   uid?: string
@@ -259,7 +263,9 @@ function generateInvoiceHTML(
         <div class="therapist-info">
           <div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>
           <div>${therapistInfo.address}</div>
-          <div>${therapistInfo.postalCode} ${therapistInfo.city}, ${therapistInfo.country}</div>
+          ${therapistInfo.postalCode || therapistInfo.city || therapistInfo.country ?
+            `<div>${[therapistInfo.postalCode, therapistInfo.city].filter(Boolean).join(' ')}${therapistInfo.country ? ', ' + therapistInfo.country : ''}</div>`
+            : ''}
           <div style="margin-top: 10px;">
             <div>Tel: ${therapistInfo.phone}</div>
             <div>E-Mail: ${therapistInfo.email}</div>
@@ -277,6 +283,10 @@ function generateInvoiceHTML(
         <div style="font-weight: bold; margin-bottom: 10px;">Rechnungsempfänger:</div>
         <div class="client-info">
           <div class="bold">${invoice.Client?.name || 'Kunde'}</div>
+          ${invoice.Client && (invoice.Client.street || invoice.Client.postalCode || invoice.Client.city || invoice.Client.country)
+            ? `<div>${invoice.Client.street || ''}</div>
+               <div>${[invoice.Client.postalCode, invoice.Client.city].filter(Boolean).join(' ')}${invoice.Client.country ? ', ' + invoice.Client.country : ''}</div>`
+            : ''}
           ${invoice.Client?.email ? `<div>E-Mail: ${invoice.Client.email}</div>` : ''}
           ${invoice.Client?.phone ? `<div>Tel: ${invoice.Client.phone}</div>` : ''}
         </div>

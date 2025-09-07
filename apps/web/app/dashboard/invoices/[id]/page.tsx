@@ -30,6 +30,10 @@ interface Invoice {
     name: string
     email: string
     phone?: string
+    street?: string
+    postalCode?: string
+    city?: string
+    country?: string
   }
   Appointment?: {
     id: string
@@ -393,6 +397,13 @@ MyoFlow - Austrian Therapy Practice Management`
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Rechnungsempfänger</h4>
               <div className="text-gray-700">
                 <p className="font-medium">{invoice.Client.name}</p>
+                {invoice.Client.street && <p>{invoice.Client.street}</p>}
+                {(invoice.Client.postalCode || invoice.Client.city || invoice.Client.country) && (
+                  <p>
+                    {[invoice.Client.postalCode, invoice.Client.city].filter(Boolean).join(' ')}
+                    {invoice.Client.country ? `, ${invoice.Client.country}` : ''}
+                  </p>
+                )}
                 <p>{invoice.Client.email}</p>
                 {invoice.Client.phone && <p>{invoice.Client.phone}</p>}
               </div>
