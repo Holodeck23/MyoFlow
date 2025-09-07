@@ -167,9 +167,36 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
     
     try {
-      // Create email subject and body
+      // First, download the PDF
+      console.log('Downloading PDF for email attachment...')
+      const pdfResponse = await fetch(`/api/invoices/${invoice.id}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      })
+
+      if (!pdfResponse.ok) {
+        throw new Error('Failed to generate PDF')
+      }
+
+      const blob = await pdfResponse.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = `Rechnung-${invoice.number}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      // Small delay to ensure download starts
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Create email subject and body with instruction to attach PDF
       const subject = `Invoice ${invoice.number} - MyoFlow`
-      const body = `Dear ${invoice.Client.name},\n\nPlease find attached your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.\n\nBest regards,\n${invoice.Therapist.User.name}\n${invoice.Therapist.designation}`
+      const body = `Dear ${invoice.Client.name},\n\nPlease find attached your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.\n\n📎 The PDF invoice has been downloaded to your computer - please attach it to this email.\n\nBest regards,\n${invoice.Therapist.User.name}\n${invoice.Therapist.designation}\n\n---\nMyoFlow - Austrian Therapy Practice Management`
       
       // Open default email client with pre-filled content
       const mailtoLink = `mailto:${invoice.Client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
@@ -179,9 +206,13 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       if (invoice.status === 'DRAFT') {
         await updateStatus('SENT')
       }
+      
+      // Show helpful message
+      alert('✅ PDF downloaded and email opened!\n\n📎 Please attach the downloaded PDF file to your email before sending.')
+      
     } catch (error) {
-      alert('❌ Failed to open email client. Please try again.')
-      console.error('Email client error:', error)
+      console.error('Email preparation error:', error)
+      alert('❌ Failed to prepare email. Please try downloading PDF manually and composing email.')
     }
   }
 
