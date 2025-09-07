@@ -126,16 +126,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleEmail = () => {
-    if (!invoice) return
-    if (!invoice.Client.email) {
-      alert('Client has no email address on file. Please add an email to the client profile first.')
-      return
-    }
-    // TODO: Wire up email functionality
-    alert(`📧 Email functionality coming soon!\n\nWill send invoice ${invoice.number} to:\n${invoice.Client.email}\n\nFor now, you can download the PDF and send it manually.`)
-  }
-
   const handleDownloadPDF = async () => {
     if (!invoice) return
     
@@ -170,13 +160,22 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   const handleSendInvoice = async () => {
     if (!invoice) return
     
+    // Check if client has email
+    if (!invoice.Client.email) {
+      alert('❌ Cannot send invoice: Client has no email address.\n\nPlease add an email to the client profile first, or download the PDF to send manually.')
+      return
+    }
+    
     try {
       if (invoice.status === 'DRAFT') {
+        // Update status to SENT
         await updateStatus('SENT')
-        alert('Invoice successfully sent!')
+        
+        // Show success with email info (actual email sending to be implemented later)
+        alert(`✅ Invoice ${invoice.number} marked as SENT!\n\n📧 Email functionality coming soon:\nWill send to: ${invoice.Client.email}\n\n💡 For now, download the PDF and send manually.`)
       }
     } catch (error) {
-      alert('Failed to send invoice. Please try again.')
+      alert('❌ Failed to send invoice. Please try again.')
       console.error('Send invoice error:', error)
     }
   }
@@ -300,16 +299,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           </div>
           <div className="flex space-x-3">
             <button
-              onClick={handleEmail}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Email
-            </button>
-            
-            <button
               onClick={handlePrint}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
@@ -345,11 +334,12 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
               onClick={handleSendInvoice}
               disabled={updating || invoice.status !== 'DRAFT'}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={invoice.status === 'DRAFT' ? `Send invoice ${invoice.number} to ${invoice.Client.email || 'client'}` : 'Invoice already sent'}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              {updating ? 'Sending...' : 'Send Invoice'}
+              {updating ? 'Sending...' : invoice.status === 'DRAFT' ? '📧 Send Invoice' : '✅ Sent'}
             </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
