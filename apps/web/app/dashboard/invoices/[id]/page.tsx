@@ -118,13 +118,43 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   }
 
   const handlePrint = () => {
-    window.print()
+    try {
+      window.print()
+    } catch (error) {
+      console.error('Print error:', error)
+      alert('Print functionality not available. Please use browser menu: File > Print')
+    }
   }
 
-  const handleEmail = () => {
+  const handleEmailInvoice = () => {
     if (!invoice) return
-    // TODO: Wire up email functionality
-    alert(`Email functionality coming soon!\nWill send invoice ${invoice.number} to ${invoice.Client.email}`)
+
+    if (!invoice.Client.email) {
+      alert('❌ Client has no email address on file.\nPlease add an email to the client profile first.')
+      return
+    }
+
+    // Create public invoice link (no authentication required)
+    const invoiceLink = `${window.location.origin}/invoice/${invoice.id}`
+    
+    const subject = `Invoice ${invoice.number} - MyoFlow`
+    const body = `Dear ${invoice.Client.name},
+
+Please find your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.
+
+View invoice: ${invoiceLink}
+
+You can view and print the invoice from this link.
+
+Best regards,
+${invoice.Therapist.User.name}
+${invoice.Therapist.designation}
+
+---
+MyoFlow - Austrian Therapy Practice Management`
+
+    const mailtoLink = `mailto:${invoice.Client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailtoLink, '_blank')
   }
 
   const handleDownloadPDF = async () => {
@@ -136,6 +166,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         headers: {
           'Accept': 'application/pdf',
         },
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -158,13 +189,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleSave = async () => {
-    if (!invoice) return
-    // For now, just update to SENT status if it's DRAFT
-    if (invoice.status === 'DRAFT') {
-      await updateStatus('SENT')
-    }
-  }
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('de-AT', {
@@ -285,16 +309,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           </div>
           <div className="flex space-x-3">
             <button
-              onClick={handleEmail}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Email
-            </button>
-            
-            <button
               onClick={handlePrint}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
@@ -314,6 +328,18 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
               PDF
             </button>
 
+            <button
+              onClick={handleEmailInvoice}
+              disabled={!invoice.Client.email}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!invoice.Client.email ? 'Client has no email address' : `Email invoice link to ${invoice.Client.email}`}
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Email
+            </button>
+
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
               <Link
                 href={`/dashboard/invoices/${invoice.id}/edit`}
@@ -325,17 +351,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 Edit
               </Link>
             )}
-
-            <button
-              onClick={handleSave}
-              disabled={updating || invoice.status === 'PAID'}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              {updating ? 'Saving...' : invoice.status === 'DRAFT' ? 'Send Invoice' : 'Save'}
-            </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
               <div className="relative">
