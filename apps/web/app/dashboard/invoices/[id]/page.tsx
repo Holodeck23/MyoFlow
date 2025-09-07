@@ -157,26 +157,31 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleSendInvoice = async () => {
+  const handleEmailInvoice = async () => {
     if (!invoice) return
     
     // Check if client has email
     if (!invoice.Client.email) {
-      alert('❌ Cannot send invoice: Client has no email address.\n\nPlease add an email to the client profile first, or download the PDF to send manually.')
+      alert('❌ Cannot send invoice: Client has no email address.\n\nPlease add an email to the client profile first.')
       return
     }
     
     try {
+      // Create email subject and body
+      const subject = `Invoice ${invoice.number} - MyoFlow`
+      const body = `Dear ${invoice.Client.name},\n\nPlease find attached your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.\n\nBest regards,\n${invoice.Therapist.User.name}\n${invoice.Therapist.designation}`
+      
+      // Open default email client with pre-filled content
+      const mailtoLink = `mailto:${invoice.Client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      window.open(mailtoLink, '_blank')
+      
+      // Update status to SENT after opening email client
       if (invoice.status === 'DRAFT') {
-        // Update status to SENT
         await updateStatus('SENT')
-        
-        // Show success with email info (actual email sending to be implemented later)
-        alert(`✅ Invoice ${invoice.number} marked as SENT!\n\n📧 Email functionality coming soon:\nWill send to: ${invoice.Client.email}\n\n💡 For now, download the PDF and send manually.`)
       }
     } catch (error) {
-      alert('❌ Failed to send invoice. Please try again.')
-      console.error('Send invoice error:', error)
+      alert('❌ Failed to open email client. Please try again.')
+      console.error('Email client error:', error)
     }
   }
 
@@ -331,15 +336,15 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
             )}
 
             <button
-              onClick={handleSendInvoice}
-              disabled={updating || invoice.status !== 'DRAFT'}
+              onClick={handleEmailInvoice}
+              disabled={updating || !invoice.Client.email}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={invoice.status === 'DRAFT' ? `Send invoice ${invoice.number} to ${invoice.Client.email || 'client'}` : 'Invoice already sent'}
+              title={!invoice.Client.email ? 'Client has no email address' : `Email invoice ${invoice.number} to ${invoice.Client.email}`}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              {updating ? 'Sending...' : invoice.status === 'DRAFT' ? '📧 Send Invoice' : '✅ Sent'}
+              📧 Email
             </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
