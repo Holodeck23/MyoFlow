@@ -56,6 +56,72 @@ async function main() {
 
   console.log('✅ Created locations:', [homeLocation.name, mobileLocation.name])
 
+  // Create service rate templates
+  const serviceRateTemplates = await Promise.all([
+    prisma.serviceRateTemplate.create({
+      data: {
+        therapistId: testTherapist.id,
+        name: 'Klassische Massage 60min',
+        category: ServiceCategory.MASSAGE,
+        durationMin: 60,
+        priceCents: 8000, // €80
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        description: 'Standard-Ganzkörpermassage zur Entspannung und Schmerzlinderung',
+        isDefault: true,
+      }
+    }),
+    prisma.serviceRateTemplate.create({
+      data: {
+        therapistId: testTherapist.id,
+        name: 'Kurzmassage 30min',
+        category: ServiceCategory.MASSAGE,
+        durationMin: 30,
+        priceCents: 5000, // €50
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        description: 'Gezielte Behandlung für Schulter, Nacken oder Rücken',
+        isDefault: false,
+      }
+    }),
+    prisma.serviceRateTemplate.create({
+      data: {
+        therapistId: testTherapist.id,
+        name: 'Entspannungsmassage 45min',
+        category: ServiceCategory.MASSAGE,
+        durationMin: 45,
+        priceCents: 6500, // €65
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        description: 'Sanfte Wellness-Massage mit ätherischen Ölen',
+        isDefault: false,
+      }
+    }),
+    prisma.serviceRateTemplate.create({
+      data: {
+        therapistId: testTherapist.id,
+        name: 'Erstberatung',
+        category: ServiceCategory.CONSULTING,
+        durationMin: 30,
+        priceCents: 5000, // €50
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        description: 'Ausführliche Anamnese und Behandlungsplanung',
+        isDefault: true,
+      }
+    }),
+    prisma.serviceRateTemplate.create({
+      data: {
+        therapistId: testTherapist.id,
+        name: 'Nachberatung',
+        category: ServiceCategory.CONSULTING,
+        durationMin: 15,
+        priceCents: 2500, // €25
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        description: 'Kurzes Beratungsgespräch zur Behandlungsnachbereitung',
+        isDefault: false,
+      }
+    }),
+  ])
+
+  console.log('✅ Created service rate templates:', serviceRateTemplates.map(t => `${t.name} (€${t.priceCents/100})`))
+
   // Create services
   const services = await Promise.all([
     prisma.service.create({

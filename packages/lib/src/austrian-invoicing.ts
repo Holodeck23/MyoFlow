@@ -113,6 +113,13 @@ export function getKleinunternehmerNotice(): string {
 }
 
 /**
+ * Alias for getKleinunternehmerNotice (for compatibility)
+ */
+export function getKleinunternehmerDisclaimer(): string {
+  return getKleinunternehmerNotice()
+}
+
+/**
  * Get standard Austrian therapy service legal notice
  */
 export function getTherapyServiceNotice(): string {
@@ -133,6 +140,13 @@ export function formatAustrianCurrency(cents: number): string {
 }
 
 /**
+ * Format currency amount using Austrian locale (€80,00) - compatibility alias
+ */
+export function formatEuro(amount: number): string {
+  return formatAustrianCurrency(amount * 100) // Convert euros to cents
+}
+
+/**
  * Format Austrian date for invoices
  */
 export function formatInvoiceDate(date: Date): string {
@@ -141,6 +155,13 @@ export function formatInvoiceDate(date: Date): string {
     month: '2-digit', 
     year: 'numeric'
   })
+}
+
+/**
+ * Format date using Austrian locale (DD.MM.YYYY) - compatibility alias
+ */
+export function formatDate(date: Date): string {
+  return formatInvoiceDate(date)
 }
 
 /**
@@ -216,4 +237,37 @@ export function validateInvoiceData(invoice: AustrianInvoiceData): { valid: bool
     valid: errors.length === 0,
     errors
   }
+}
+
+/**
+ * Austrian VAT rates constants
+ */
+export const VAT_RATES = {
+  KLEINUNTERNEHMER: 0,
+  STANDARD: 20,
+  REDUCED_10: 10,
+  REDUCED_13: 13
+} as const
+
+/**
+ * Calculate VAT amounts for invoice (simplified version)
+ */
+export function calculateVAT(subtotal: number, vatRate: number): {
+  vatAmount: number
+  total: number
+} {
+  const vatAmount = Math.round(subtotal * vatRate) / 100
+  const total = subtotal + vatAmount
+  
+  return { vatAmount, total }
+}
+
+/**
+ * Get next invoice number for therapist (placeholder for API implementation)
+ */
+export async function getNextInvoiceNumber(therapistId: string): Promise<string> {
+  // This will be implemented in the API route with database access
+  const year = new Date().getFullYear()
+  const sequenceNumber = 1
+  return generateInvoiceNumber(year, sequenceNumber)
 }
