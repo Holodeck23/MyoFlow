@@ -96,8 +96,6 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test
-        if: false # TODO-CLAUDE: Enable once tests are written
 
       - name: Run E2E tests
         run: pnpm test:e2e
-        if: false # TODO-CLAUDE: Enable once Playwright tests are written

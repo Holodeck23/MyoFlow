@@ -1,7 +1,43 @@
 import { test, expect } from '@playwright/test';
 
+const sampleAppointments = [
+  {
+    id: '1',
+    start: '2024-01-01T10:00:00.000Z',
+    end: '2024-01-01T11:00:00.000Z',
+    status: 'BOOKED',
+    Client: { id: 'c1', name: 'Maria Schmidt', email: 'maria@example.com', phone: '123' },
+    Service: { id: 's1', name: 'Massage', durationMin: 60, priceCents: 8000, category: 'THERAPY' },
+    Location: { id: 'l1', name: 'Main Office', type: 'OFFICE', address: 'Street 1' }
+  },
+  {
+    id: '2',
+    start: '2024-01-02T12:00:00.000Z',
+    end: '2024-01-02T13:00:00.000Z',
+    status: 'BOOKED',
+    Client: { id: 'c2', name: 'Johann Weber', email: 'johann@example.com', phone: '456' },
+    Service: { id: 's2', name: 'Consulting', durationMin: 60, priceCents: 5000, category: 'THERAPY' },
+    Location: { id: 'l1', name: 'Main Office', type: 'OFFICE', address: 'Street 1' }
+  }
+];
+
 test.describe('Appointments', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/api/appointments', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ appointments: sampleAppointments })
+      })
+    })
+    await page.route('**/api/appointments/1', route => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ appointment: sampleAppointments[0] })
+      })
+    })
+
     // Sign in first
     await page.goto('/auth/sign-in');
     await page.fill('input[name="email"]', 'test@myoflow.at');
