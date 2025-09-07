@@ -118,13 +118,22 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   }
 
   const handlePrint = () => {
-    window.print()
+    try {
+      window.print()
+    } catch (error) {
+      console.error('Print error:', error)
+      alert('Print functionality not available. Please use browser menu: File > Print')
+    }
   }
 
   const handleEmail = () => {
     if (!invoice) return
+    if (!invoice.Client.email) {
+      alert('Client has no email address on file. Please add an email to the client profile first.')
+      return
+    }
     // TODO: Wire up email functionality
-    alert(`Email functionality coming soon!\nWill send invoice ${invoice.number} to ${invoice.Client.email}`)
+    alert(`📧 Email functionality coming soon!\n\nWill send invoice ${invoice.number} to:\n${invoice.Client.email}\n\nFor now, you can download the PDF and send it manually.`)
   }
 
   const handleDownloadPDF = async () => {
@@ -158,11 +167,17 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleSave = async () => {
+  const handleSendInvoice = async () => {
     if (!invoice) return
-    // For now, just update to SENT status if it's DRAFT
-    if (invoice.status === 'DRAFT') {
-      await updateStatus('SENT')
+    
+    try {
+      if (invoice.status === 'DRAFT') {
+        await updateStatus('SENT')
+        alert('Invoice successfully sent!')
+      }
+    } catch (error) {
+      alert('Failed to send invoice. Please try again.')
+      console.error('Send invoice error:', error)
     }
   }
 
@@ -327,14 +342,14 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
             )}
 
             <button
-              onClick={handleSave}
-              disabled={updating || invoice.status === 'PAID'}
+              onClick={handleSendInvoice}
+              disabled={updating || invoice.status !== 'DRAFT'}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
-              {updating ? 'Saving...' : invoice.status === 'DRAFT' ? 'Send Invoice' : 'Save'}
+              {updating ? 'Sending...' : 'Send Invoice'}
             </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
