@@ -126,6 +126,37 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
+  const handleEmailInvoice = () => {
+    if (!invoice) return
+
+    if (!invoice.Client.email) {
+      alert('❌ Client has no email address on file.\nPlease add an email to the client profile first.')
+      return
+    }
+
+    // Create invoice link (using current domain)
+    const invoiceLink = `${window.location.origin}/dashboard/invoices/${invoice.id}`
+    
+    const subject = `Invoice ${invoice.number} - MyoFlow`
+    const body = `Dear ${invoice.Client.name},
+
+Please find your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.
+
+View invoice: ${invoiceLink}
+
+You can view and print the invoice from this link.
+
+Best regards,
+${invoice.Therapist.User.name}
+${invoice.Therapist.designation}
+
+---
+MyoFlow - Austrian Therapy Practice Management`
+
+    const mailtoLink = `mailto:${invoice.Client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailtoLink, '_blank')
+  }
+
   const handleDownloadPDF = async () => {
     if (!invoice) return
     
@@ -297,15 +328,17 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
               PDF
             </button>
 
-            <Link
-              href={`/dashboard/invoices/${invoice.id}/email`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            <button
+              onClick={handleEmailInvoice}
+              disabled={!invoice.Client.email}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!invoice.Client.email ? 'Client has no email address' : `Email invoice link to ${invoice.Client.email}`}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              Send
-            </Link>
+              Email
+            </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
               <Link
