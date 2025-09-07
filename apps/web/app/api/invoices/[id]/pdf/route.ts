@@ -48,18 +48,18 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
-    // Get therapist profile information (for now use placeholder data)
+    // Get therapist profile information
     const therapistInfo = {
       name: user.name || 'Dr. Therapist',
-      address: 'Therapist Address 123',
-      city: 'Wien',
-      postalCode: '1010',
-      country: 'Österreich',
-      phone: '+43 1 234 5678',
-      email: user.email,
-      uid: 'ATU12345678', // Austrian tax number
-      iban: 'AT61 1904 3002 3457 3201',
-      kleinunternehmer: true // Default to Kleinunternehmer for now
+      address: user.Therapist.businessAddress || '',
+      city: undefined,
+      postalCode: undefined,
+      country: undefined,
+      phone: user.Therapist.businessPhone || '',
+      email: user.Therapist.businessEmail || user.email || '',
+      uid: user.Therapist.uidNumber || undefined,
+      iban: user.Therapist.iban || undefined,
+      kleinunternehmer: user.Therapist.kleinunternehmer
     }
 
     // Generate PDF
