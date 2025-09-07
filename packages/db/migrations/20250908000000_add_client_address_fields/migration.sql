@@ -1,0 +1,4 @@
+ALTER TABLE "Client" ADD COLUMN "street" TEXT;
+ALTER TABLE "Client" ADD COLUMN "postalCode" TEXT;
+ALTER TABLE "Client" ADD COLUMN "city" TEXT;
+ALTER TABLE "Client" ADD COLUMN "country" TEXT;

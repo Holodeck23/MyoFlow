@@ -275,14 +275,20 @@ export async function POST(request: NextRequest) {
       serviceDate: data.serviceDate ? new Date(data.serviceDate) : undefined,
       therapist: {
         name: therapist.User.name || 'Unknown Therapist',
-        address: '', // TODO: Add therapist address to schema
+        address: therapist.businessAddress || '',
         kleinunternehmer: therapist.kleinunternehmer,
-        uid: undefined, // TODO: Add UID to schema
+        uid: therapist.uidNumber || undefined,
       },
       client: {
         name: client.name,
         email: client.email || undefined,
-        address: undefined, // TODO: Add client address
+        address: [
+          client.street,
+          [client.postalCode, client.city].filter(Boolean).join(' '),
+          client.country,
+        ]
+          .filter(Boolean)
+          .join(', ') || undefined,
       },
       lines: invoiceLines,
       ...totals,

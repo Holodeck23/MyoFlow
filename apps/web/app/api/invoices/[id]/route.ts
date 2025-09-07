@@ -71,6 +71,10 @@ export async function GET(
             name: true,
             email: true,
             phone: true,
+            street: true,
+            postalCode: true,
+            city: true,
+            country: true,
           },
         },
         Appointment: {

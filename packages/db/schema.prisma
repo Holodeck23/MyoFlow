@@ -215,6 +215,10 @@ model Client {
   name           String
   email          String?
   phone          String?
+  street         String?
+  postalCode     String?
+  city           String?
+  country        String?
   tags           String[]      @default([])
   healthFlagsEnc String?
   createdAt      DateTime      @default(now())
