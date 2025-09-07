@@ -158,68 +158,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleEmailInvoice = async () => {
-    if (!invoice) return
-    
-    // Check if client has email
-    if (!invoice.Client.email) {
-      alert('❌ Cannot send invoice: Client has no email address.\n\nPlease add an email to the client profile first.')
-      return
-    }
-    
-    try {
-      // First, download the PDF
-      console.log('Downloading PDF for email attachment...')
-      const pdfResponse = await fetch(`/api/invoices/${invoice.id}/pdf`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf',
-        },
-        credentials: 'include', // Include cookies for authentication
-      })
-
-      if (!pdfResponse.ok) {
-        const errorText = await pdfResponse.text()
-        console.error('PDF generation failed:', pdfResponse.status, errorText)
-        throw new Error(`Failed to generate PDF: ${pdfResponse.status} ${errorText}`)
-      }
-
-      const blob = await pdfResponse.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.style.display = 'none'
-      a.href = url
-      a.download = `Rechnung-${invoice.number}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      
-      // Small delay to ensure download starts
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Create email subject and body with instruction to attach PDF
-      const subject = `Invoice ${invoice.number} - MyoFlow`
-      const body = `Dear ${invoice.Client.name},\n\nPlease find attached your invoice ${invoice.number} for ${formatCurrency(invoice.totalGrossCents)}.\n\n📎 The PDF invoice has been downloaded to your computer - please attach it to this email.\n\nBest regards,\n${invoice.Therapist.User.name}\n${invoice.Therapist.designation}\n\n---\nMyoFlow - Austrian Therapy Practice Management`
-      
-      // Open default email client with pre-filled content
-      const mailtoLink = `mailto:${invoice.Client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-      window.open(mailtoLink, '_blank')
-      
-      // Update status to SENT after opening email client
-      if (invoice.status === 'DRAFT') {
-        await updateStatus('SENT')
-      }
-      
-      // Show helpful message
-      alert('✅ PDF downloaded and email opened!\n\n📎 Please attach the downloaded PDF file to your email before sending.')
-      
-    } catch (error) {
-      console.error('Email preparation error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      alert(`❌ Failed to prepare email: ${errorMessage}\n\nPlease try downloading PDF manually and composing email.`)
-    }
-  }
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('de-AT', {
@@ -359,6 +297,16 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
               PDF
             </button>
 
+            <Link
+              href={`/dashboard/invoices/${invoice.id}/email`}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Send
+            </Link>
+
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
               <Link
                 href={`/dashboard/invoices/${invoice.id}/edit`}
@@ -370,18 +318,6 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 Edit
               </Link>
             )}
-
-            <button
-              onClick={handleEmailInvoice}
-              disabled={updating || !invoice.Client.email}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={!invoice.Client.email ? 'Client has no email address' : `Email invoice ${invoice.number} to ${invoice.Client.email}`}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              📧 Email
-            </button>
 
             {(invoice.status === 'DRAFT' || invoice.status === 'SENT') && (
               <div className="relative">
