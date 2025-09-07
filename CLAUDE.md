@@ -109,7 +109,7 @@
 - ✅ Print functionality and placeholder email system
 - ✅ Production-ready branch with comprehensive error handling
 
-### **Sprint 1.5 PDF Generation System (Current Sprint):**
+### **Sprint 1.5 PDF Generation & Therapist Profile System (Current Sprint):**
 - ✅ Austrian-compliant PDF invoice generation with Puppeteer
 - ✅ Professional PDF templates with German text and Austrian formatting
 - ✅ VAT breakdown calculations and Kleinunternehmer legal notices
@@ -117,13 +117,22 @@
 - ✅ Frontend PDF download button integration
 - ✅ Proper MIME types, file naming, and error handling
 - ✅ TypeScript strict compliance and production build compatibility
-- 🚧 Service rate defaults in therapist profile settings (IN PROGRESS)
+- ✅ **Task 1: Database Schema Implementation** - Therapist profile extensions and ServiceRateTemplate model with Austrian compliance fields
+- 🚧 **Task 2: API Endpoints Development** - Profile management and service rate template CRUD (IN PROGRESS)
+- 📋 **Task 3: Settings Page UI Development** - `/dashboard/settings` interface (PENDING)
+- 📋 **Task 4: Invoice Integration Enhancement** - Auto-populate business details and service rates (PENDING)
 - 📋 CSV exports for BMD/RZL/DATEV accounting software (PENDING)
 
 ### **Technical Debt:**
 - Minor ESLint warnings for useEffect dependencies (non-blocking)
 - Next.js config warning for transpilePackages (cosmetic)
 - Puppeteer deprecation warnings (non-blocking, latest version used)
+
+### **Agent OS Integration Complete:**
+- ✅ **Development Rules Migrated** - CLAUDE_CODE_RULES.md integrated into Agent OS workflow
+- ✅ **MyoFlow Standards Created** - `.agent-os/standards/myoflow-development-rules.md` with surgical precision and Austrian compliance focus
+- ✅ **Quality Gates Preserved** - Mandatory testing sequence, one-branch-per-feature, factual documentation
+- ✅ **Spec-Driven Development** - Complete spec created for therapist profile system with technical specifications
 
 ---
 
