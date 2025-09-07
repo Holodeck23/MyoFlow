@@ -179,7 +179,9 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       })
 
       if (!pdfResponse.ok) {
-        throw new Error('Failed to generate PDF')
+        const errorText = await pdfResponse.text()
+        console.error('PDF generation failed:', pdfResponse.status, errorText)
+        throw new Error(`Failed to generate PDF: ${pdfResponse.status} ${errorText}`)
       }
 
       const blob = await pdfResponse.blob()
@@ -214,7 +216,8 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
       
     } catch (error) {
       console.error('Email preparation error:', error)
-      alert('❌ Failed to prepare email. Please try downloading PDF manually and composing email.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`❌ Failed to prepare email: ${errorMessage}\n\nPlease try downloading PDF manually and composing email.`)
     }
   }
 
