@@ -135,6 +135,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         headers: {
           'Accept': 'application/pdf',
         },
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!response.ok) {
@@ -174,6 +175,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
         headers: {
           'Accept': 'application/pdf',
         },
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (!pdfResponse.ok) {
