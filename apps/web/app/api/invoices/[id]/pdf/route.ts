@@ -16,12 +16,15 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find the therapist user
-    const therapist = await prisma.user.findUnique({
-      where: { email: session.user.email }
+    // Find the therapist user and therapist profile
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        Therapist: true
+      }
     })
 
-    if (!therapist) {
+    if (!user || !user.Therapist) {
       return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
     }
 
@@ -29,7 +32,7 @@ export async function GET(
     const invoice = await prisma.invoice.findFirst({
       where: {
         id: params.id,
-        therapistId: therapist.id
+        therapistId: user.Therapist.id
       },
       include: {
         Client: true,
@@ -47,13 +50,13 @@ export async function GET(
 
     // Get therapist profile information (for now use placeholder data)
     const therapistInfo = {
-      name: therapist.name || 'Dr. Therapist',
+      name: user.name || 'Dr. Therapist',
       address: 'Therapist Address 123',
       city: 'Wien',
       postalCode: '1010',
       country: 'Österreich',
       phone: '+43 1 234 5678',
-      email: therapist.email,
+      email: user.email,
       uid: 'ATU12345678', // Austrian tax number
       iban: 'AT61 1904 3002 3457 3201',
       kleinunternehmer: true // Default to Kleinunternehmer for now
