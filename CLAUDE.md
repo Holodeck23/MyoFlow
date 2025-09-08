@@ -1,18 +1,18 @@
 # 📋 CLAUDE DEVELOPMENT NOTES
 
 **Project:** MyoFlow - Austrian Therapy Practice Management  
-**Session Date:** September 6, 2025  
-**Status:** Sprint 1.5 PDF Generation & Service Rates - IN PROGRESS 🚧
+**Session Date:** September 7, 2025  
+**Status:** Agent OS Integration & Invoice PDF Austrian Compliance - IN PROGRESS 🚧
 
 ---
 
 ## 🎯 **Current Session Objectives**
 
-**Primary Goal:** Sprint 1.5 Austrian PDF Invoice Generation & Service Rate Defaults  
-**Current Branch:** `feature/pdf-generation-and-service-rates`  
-**Completed Features:** ✅ Austrian-compliant PDF generation with Puppeteer, PDF download integration  
-**In Progress:** Service rate defaults in therapist profile settings  
-**Remaining Tasks:** CSV exports for BMD/RZL/DATEV accounting software
+**Primary Goal:** Agent OS Integration & Austrian Invoice PDF Compliance System  
+**Current Branch:** `hotfix/invoice-action-buttons`  
+**Completed Features:** ✅ Enhanced Agent OS with MyoFlow-specific Austrian compliance context, Ready-to-execute invoice PDF spec  
+**In Progress:** Coordinating with Codex on parallel infrastructure tasks  
+**Next Tasks:** Execute invoice PDF Austrian compliance spec, Service rate defaults, CSV exports
 
 ---
 
@@ -109,7 +109,7 @@
 - ✅ Print functionality and placeholder email system
 - ✅ Production-ready branch with comprehensive error handling
 
-### **Sprint 1.5 PDF Generation & Therapist Profile System (Current Sprint):**
+### **Sprint 1.5 PDF Generation & Therapist Profile System Complete:**
 - ✅ Austrian-compliant PDF invoice generation with Puppeteer
 - ✅ Professional PDF templates with German text and Austrian formatting
 - ✅ VAT breakdown calculations and Kleinunternehmer legal notices
@@ -118,21 +118,33 @@
 - ✅ Proper MIME types, file naming, and error handling
 - ✅ TypeScript strict compliance and production build compatibility
 - ✅ **Task 1: Database Schema Implementation** - Therapist profile extensions and ServiceRateTemplate model with Austrian compliance fields
-- 🚧 **Task 2: API Endpoints Development** - Profile management and service rate template CRUD (IN PROGRESS)
-- 📋 **Task 3: Settings Page UI Development** - `/dashboard/settings` interface (PENDING)
-- 📋 **Task 4: Invoice Integration Enhancement** - Auto-populate business details and service rates (PENDING)
-- 📋 CSV exports for BMD/RZL/DATEV accounting software (PENDING)
+- ✅ **Task 2: API Endpoints Development** - Profile management and service rate template CRUD complete
+- ✅ **Task 3: Minimal Settings Page UI** - `/dashboard/settings` interface with Austrian compliance tracking
+- ✅ **Task 4: Invoice PDF Integration** - Real therapist data replaces placeholder information in PDFs
+- ✅ **Dashboard Integration** - Settings navigation added to main dashboard
+- ✅ **Profile Completion Tracking** - Visual progress bar and missing field indicators
+- 📋 **Future:** CSV exports for BMD/RZL/DATEV accounting software (Sprint 1.6)
+
+### **Codex Integration Cleanup (September 7, 2025):**
+- ⚠️ **Failed Branches Cleaned Up** - Removed 2 Codex branches that failed CI due to missing test infrastructure
+  - `codex/add-playwright-browsers-installation-step` - Attempted E2E CI fixes 
+  - `codex/write-unit-tests-for-domain-utilities-and-api` - Created excellent test files but missing Vitest setup
+  - **Resolution:** Branches deleted, test infrastructure scheduled for Sprint 1.6
+  - **Preserved Work:** Test code patterns documented for future implementation
 
 ### **Technical Debt:**
 - Minor ESLint warnings for useEffect dependencies (non-blocking)
 - Next.js config warning for transpilePackages (cosmetic)
 - Puppeteer deprecation warnings (non-blocking, latest version used)
+- Missing test infrastructure (Vitest, Jest) - **Priority: Sprint 1.6**
 
-### **Agent OS Integration Complete:**
-- ✅ **Development Rules Migrated** - CLAUDE_CODE_RULES.md integrated into Agent OS workflow
-- ✅ **MyoFlow Standards Created** - `.agent-os/standards/myoflow-development-rules.md` with surgical precision and Austrian compliance focus
-- ✅ **Quality Gates Preserved** - Mandatory testing sequence, one-branch-per-feature, factual documentation
-- ✅ **Spec-Driven Development** - Complete spec created for therapist profile system with technical specifications
+### **Agent OS Integration Enhanced (September 7, 2025):**
+- ✅ **MyoFlow Context Added** - Enhanced analyze-product.md with Austrian compliance, current tech stack, and known gaps
+- ✅ **Invoice PDF Austrian Compliance Spec** - Complete ready-to-execute spec with technical, API, and database sub-specs
+- ✅ **Task Breakdown Created** - 6 actionable tasks for Austrian KU/VAT logic, PDF generation, and CSV exports
+- ✅ **Coordination with Codex** - Parallel work on subdomain routing, address data, and CI automation
+- ✅ **Perfect Division of Labor** - Agent OS handles structured workflow, Claude handles implementation
+- ✅ **Austrian Business Logic Specs** - KU/VAT calculations, BMD/RZL/DATEV CSV formats, compliance requirements
 
 ---
 
@@ -197,6 +209,33 @@
 **Success:** €500 MRR from 10+ therapists
 
 ### **Future Feature Ideas (Backlog)**
+
+#### **Sprint 1.6: Test Infrastructure & Quality (Priority: High)**
+- **Unit Test Suite Setup** - Complete test infrastructure for Austrian business logic
+  - Install and configure Vitest in monorepo packages
+  - Set up test scripts and CI integration
+  - Import Codex's test files (Austrian holidays, VAT/KU calculations, API routes)
+  - Add comprehensive test coverage for invoice generation and compliance
+  - *Rationale: Austrian compliance must be bulletproof for legal requirements*
+
+#### **Sprint 1.7: Comprehensive Settings Dashboard (Priority: High)**  
+- **Full Settings Implementation** - Expand minimal settings into complete management system
+  - Profile editing forms with Austrian validation
+  - Service rate template management interface
+  - File upload for business logos and avatars
+  - CSV export functionality for BMD/RZL/DATEV accounting software
+  - Advanced Austrian compliance features
+  - *Rationale: Builds on Sprint 1.5 foundation, critical for user onboarding*
+
+#### **Sprint 1.8: E2E Testing & CI Robustness (Priority: Medium)**
+- **Playwright E2E Infrastructure** - Complete end-to-end testing system
+  - Fix CI pipeline Playwright browser installation
+  - Add comprehensive user journey testing
+  - Austrian compliance workflow testing
+  - Performance and reliability testing
+  - *Rationale: Ensures quality before real user deployment*
+
+#### **Future Wellness Features (Priority: Low)**
 - **Therapist Wellness Tracking** - "Car service logbook" for therapists
   - Daily mood/energy tracking
   - Self-care logging (received massages, rest days, exercise)
@@ -246,12 +285,13 @@
 4. ✅ Sequential invoice numbering (YYYY-NNN format) and storage
 5. ✅ Client-appointment integration with smart filtering
 
-### **Sprint 1.5 - PDF Generation & Service Rates (IN PROGRESS 🚧):**
-1. ✅ Austrian-compliant PDF generation with Puppeteer
-2. ✅ Professional PDF templates with German text and formatting
-3. ✅ PDF download API and frontend integration
-4. 🚧 Service rate defaults in therapist profile settings
-5. 📋 CSV exports for BMD/RZL/DATEV accounting software
+### **Current Sprint - Agent OS Integration & Invoice PDF Austrian Compliance (IN PROGRESS 🚧):**
+1. ✅ Agent OS structure enhanced with MyoFlow-specific context
+2. ✅ Complete Austrian invoice PDF compliance spec created
+3. ✅ Technical specifications for KU/VAT logic and CSV exports
+4. 📋 Execute invoice PDF Austrian compliance tasks
+5. 📋 Service rate defaults in therapist profile settings
+6. 📋 CSV exports for BMD/RZL/DATEV accounting software
 
 ---
 
@@ -260,14 +300,15 @@
 ### **Key Insights:**
 - Project has evolved from personal tool to legitimate business opportunity
 - Technical foundation is enterprise-grade and well-architected  
-- Main challenge is discipline to resist feature creep
+- Agent OS integration provides structured workflow and spec-driven development
 - Austrian regulatory compliance is significant competitive advantage
+- Perfect coordination with Codex on parallel infrastructure tasks
 
 ### **Development Approach:**
-- Claude Code operational rules prevent scope drift
-- Surgical edits maintain code integrity
-- Comprehensive testing before commits
-- Focus on user value over technical perfection
+- Agent OS handles structured workflow (specs → tasks → execution)
+- Claude focuses on implementation details and real-time problem solving
+- Codex handles infrastructure (subdomain routing, address data, CI)
+- Clear division of labor prevents conflicts and maximizes productivity
 
 ### **Business Validation Plan:**
 - Start with wife as primary user and feedback source
@@ -279,21 +320,19 @@
 
 ## 🔄 **Update Log**
 
+**2025-09-07 16:00:** Agent OS enhanced with MyoFlow-specific Austrian compliance context and ready-to-execute invoice PDF spec  
+**2025-09-07 15:45:** Created complete Austrian invoice PDF compliance specification with technical, API, and database sub-specs  
+**2025-09-07 15:30:** Established coordination with Codex on parallel infrastructure tasks (subdomain routing, address data, CI)  
+**2025-09-07 15:15:** Enhanced Agent OS analyze-product.md with MyoFlow context and current state documentation  
+**2025-09-07 15:00:** Started Agent OS integration session - examined existing structure and identified enhancement opportunities  
 **2025-09-06 16:30:** Sprint 1.5 Austrian PDF generation system complete - TypeScript compilation successful  
 **2025-09-06 16:15:** PDF download button integrated into invoice detail page with error handling  
 **2025-09-06 16:00:** Complete PDF API endpoint with Austrian formatting and Puppeteer integration  
 **2025-09-06 15:45:** Austrian-compliant PDF invoice templates with VAT breakdown and legal notices  
 **2025-09-06 15:30:** Started Sprint 1.5 PDF Generation - merged Sprint 1.4 invoice system  
 **2025-09-06 15:15:** Created feature branch `feature/pdf-generation-and-service-rates`  
-**2025-09-06 15:00:** Sprint 1.4 Austrian Invoice Generation System complete and documented  
-**2024-09-06 23:45:** Sprint 1.3 Appointment Scheduling System complete - ready for PR merge  
-**2024-09-06 23:30:** Clickable appointment detail cards with comprehensive Austrian formatting  
-**2024-09-06 23:00:** Appointment listing interface with professional UI and navigation  
-**2024-09-06 22:30:** Austrian holiday system integrated with all 9 Bundesländer support  
-**2024-09-06 22:00:** Complete appointment CRUD API with conflict detection implemented  
-**2024-09-06 21:50:** Started Sprint 1.3 Appointment Scheduling - created feature branch  
-**2024-09-05 18:00:** Sprint 1.2 Client Management System complete and merged
+**2025-09-06 15:00:** Sprint 1.4 Austrian Invoice Generation System complete and documented
 
 ---
 
-**Current Priority:** Complete Sprint 1.5 service rate defaults and CSV exports
+**Current Priority:** Execute Austrian invoice PDF compliance spec and coordinate with Codex infrastructure tasks

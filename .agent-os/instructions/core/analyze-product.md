@@ -10,7 +10,16 @@ encoding: UTF-8
 
 ## Overview
 
-Install Agent OS into an existing codebase, analyze current product state and progress.  Builds on plan-product.md
+Install Agent OS into an existing codebase, analyze current product state and progress. Builds on plan-product.md
+
+## MyoFlow Context
+
+When analyzing MyoFlow specifically, focus on:
+- **Austrian Compliance**: KU/VAT thresholds, GDPR Article 9, therapist designations
+- **Current State**: Monorepo (Turborepo + pnpm), Next.js 14, Prisma + Postgres
+- **Features Working**: Auth, Clients, Appointments, Invoices (DRAFT→SENT→PAID), PDF generation
+- **Known Gaps**: Service rate defaults, CSV exports (BMD/RZL/DATEV), field-level encryption
+- **Business Logic**: German-first UX, therapist practice management, revenue optimization
 
 <pre_flight_check>
   EXECUTE: @.agent-os/instructions/meta/pre-flight.md
