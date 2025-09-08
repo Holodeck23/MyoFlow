@@ -53,8 +53,8 @@ export async function GET(
     const therapistInfo = {
       name: therapist.businessName || user.name || 'Dr. Therapist',
       address: therapist.businessAddress || 'Business Address not set',
-      city: 'Wien', // Default city for Austrian therapists
-      postalCode: '1010', // Default postal code 
+      city: 'Wien',
+      postalCode: '1010',
       country: 'Österreich',
       phone: therapist.businessPhone || '+43 1 234 5678',
       email: therapist.businessEmail || user.email,

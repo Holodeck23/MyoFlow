@@ -8,6 +8,10 @@ const CreateClientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
+  street: z.string().optional(),
+  postalCode: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
   tags: z.array(z.string()).optional(),
 })
 
@@ -100,7 +104,11 @@ export async function POST(request: NextRequest) {
         ...validatedData,
         therapistId,
         email: validatedData.email || null,
-        tags: validatedData.tags || []
+        tags: validatedData.tags || [],
+        street: validatedData.street || null,
+        postalCode: validatedData.postalCode || null,
+        city: validatedData.city || null,
+        country: validatedData.country || null,
       }
     })
 
