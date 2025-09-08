@@ -94,11 +94,5 @@ export async function GET(
       { error: 'Failed to generate PDF' }, 
       { status: 500 }
     )
-  } catch (error) {
-    console.error('PDF generation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate PDF' }, 
-      { status: 500 }
-    )
   }
 }
