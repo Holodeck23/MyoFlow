@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Logo } from '@/components/ui/Logo'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Badge, EncryptionBadge } from '@/components/ui/Badge'
+import { formatAustrianPhoneNumber, formatAustrianDate } from '@/lib/austrian-formatting'
 
 interface Client {
   id: string
@@ -80,8 +86,11 @@ export default function ClientsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-medical-blue"></div>
+          <p className="text-neutral-gray-600 font-medium">Laden...</p>
+        </div>
       </div>
     )
   }
@@ -89,166 +98,216 @@ export default function ClientsPage() {
   if (!session) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-background">
+      {/* Professional MyoFlow Navigation */}
+      <nav className="bg-white shadow-professional border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-xl font-semibold text-blue-600 hover:text-blue-700">
-                MyoFlow
+            <div className="flex items-center space-x-6">
+              <Link href="/dashboard" className="hover:opacity-80 transition-professional">
+                <Logo size="sm" />
               </Link>
-              <span className="text-sm text-gray-500">Clients</span>
+              <div className="h-6 w-px bg-border"></div>
+              <nav className="flex space-x-6">
+                <Link 
+                  href="/dashboard" 
+                  className="text-neutral-gray-600 hover:text-medical-blue font-medium text-sm transition-professional"
+                >
+                  Dashboard
+                </Link>
+                <span className="text-medical-blue font-semibold text-sm">
+                  Klienten
+                </span>
+              </nav>
             </div>
+            
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                {session.user?.email}
-              </span>
-              <Link
-                href="/dashboard/clients/new"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Add Client
-              </Link>
+              <div className="flex items-center space-x-2 text-sm text-neutral-gray-600">
+                <div className="w-8 h-8 bg-medical-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-medical-blue font-semibold text-xs">
+                    {session.user?.email?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="hidden sm:block">{session.user?.email}</span>
+              </div>
+              
+              <Button asChild>
+                <Link href="/dashboard/clients/new">
+                  Neuen Klienten hinzufügen
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-lg font-medium text-gray-900 mb-4">Client Management</h1>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search clients..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              {allTags.length > 0 && (
-                <div>
-                  <select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All tags</option>
-                    {allTags.map(tag => (
-                      <option key={tag} value={tag}>{tag}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
+      {/* Professional Main Content */}
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          {/* Header Section */}
+          <div>
+            <h1 className="text-2xl font-semibold text-neutral-gray-900">Klienten verwalten</h1>
+            <p className="mt-2 text-neutral-gray-600">
+              Verwalten Sie Ihre Klientendaten sicher und GDPR-konform.
+              <EncryptionBadge className="ml-2" />
+            </p>
           </div>
 
-          <div className="overflow-x-auto">
-            {error ? (
-              <div className="p-6 text-center text-red-600">
-                Error: {error}
+          {/* Search and Filter Section */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    placeholder="Klienten suchen..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                
+                {allTags.length > 0 && (
+                  <div className="sm:w-48">
+                    <select
+                      value={selectedTag}
+                      onChange={(e) => setSelectedTag(e.target.value)}
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-medical-blue-500 focus:border-transparent transition-professional"
+                    >
+                      <option value="">Alle Tags</option>
+                      {allTags.map(tag => (
+                        <option key={tag} value={tag}>{tag}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
-            ) : clients.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="text-gray-400 text-lg mb-2">No clients found</div>
-                <p className="text-gray-500 mb-4">
-                  {search || selectedTag
-                    ? 'Try adjusting your search or filter.'
-                    : "You haven't added any clients yet."}
-                </p>
-                <Link
-                  href="/dashboard/clients/new"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
-                >
-                  Add Your First Client
-                </Link>
-              </div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tags
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Updated
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {clients.map(client => (
-                    <tr key={client.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Link
-                          href={`/dashboard/clients/${client.id}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                        >
-                          {client.name}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            </CardContent>
+          </Card>
+
+          {/* Content Section */}
+          {error ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center text-austrian-red-600 flex items-center justify-center space-x-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>Fehler: {error}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ) : clients.length === 0 ? (
+            <Card>
+              <CardContent className="p-12">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-neutral-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-neutral-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-neutral-gray-900 mb-2">
+                    {search || selectedTag ? 'Keine Klienten gefunden' : 'Noch keine Klienten hinzugefügt'}
+                  </h3>
+                  <p className="text-neutral-gray-600 mb-6">
+                    {search || selectedTag
+                      ? 'Versuchen Sie, Ihre Suche oder Filter anzupassen.'
+                      : 'Fügen Sie Ihren ersten Klienten hinzu, um zu beginnen.'}
+                  </p>
+                  <Button asChild>
+                    <Link href="/dashboard/clients/new">
+                      {search || selectedTag ? 'Neuen Klienten hinzufügen' : 'Ersten Klienten hinzufügen'}
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {clients.map(client => (
+                <Card key={client.id} className="hover:shadow-professional transition-professional cursor-pointer">
+                  <Link href={`/dashboard/clients/${client.id}`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
                         <div>
+                          <CardTitle className="text-lg">{client.name}</CardTitle>
+                          <p className="text-sm text-neutral-gray-500 mt-1">
+                            Aktualisiert am {formatAustrianDate(new Date(client.updatedAt))}
+                          </p>
+                        </div>
+                        <EncryptionBadge />
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="space-y-3">
+                        {/* Contact Information */}
+                        <div className="space-y-2">
                           {client.email && (
-                            <div>{client.email}</div>
+                            <div className="flex items-center space-x-2 text-sm text-neutral-gray-600">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                              </svg>
+                              <span className="truncate">{client.email}</span>
+                            </div>
                           )}
                           {client.phone && (
-                            <div className="text-gray-500">{client.phone}</div>
+                            <div className="flex items-center space-x-2 text-sm text-neutral-gray-600">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              <span>{formatAustrianPhoneNumber(client.phone)}</span>
+                            </div>
                           )}
                           {!client.email && !client.phone && (
-                            <span className="text-gray-400">No contact info</span>
+                            <div className="text-sm text-neutral-gray-400 italic">
+                              Keine Kontaktdaten verfügbar
+                            </div>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-wrap gap-1">
-                          {client.tags.map(tag => (
-                            <span
-                              key={tag}
-                              className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(client.updatedAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2">
-                          <Link
-                            href={`/dashboard/clients/${client.id}/edit`}
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Edit
-                          </Link>
-                          <button
-                            onClick={() => handleDeleteClient(client.id, client.name)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+
+                        {/* Tags */}
+                        {client.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {client.tags.map(tag => (
+                              <Badge key={tag} variant="secondary" size="sm">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Link>
+                  
+                  {/* Action Buttons */}
+                  <div className="px-6 pb-4 pt-0 flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                    >
+                      <Link href={`/dashboard/clients/${client.id}/edit`}>
+                        Bearbeiten
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleDeleteClient(client.id, client.name)
+                      }}
+                      className="text-austrian-red-600 hover:text-austrian-red-700 hover:bg-austrian-red-50"
+                    >
+                      Löschen
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
