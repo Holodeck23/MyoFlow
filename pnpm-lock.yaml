@@ -53,6 +53,9 @@ importers:
       bullmq:
         specifier: ^4.15.0
         version: 4.18.3
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       next:
         specifier: 14.0.4
         version: 14.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -71,6 +74,9 @@ importers:
       stripe:
         specifier: ^14.9.0
         version: 14.25.0
+      tailwind-merge:
+        specifier: ^2.6.0
+        version: 2.6.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
