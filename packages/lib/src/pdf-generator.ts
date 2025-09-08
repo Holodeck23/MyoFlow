@@ -1,13 +1,19 @@
 import puppeteer from 'puppeteer'
-import { formatEuro, formatDate, getKleinunternehmerDisclaimer } from './austrian-invoicing'
+import {
+  formatEuro,
+  formatDate,
+  getKleinunternehmerDisclaimer,
+  InvoiceLine,
+  VATBreakdown
+} from './austrian-invoicing'
 
 interface InvoiceWithRelations {
   id: string
   number: string
   status: string
   totalGrossCents: number
-  lines: any
-  vatBreakdown: any
+  lines: InvoiceLine[]
+  vatBreakdown: VATBreakdown[]
   kleinunternehmer: boolean
   createdAt: Date
   Client: {
@@ -91,8 +97,8 @@ function generateInvoiceHTML(
   therapistInfo: TherapistInfo
 ): string {
   const isKU = therapistInfo.kleinunternehmer
-  const lines = Array.isArray(invoice.lines) ? invoice.lines : []
-  const vatBreakdown = Array.isArray(invoice.vatBreakdown) ? invoice.vatBreakdown : []
+  const lines = invoice.lines
+  const vatBreakdown = invoice.vatBreakdown
   const showVAT = !isKU && vatBreakdown.some(vat => vat.vatRate > 0)
   
   return `
