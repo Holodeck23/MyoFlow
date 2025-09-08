@@ -25,10 +25,34 @@ MyoFlow is a **single-tenant** practice management platform specifically designe
 
 ### 🏗️ Architecture
 - **Monorepo:** Turborepo with pnpm workspaces for optimal developer experience
-- **Frontend:** Next.js 14 with App Router, TypeScript strict mode, Tailwind CSS
-- **Backend:** Next.js API routes with tRPC-style handlers, PostgreSQL + Prisma
+- **Frontend:** Next.js 14.2.13 with App Router, TypeScript strict mode, Tailwind CSS
+- **Backend:** Next.js API routes with Austrian-compliant APIs, PostgreSQL + Prisma
 - **Security:** libsodium field-level encryption, comprehensive audit logging, RBAC
 - **Infrastructure:** Docker Compose for local development, GitHub Actions CI/CD
+- **Development:** Agent OS structured workflow with Claude-Codex coordination
+
+### 🎉 Current Status (September 2025)
+
+**✅ MVP Features Complete:**
+- 🔐 **Authentication System** - NextAuth.js with professional Austrian UI
+- 👥 **Client Management** - Complete CRUD with Austrian data fields, notes, tags
+- 📅 **Appointment Scheduling** - Austrian holiday system, conflict detection, travel buffers
+- 🧾 **Invoice Generation** - Austrian tax-compliant invoices with VAT/Kleinunternehmer support  
+- 📄 **PDF Generation** - Professional Austrian-formatted invoice PDFs with Puppeteer
+- ⚙️ **Therapist Profiles** - Business settings with Austrian compliance tracking
+- 🎨 **Professional Branding** - MyoFlow design system with Austrian medical colors
+
+**🚧 In Progress:**
+- 🔧 **Webpack Configuration** - Resolving module resolution with Codex coordination
+- 📱 **Client Profile Tabs** - Enhanced tabbed interface for detailed client information
+
+**🔮 Roadmap Highlights:**
+- **Mobile PWA** - Offline-first experience for mobile practitioners
+- **AI Revenue Optimization** - Austrian tax-aware pricing recommendations  
+- **ÖGK Integration** - Direct billing with Austrian Health Insurance Fund
+- **BMD/RZL/DATEV** - Enhanced accounting software integrations
+
+**📊 External Validation:** Perplexity AI review confirms strong market positioning with Austrian-first approach as key differentiator vs international SaaS solutions.
 
 ---
 
@@ -190,7 +214,28 @@ MyoFlow implements **defense-in-depth** security principles throughout the appli
 
 ---
 
-## 🔧 Development Workflow
+## 🤖 Agent OS Development Workflow
+
+MyoFlow follows the **Agent OS structured development approach** with coordinated AI agents:
+
+### Agent Communication Protocol
+- **agents.md** - Central communication hub between Claude and Codex
+- **CLAUDE.md** - Detailed session notes and implementation tracking  
+- **Structured Workflow** - `/create-spec` → `/create-tasks` → execution → coordination
+
+### Agent Responsibilities
+- **Claude (Implementation)** - Feature development, UI/UX, real-time debugging, Austrian compliance
+- **Codex (Infrastructure)** - System architecture, CI/CD, build optimization, environment setup
+- **Coordination** - Parallel task execution with structured handoffs and status updates
+
+### Development Phases
+1. **MVP Phase** (Complete ✅) - Core Austrian therapy practice features
+2. **Revenue Phase** (Next) - Multi-tenant onboarding, payment integration  
+3. **Scale Phase** (Future) - Advanced features, market expansion
+
+---
+
+## 🔧 Traditional Development Workflow
 
 ### Branch Strategy
 ```bash
