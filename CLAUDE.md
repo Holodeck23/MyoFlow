@@ -216,13 +216,63 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 **Success:** €500 MRR from 10+ therapists
 
-### **Future Feature Ideas (Backlog)**
+### **Future Sprint Planning (Updated with Perplexity Insights)**
+
+#### **Sprint 1.6: Test Infrastructure & Quality (Priority: High)**
+- **Unit Test Suite Setup** - Complete test infrastructure for Austrian business logic
+  - Install and configure Vitest in monorepo packages
+  - Add comprehensive test coverage for invoice generation and compliance
+  - *Rationale: Austrian compliance must be bulletproof for legal requirements*
+
+#### **Sprint 1.7: Mobile-First PWA Experience (Priority: High)**
+- **Progressive Web App Implementation** - Critical for on-the-go practitioners
+  - PWA manifest and service worker setup
+  - Offline appointment viewing and client lookup
+  - Mobile-optimized scheduling interface
+  - Push notifications for appointment reminders
+  - *Rationale: Perplexity identified mobile experience as critical for solo practitioners*
+
+#### **Sprint 1.8: Comprehensive Settings Dashboard (Priority: High)**  
+- **Full Settings Implementation** - Expand minimal settings into complete management system
+  - Profile editing forms with Austrian validation
+  - Service rate template management interface
+  - CSV export functionality for BMD/RZL/DATEV accounting software
+  - *Rationale: Builds on current foundation, critical for user onboarding*
+
+#### **Sprint 2.1: Integration Ecosystem (Priority: High)**
+- **Austrian Business Integration Suite** - Seamless local software connections
+  - Enhanced BMD/RZL/DATEV accounting software APIs (beyond CSV)
+  - Telehealth platform integrations (DocTelehealth, eHealth Austria)
+  - Austrian bank payment processing (SEPA, Sofortüberweisung)
+  - *Rationale: Perplexity emphasized integrations increase market appeal significantly*
+
+#### **Sprint 2.2: AI-Driven Revenue Optimization (Priority: Medium)**
+- **Smart Austrian Tax & Pricing Assistant** - AI-powered business optimization
+  - Kleinunternehmer threshold monitoring with alerts
+  - Optimal pricing suggestions based on Austrian tax brackets
+  - Revenue forecasting with VAT impact analysis
+  - Austrian market rate comparisons and recommendations
+  - *Rationale: Perplexity highlighted AI revenue optimization as key differentiator*
+
+#### **Sprint 2.3: Austrian Social Insurance Integration (Priority: Medium)**
+- **ÖGK Direct Billing System** - Ultimate Austrian market lock-in
+  - Austrian Health Insurance Fund (ÖGK) API integration
+  - Direct billing for covered treatments
+  - Automated insurance claim submissions
+  - *Rationale: Perplexity identified this as ultimate market differentiation*
+
+#### **Sprint 3.1: Multi-Tenancy & Scalability (Priority: Low)**
+- **Hybrid Multi-Tenant Architecture** - Cost efficiency at scale
+  - Multi-clinic management for larger practices
+  - Shared infrastructure with data isolation
+  - Enterprise pricing tiers
+  - *Rationale: Perplexity suggested considering multi-tenancy for business scaling*
+
+#### **Future Wellness Features (Priority: Low)**
 - **Therapist Wellness Tracking** - "Car service logbook" for therapists
   - Daily mood/energy tracking
   - Self-care logging (received massages, rest days, exercise)
   - Burnout prevention alerts
-  - Work-life balance metrics
-  - Professional development tracking
   - *Rationale: Therapist wellness directly impacts client care quality*
 
 ---
