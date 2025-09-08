@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@myoflow/db'
 import { generateInvoicePDF } from '@myoflow/lib'
 
-const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
@@ -84,7 +83,11 @@ export async function GET(
       { error: 'Failed to generate PDF' }, 
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
+  } catch (error) {
+    console.error('PDF generation error:', error)
+    return NextResponse.json(
+      { error: 'Failed to generate PDF' }, 
+      { status: 500 }
+    )
   }
 }
