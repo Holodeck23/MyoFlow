@@ -66,7 +66,7 @@ export default function Dashboard() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
               <div className="p-4 border rounded-lg hover:bg-gray-50">
                 <Link href="/dashboard/clients" className="block">
                   <h4 className="font-medium text-gray-900">Clients</h4>
@@ -88,6 +88,14 @@ export default function Dashboard() {
                   <h4 className="font-medium text-gray-900">Invoices</h4>
                   <p className="text-sm text-gray-500 mt-1">Austrian tax-compliant invoicing</p>
                   <p className="text-xs text-green-600 mt-2">✅ Available now</p>
+                </Link>
+              </div>
+
+              <div className="p-4 border rounded-lg hover:bg-gray-50">
+                <Link href="/dashboard/settings" className="block">
+                  <h4 className="font-medium text-gray-900">Settings</h4>
+                  <p className="text-sm text-gray-500 mt-1">Profile and Austrian compliance</p>
+                  <p className="text-xs text-blue-600 mt-2">✅ Available now</p>
                 </Link>
               </div>
             </div>

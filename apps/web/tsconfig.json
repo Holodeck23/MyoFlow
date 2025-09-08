@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*", "./*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
       "@myoflow/ui": ["../../packages/ui"],
       "@myoflow/lib": ["../../packages/lib"],
       "@myoflow/db": ["../../packages/db"]
