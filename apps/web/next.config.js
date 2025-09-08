@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    transpilePackages: ["@myoflow/ui", "@myoflow/lib", "@myoflow/db"],
-  },
+  transpilePackages: ["@myoflow/ui", "@myoflow/lib", "@myoflow/db"],
   images: {
     domains: ['localhost'],
   },
