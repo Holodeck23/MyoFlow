@@ -3,8 +3,8 @@ import {
   formatEuro,
   formatDate,
   getKleinunternehmerDisclaimer,
-  InvoiceLine,
-  VATBreakdown
+  type InvoiceLine,
+  type VATBreakdown
 } from './austrian-invoicing'
 
 interface InvoiceWithRelations {
@@ -97,9 +97,8 @@ function generateInvoiceHTML(
   therapistInfo: TherapistInfo
 ): string {
   const isKU = therapistInfo.kleinunternehmer
-  const lines = invoice.lines
-  const vatBreakdown = invoice.vatBreakdown
-  const showVAT = !isKU && vatBreakdown.some(vat => vat.vatRate > 0)
+  const showVAT =
+    !isKU && invoice.vatBreakdown.some(vat => vat.vatRate > 0)
   
   return `
     <!DOCTYPE html>
@@ -324,24 +323,27 @@ function generateInvoiceHTML(
           </tr>
         </thead>
         <tbody>
-          ${lines.map(line => `
+          ${invoice.lines
+            .map(
+              line => `
             <tr>
               <td>${invoice.Appointment?.Service.name || 'Therapieleistung'}</td>
               <td>${line.description}</td>
               <td class="number-cell">${line.quantity}</td>
               <td class="number-cell">${formatEuro(line.unitPriceCents / 100)}</td>
-              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents / (1 + (vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100)) / 100)}</td>` : ''}
-              ${showVAT ? `<td class="number-cell">${vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0}%</td>` : ''}
-              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents - (line.totalCents / (1 + (vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100))) / 100)}</td>` : ''}
+              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents / (1 + (invoice.vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100)) / 100)}</td>` : ''}
+              ${showVAT ? `<td class="number-cell">${invoice.vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0}%</td>` : ''}
+              ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents - (line.totalCents / (1 + (invoice.vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100))) / 100)}</td>` : ''}
               <td class="number-cell bold">${formatEuro(line.totalCents / 100)}</td>
             </tr>
-          `).join('')}
+          `)
+            .join('')}
         </tbody>
       </table>
 
       <div class="totals-section">
         <table class="totals-table">
-          ${showVAT ? vatBreakdown.map(vat => `
+          ${showVAT ? invoice.vatBreakdown.map(vat => `
             <tr>
               <td class="label">Nettobetrag (${vat.vatRate}%):</td>
               <td class="amount">${formatEuro(vat.netCents / 100)}</td>
