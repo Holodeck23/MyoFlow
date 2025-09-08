@@ -21,9 +21,13 @@ export async function middleware(request: NextRequest) {
   
   // CSP with nonce for scripts
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
+  const scriptSrc = [`'self'`, `'nonce-${nonce}'`]
+  if (process.env.NODE_ENV !== 'production') {
+    scriptSrc.push("'unsafe-eval'")
+  }
   response.headers.set(
     'Content-Security-Policy',
-    `default-src 'self'; script-src 'self' 'nonce-${nonce}' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self';`
+    `default-src 'self'; script-src ${scriptSrc.join(' ')}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self';`
   )
   
   // Protect dashboard routes

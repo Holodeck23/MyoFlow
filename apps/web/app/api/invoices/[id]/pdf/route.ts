@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
-import { generateInvoicePDF } from '@myoflow/lib'
+import {
+  generateInvoicePDF,
+  type InvoiceLine,
+  type VATBreakdown
+} from '@myoflow/lib'
 
 
 export async function GET(
@@ -64,8 +68,15 @@ export async function GET(
       vatStatus: therapist.vatStatus || 'KLEINUNTERNEHMER'
     }
 
+    // Cast JSON fields to typed arrays for PDF generation
+    const invoiceForPDF: Parameters<typeof generateInvoicePDF>[0] = {
+      ...invoice,
+      lines: (invoice.lines as unknown as InvoiceLine[]) || [],
+      vatBreakdown: (invoice.vatBreakdown as unknown as VATBreakdown[]) || []
+    }
+
     // Generate PDF
-    const pdfBuffer = await generateInvoicePDF(invoice, therapistInfo)
+    const pdfBuffer = await generateInvoicePDF(invoiceForPDF, therapistInfo)
 
     // Return PDF with proper headers
     return new NextResponse(Buffer.from(pdfBuffer), {
