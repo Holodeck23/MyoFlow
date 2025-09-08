@@ -6,9 +6,9 @@ import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
 // Global test setup
 beforeAll(() => {
   // Mock environment variables for testing
-  process.env.NODE_ENV = 'test'
-  process.env.NEXTAUTH_SECRET = 'test-secret'
-  process.env.NEXTAUTH_URL = 'http://localhost:3000'
+  ;(process.env as any).NODE_ENV = 'test'
+  ;(process.env as any).NEXTAUTH_SECRET = 'test-secret'
+  ;(process.env as any).NEXTAUTH_URL = 'http://localhost:3000'
   
   console.log('🧪 Starting @myoflow/web test suite')
 })
@@ -37,9 +37,9 @@ export const mockRequest = (method: string, body?: any) => {
 
 export const mockResponse = () => {
   const res: any = {}
-  res.status = vi.fn().mockReturnValue(res)
-  res.json = vi.fn().mockReturnValue(res)
-  res.end = vi.fn().mockReturnValue(res)
+  res.status = () => res
+  res.json = () => res
+  res.end = () => res
   return res
 }
 
