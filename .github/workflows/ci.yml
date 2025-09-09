@@ -95,8 +95,7 @@ jobs:
         run: pnpm build
 
       - name: Run unit tests
-        run: pnpm test
-        if: false # TODO-CLAUDE: Enable once tests are written
+        run: pnpm test:run
 
       - name: Run E2E tests
         run: pnpm test:e2e
