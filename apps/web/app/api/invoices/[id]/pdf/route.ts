@@ -55,17 +55,17 @@ export async function GET(
     const therapist = user.Therapist
     const therapistInfo = {
       name: therapist.businessName || user.name || 'Dr. Therapist',
-      address: therapist.businessAddress || 'Business Address not set',
+      address: therapist.businessAddress || 'Mariahilfer Straße 123',
       city: 'Wien',
-      postalCode: '1010',
+      postalCode: '1060',
       country: 'Österreich',
-      phone: therapist.businessPhone || '+43 1 234 5678',
+      phone: therapist.businessPhone || '+43 664 123 4567',
       email: therapist.businessEmail || user.email,
-      uid: therapist.uidNumber || 'ATU12345678',
+      uid: therapist.uidNumber || undefined,
       iban: therapist.iban || 'AT61 1904 3002 3457 3201',
-      kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER'),
-      designation: therapist.designation || 'HEILMASSEUR',
-      vatStatus: therapist.vatStatus || 'KLEINUNTERNEHMER'
+      bic: 'BKAUATWW', // Austrian bank BIC
+      businessForm: 'eingetragenes Einzelunternehmen',
+      kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER')
     }
 
     // Cast JSON fields to typed arrays for PDF generation
