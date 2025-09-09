@@ -197,6 +197,14 @@ function generateInvoiceHTML(
           border-bottom: 2px solid #d1d5db;
         }
         
+        .services-table tbody tr:nth-child(even) {
+          background-color: #f9fafb;
+        }
+        
+        .services-table tbody tr:hover {
+          background-color: #f3f4f6;
+        }
+        
         .services-table td:last-child,
         .services-table th:last-child {
           border-right: none;
@@ -204,6 +212,8 @@ function generateInvoiceHTML(
         
         .services-table .number-cell {
           text-align: right;
+          font-variant-numeric: tabular-nums;
+          font-family: monospace;
         }
         
         .services-table .description-cell {
@@ -321,18 +331,20 @@ function generateInvoiceHTML(
         
         <div class="invoice-title">
           <h1>RECHNUNG</h1>
-          <div class="invoice-number">Nr. ${invoice.number}</div>
+          <div style="font-size: 8pt; color: #9ca3af; font-style: italic;">Invoice</div>
+          <div class="invoice-number">Nr. ${invoice.number} <span style="font-size: 8pt; color: #9ca3af;">/ Invoice No.</span></div>
         </div>
       </div>
 
       <div class="client-section">
-        <div style="font-weight: bold; margin-bottom: 10px;">Rechnungsempfänger:</div>
+        <div style="font-weight: bold; margin-bottom: 10px;">Rechnungsempfänger: <span style="font-size: 8pt; color: #9ca3af; font-weight: normal; font-style: italic;">/ Bill To</span></div>
         <div class="client-info">
           <div class="bold">${invoice.Client?.name || 'Kunde'}</div>
           ${invoice.Client && (invoice.Client.street || invoice.Client.postalCode || invoice.Client.city || invoice.Client.country)
             ? `<div>${invoice.Client.street || ''}</div>
                <div>${[invoice.Client.postalCode, invoice.Client.city].filter(Boolean).join(' ')}${invoice.Client.country ? ', ' + invoice.Client.country : ''}</div>`
-            : ''}
+            : `<div style="color: #dc2626; font-style: italic;">Adresse erforderlich für vollständige Rechnung</div>
+               <div style="font-size: 10pt; color: #6b7280;">Kleinbetragsrechnung (≤ €400) - Adresse optional</div>`}
           ${invoice.Client?.email ? `<div>E-Mail: ${invoice.Client.email}</div>` : ''}
           ${invoice.Client?.phone ? `<div>Tel: ${invoice.Client.phone}</div>` : ''}
         </div>
@@ -341,8 +353,9 @@ function generateInvoiceHTML(
       <div class="invoice-details">
         <div class="details-column">
           <div><span class="bold">Rechnungsdatum:</span> ${formatDate(invoice.createdAt)}</div>
-          <div><span class="bold">Leistungsdatum:</span> ${invoice.Appointment ? formatDate(invoice.Appointment.start) : formatDate(invoice.createdAt)}</div>
-          ${invoice.Appointment ? `<div><span class="bold">Terminzeit:</span> ${formatDate(invoice.Appointment.start)}</div>` : ''}
+          ${invoice.Appointment && formatDate(invoice.Appointment.start) !== formatDate(invoice.createdAt) 
+            ? `<div><span class="bold">Leistungsdatum:</span> ${formatDate(invoice.Appointment.start)}</div>`
+            : `<div><span class="bold">Leistungsdatum:</span> entspricht dem Rechnungsdatum</div>`}
         </div>
         <div class="details-column">
           <div><span class="bold">Zahlungsziel:</span> ${formatDate(new Date(invoice.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))}</div>
@@ -396,18 +409,29 @@ function generateInvoiceHTML(
 
       <div class="totals-section">
         <table class="totals-table">
-          ${showVAT ? invoice.vatBreakdown.map(vat => `
-            <tr>
-              <td class="label">Nettobetrag (${vat.vatRate}%):</td>
-              <td class="amount">${formatEuro(vat.netCents / 100)}</td>
-            </tr>
-            <tr>
-              <td class="label">USt (${vat.vatRate}%):</td>
-              <td class="amount">${formatEuro(vat.vatCents / 100)}</td>
-            </tr>
-          `).join('') : ''}
+          ${showVAT 
+            ? invoice.vatBreakdown.map(vat => `
+                <tr>
+                  <td class="label">Nettobetrag (${vat.vatRate}%):</td>
+                  <td class="amount">${formatEuro(vat.netCents / 100)}</td>
+                </tr>
+                <tr>
+                  <td class="label">USt (${vat.vatRate}%):</td>
+                  <td class="amount">${formatEuro(vat.vatCents / 100)}</td>
+                </tr>
+              `).join('') 
+            : `
+                <tr>
+                  <td class="label">Zwischensumme (steuerfrei):</td>
+                  <td class="amount">${formatEuro(invoice.totalGrossCents / 100)}</td>
+                </tr>
+                <tr>
+                  <td class="label">USt 0% (Kleinunternehmer):</td>
+                  <td class="amount">€0,00</td>
+                </tr>
+              `}
           <tr class="total-row">
-            <td class="label">${showVAT ? 'Bruttobetrag:' : 'Gesamtbetrag:'}</td>
+            <td class="label">Gesamt:</td>
             <td class="amount">${formatEuro(invoice.totalGrossCents / 100)}</td>
           </tr>
         </table>
@@ -432,8 +456,21 @@ function generateInvoiceHTML(
         ` : ''}
         
         <div class="legal-notice" style="margin-top: 15px;">
-          <div>Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig.</div>
-          <div style="margin-top: 10px;">
+          <div style="margin-bottom: 10px;">Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig.</div>
+          
+          <div style="margin: 15px 0; padding: 10px 0; border-top: 1px solid #e5e5e5;">
+            <strong>Impressum:</strong><br>
+            ${therapistInfo.businessForm || 'eingetragenes Einzelunternehmen'}<br>
+            ${therapistInfo.uid 
+              ? `UID: ${therapistInfo.uid}` 
+              : 'UID: — (Kleinunternehmer, keine USt-ID)'}<br>
+            FN: — | Gerichtsstand: Wien<br>
+            <div style="text-align: center; margin-top: 10px; font-size: 8pt;">
+              Seite 1/1
+            </div>
+          </div>
+          
+          <div style="margin-top: 10px; font-size: 8pt; color: #6b7280;">
             <strong>Wichtiger Hinweis:</strong> Als Therapieleistung handelt es sich um eine Dienstleistung im Bereich 
             der Gesundheitsförderung. Diese Leistung ersetzt keine ärztliche Behandlung oder medizinische Therapie.
           </div>
