@@ -57,6 +57,8 @@ interface TherapistInfo {
   email: string
   uid?: string
   iban?: string
+  bic?: string
+  businessForm?: string
   kleinunternehmer: boolean
 }
 
@@ -177,23 +179,36 @@ function generateInvoiceHTML(
           border-collapse: collapse;
           margin: 30px 0;
           background: white;
+          border: 1px solid #d1d5db;
         }
         
         .services-table th,
         .services-table td {
-          padding: 12px;
+          padding: 12px 16px;
           text-align: left;
           border-bottom: 1px solid #e5e5e5;
+          border-right: 1px solid #f3f4f6;
         }
         
         .services-table th {
-          background-color: #f3f4f6;
+          background-color: #f8fafc;
           font-weight: bold;
           color: #374151;
+          border-bottom: 2px solid #d1d5db;
+        }
+        
+        .services-table td:last-child,
+        .services-table th:last-child {
+          border-right: none;
         }
         
         .services-table .number-cell {
           text-align: right;
+        }
+        
+        .services-table .description-cell {
+          font-weight: 600;
+          color: #1f2937;
         }
         
         .totals-section {
@@ -223,13 +238,17 @@ function generateInvoiceHTML(
         }
         
         .total-row {
-          background-color: #f3f4f6;
-          font-size: 14pt;
+          background-color: #1e40af;
+          color: white;
+          font-size: 16pt;
+          font-weight: bold;
         }
         
         .total-row td {
-          border-top: 2px solid #374151;
-          border-bottom: 2px solid #374151;
+          border-top: 3px solid #1e40af;
+          border-bottom: 3px solid #1e40af;
+          padding: 15px 12px;
+          color: white;
         }
         
         .footer {
@@ -238,6 +257,27 @@ function generateInvoiceHTML(
           border-top: 1px solid #e5e5e5;
           font-size: 10pt;
           color: #6b7280;
+        }
+        
+        .payment-terms {
+          margin: 30px 0;
+          background-color: #fef7cd;
+          padding: 20px;
+          border-left: 4px solid #eab308;
+          border-radius: 4px;
+        }
+        
+        .payment-terms h3 {
+          margin: 0 0 15px 0;
+          color: #92400e;
+          font-size: 14pt;
+        }
+        
+        .payment-terms .due-date {
+          font-size: 16pt;
+          font-weight: bold;
+          color: #92400e;
+          margin: 10px 0;
         }
         
         .payment-info {
@@ -267,14 +307,15 @@ function generateInvoiceHTML(
       <div class="invoice-header">
         <div class="therapist-info">
           <div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>
-          <div>${therapistInfo.address}</div>
+          ${therapistInfo.businessForm ? `<div style="font-size: 10pt; color: #6b7280;">${therapistInfo.businessForm}</div>` : ''}
+          <div>${therapistInfo.address || '[Geschäftsadresse erforderlich]'}</div>
           ${therapistInfo.postalCode || therapistInfo.city || therapistInfo.country ?
             `<div>${[therapistInfo.postalCode, therapistInfo.city].filter(Boolean).join(' ')}${therapistInfo.country ? ', ' + therapistInfo.country : ''}</div>`
             : ''}
           <div style="margin-top: 10px;">
             <div>Tel: ${therapistInfo.phone}</div>
             <div>E-Mail: ${therapistInfo.email}</div>
-            ${therapistInfo.uid ? `<div>UID: ${therapistInfo.uid}</div>` : ''}
+            ${therapistInfo.uid && !therapistInfo.kleinunternehmer ? `<div>UID: ${therapistInfo.uid}</div>` : ''}
           </div>
         </div>
         
@@ -309,11 +350,24 @@ function generateInvoiceHTML(
         </div>
       </div>
 
+      <div class="payment-terms">
+        <h3>Zahlungsbedingungen</h3>
+        <div class="due-date">Zahlungsziel: ${formatDate(new Date(invoice.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))}</div>
+        <div style="margin: 10px 0;">
+          <strong>Zahlungsart:</strong> Banküberweisung
+        </div>
+        <div style="margin: 5px 0;">
+          <strong>Zahlungsfrist:</strong> 30 Tage netto ab Rechnungsdatum
+        </div>
+        <div style="margin: 5px 0; font-size: 10pt; color: #92400e;">
+          Bei Zahlungsverzug werden Verzugszinsen gemäß § 456 UGB in Höhe von 9,2% p.a. verrechnet.
+        </div>
+      </div>
+
       <table class="services-table">
         <thead>
           <tr>
             <th>Leistung</th>
-            <th>Beschreibung</th>
             <th class="number-cell">Menge</th>
             <th class="number-cell">Einzelpreis</th>
             ${showVAT ? '<th class="number-cell">Netto</th>' : ''}
@@ -327,8 +381,7 @@ function generateInvoiceHTML(
             .map(
               line => `
             <tr>
-              <td>${invoice.Appointment?.Service.name || 'Therapieleistung'}</td>
-              <td>${line.description}</td>
+              <td class="description-cell">${line.description}</td>
               <td class="number-cell">${line.quantity}</td>
               <td class="number-cell">${formatEuro(line.unitPriceCents / 100)}</td>
               ${showVAT ? `<td class="number-cell">${formatEuro((line.totalCents / (1 + (invoice.vatBreakdown.find(v => v.vatRate > 0)?.vatRate || 0) / 100)) / 100)}</td>` : ''}
@@ -360,14 +413,16 @@ function generateInvoiceHTML(
         </table>
       </div>
 
-      ${therapistInfo.iban ? `
-        <div class="payment-info">
-          <div class="bold">Zahlungsinformationen:</div>
-          <div>IBAN: ${therapistInfo.iban}</div>
-          <div>Verwendungszweck: Rechnung ${invoice.number}</div>
-          <div>Zahlungsziel: ${formatDate(new Date(invoice.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000))}</div>
+      <div class="payment-info">
+        <div class="bold">Zahlungsinformationen:</div>
+        ${therapistInfo.iban ? `<div><strong>IBAN:</strong> ${therapistInfo.iban}</div>` : '<div><strong>IBAN:</strong> [Bitte um Kontaktaufnahme für Bankdaten]</div>'}
+        ${therapistInfo.bic ? `<div><strong>BIC:</strong> ${therapistInfo.bic}</div>` : ''}
+        <div><strong>Verwendungszweck:</strong> Rechnung ${invoice.number}</div>
+        <div><strong>Empfänger:</strong> ${therapistInfo.name}</div>
+        <div style="margin-top: 10px; font-style: italic; color: #6b7280;">
+          Bitte überweisen Sie den Rechnungsbetrag bis zum angegebenen Zahlungsziel.
         </div>
-      ` : ''}
+      </div>
 
       <div class="footer">
         ${isKU ? `
