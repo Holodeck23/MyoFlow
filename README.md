@@ -4,7 +4,7 @@
   <h3>🏥 Secure Practice Management for Austrian Therapists</h3>
   <p>A comprehensive, bilingual platform built with security-first principles</p>
   
-  [![CI](https://github.com/your-org/MyoFlow/workflows/CI/badge.svg)](https://github.com/your-org/MyoFlow/actions)
+  [![CI](https://github.com/Holodeck23/MyoFlow/workflows/CI/badge.svg)](https://github.com/Holodeck23/MyoFlow/actions)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
   [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
   [![Prisma](https://img.shields.io/badge/Prisma-5.0+-2D3748)](https://prisma.io/)
@@ -71,7 +71,7 @@ docker --version # Any recent version
 ### Installation
 ```bash
 # 1. Clone and install
-git clone https://github.com/your-org/MyoFlow.git
+git clone https://github.com/Holodeck23/MyoFlow.git
 cd MyoFlow && pnpm install
 
 # 2. Environment setup
@@ -381,8 +381,8 @@ POSTHOG_ENABLED=true
 - [Mini-Site Setup](./docs/mini-sites.md) - Public site configuration
 
 ### Community & Support
-- **Issues:** [GitHub Issues](https://github.com/your-org/MyoFlow/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-org/MyoFlow/discussions)
+- **Issues:** [GitHub Issues](https://github.com/Holodeck23/MyoFlow/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Holodeck23/MyoFlow/discussions)
 - **Security:** security@myoflow.at for security vulnerabilities
 
 ---
