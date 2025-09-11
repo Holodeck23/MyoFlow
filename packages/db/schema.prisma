@@ -343,14 +343,24 @@ model Invoice {
   totalGrossCents   Int
   vatBreakdown      Json
   kleinunternehmer  Boolean
+  
+  // Austrian Compliance Extensions
+  performanceDate   DateTime?     // Date when service was performed (Leistungsdatum)
+  vatRate           Decimal?      @db.Decimal(5,4) // Specific VAT rate applied (e.g., 0.2000 for 20%)
+  netCents          Int?          // Net amount before VAT in cents
+  vatCents          Int?          // VAT amount in cents  
+  tender            String?       // Payment tender information (e.g., "Barzahlung", "Überweisung")
+  
   pdfUrl            String?
   createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt @default(now())
   Therapist         Therapist     @relation(fields: [therapistId], references: [id])
   Client            Client?       @relation(fields: [clientId], references: [id])
   Appointment       Appointment?  @relation(fields: [appointmentId], references: [id])
   Payments          Payment[]
   
   @@index([therapistId, createdAt])
+  @@index([therapistId, performanceDate])
 }
 
 model Payment {
