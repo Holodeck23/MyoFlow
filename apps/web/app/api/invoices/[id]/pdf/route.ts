@@ -63,7 +63,7 @@ export async function GET(
       email: therapist.businessEmail || user.email,
       uid: therapist.uidNumber || undefined,
       iban: therapist.iban || 'AT61 1904 3002 3457 3201',
-      bic: 'BKAUATWW', // Austrian bank BIC
+      bic: undefined, // BIC will be omitted when unknown to avoid SEPA conflicts
       businessForm: 'eingetragenes Einzelunternehmen',
       kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER')
     }

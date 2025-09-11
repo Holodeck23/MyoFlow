@@ -163,7 +163,7 @@ export function exportToDATEV(
       account,
       taxAccount,
       invoice.isKleinunternehmer ? '' : '19', // VAT code for 20% (Austrian standard)
-      format(invoice.createdAt, 'ddMM', { locale: de }),
+      format(invoice.createdAt, 'ddMMyyyy', { locale: de }),
       invoice.number,
       `"${invoice.clientName}"`,
       '',
