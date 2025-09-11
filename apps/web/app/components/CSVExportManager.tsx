@@ -219,9 +219,9 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
       <div className="bg-blue-50 p-4 rounded-md">
         <h4 className="text-sm font-medium text-blue-800 mb-2">Usage Instructions</h4>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• <strong>BMD:</strong> Import via "Datenimport" → "CSV-Import" with semicolon separator</li>
-          <li>• <strong>RZL:</strong> Use "Datenaustausch" → "Import" and select CSV format</li>
-          <li>• <strong>DATEV:</strong> Import through "Datenaustausch" → "Belege" with ISO encoding</li>
+          <li>• <strong>BMD:</strong> Import via &ldquo;Datenimport&rdquo; → &ldquo;CSV-Import&rdquo; with semicolon separator</li>
+          <li>• <strong>RZL:</strong> Use &ldquo;Datenaustausch&rdquo; → &ldquo;Import&rdquo; and select CSV format</li>
+          <li>• <strong>DATEV:</strong> Import through &ldquo;Datenaustausch&rdquo; → &ldquo;Belege&rdquo; with ISO encoding</li>
           <li>• Only finalized invoices (SENT, PAID) are included in exports</li>
           <li>• VAT calculations respect your Kleinunternehmer status automatically</li>
         </ul>
