@@ -173,7 +173,7 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 ### **Project Origin:**
 - Started as gift for estranged wife's massage therapy business
 - Evolved into comprehensive Austrian therapy practice platform
-- Goal: Validate with real user, then scale to €10k MRR
+- Goal: Validate with real user, then scale to sustainable revenue
 
 ### **Market Opportunity:**
 - Austrian massage therapists using Excel + manual processes
@@ -182,7 +182,7 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 ### **Revenue Model:**
 - €50-200/month per therapist subscription
-- Target: 50-200 therapists for €10k MRR
+- Target: Sustainable recurring revenue from Austrian therapy market
 - Stripe Connect for payment processing
 
 ---

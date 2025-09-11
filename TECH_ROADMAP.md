@@ -2,7 +2,7 @@
 
 **Project Manager:** You  
 **Senior Developer:** Claude Code  
-**Target:** Austrian Therapy Practice Management → €10k MRR
+**Target:** Austrian Therapy Practice Management → Market Leadership
 
 ---
 
@@ -224,7 +224,7 @@
 - **Phase 1:** 1 active user (your wife) using daily
 - **Phase 2:** €50 MRR from 1-2 therapists
 - **Phase 3:** €500 MRR from 10+ therapists  
-- **Phase 4:** €10k MRR from 100+ therapists
+- **Phase 4:** Sustainable market leadership with established customer base
 
 ---
 
