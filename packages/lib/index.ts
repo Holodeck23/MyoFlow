@@ -37,6 +37,9 @@ export {
 // PDF generation
 export * from './src/pdf-generator'
 
+// SEPA QR codes for Austrian banking
+export * from './src/sepa-qr'
+
 // Types
 export * from './src/types'
 
