@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement travel-aware scheduling functionality that enables Austrian massage therapists to optimize their practice by considering travel time and costs between client locations. This feature will reduce scheduling conflicts, improve time management, and increase profitability by enabling smarter appointment routing and travel cost tracking. The system will provide real-time travel time validation, geographic client clustering, and automated travel cost calculations with optional client billing integration.

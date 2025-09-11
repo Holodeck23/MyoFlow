@@ -40,6 +40,9 @@ export * from './src/pdf-generator'
 // SEPA QR codes for Austrian banking
 export * from './src/sepa-qr'
 
+// CSV export for accounting software
+export * from './src/csv-export'
+
 // Types
 export * from './src/types'
 
