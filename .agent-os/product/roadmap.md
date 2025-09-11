@@ -22,7 +22,7 @@
 ## Phase 2: Revenue Optimization (IN PROGRESS - Sprint 1.5)
 
 **Goal:** Transform from admin tool to revenue-growing business system
-**Success Criteria:** 15-25% increase in practice profitability, €50 MRR from 1-2 therapists
+**Success Criteria:** 15-25% increase in practice profitability, validated market demand from Austrian therapists
 
 ### Features
 
@@ -43,7 +43,7 @@
 ## Phase 3: Scale and Polish (PLANNED)
 
 **Goal:** Expand market reach and enterprise features
-**Success Criteria:** €500 MRR from 10+ therapists, referral program active
+**Success Criteria:** Established Austrian market presence, referral program active
 
 ### Features
 
@@ -85,7 +85,7 @@
 ## Phase 5: Enterprise Features (LONG-TERM)
 
 **Goal:** Enterprise market penetration and platform ecosystem
-**Success Criteria:** €10k+ MRR, white-label partnerships
+**Success Criteria:** Market leadership, white-label partnerships
 
 ### Features
 

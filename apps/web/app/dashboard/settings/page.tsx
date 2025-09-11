@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import ServiceRateManager from '@/app/components/ServiceRateManager'
+import CSVExportManager from '@/app/components/CSVExportManager'
 
 interface TherapistProfile {
   id: string
@@ -32,6 +34,8 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showServiceRates, setShowServiceRates] = useState(false)
+  const [showCSVExports, setShowCSVExports] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -238,9 +242,12 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500 mb-3">
                     Manage default pricing for different massage types
                   </p>
-                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                    Coming Soon
-                  </div>
+                  <button
+                    onClick={() => setShowServiceRates(!showServiceRates)}
+                    className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                  >
+                    {showServiceRates ? 'Hide' : 'Manage'} Service Rates
+                  </button>
                 </div>
 
                 <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
@@ -248,11 +255,28 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500 mb-3">
                     CSV exports for BMD/RZL/DATEV accounting software
                   </p>
-                  <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                    Coming Soon
-                  </div>
+                  <button
+                    onClick={() => setShowCSVExports(!showCSVExports)}
+                    className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                  >
+                    {showCSVExports ? 'Hide' : 'Manage'} CSV Exports
+                  </button>
                 </div>
               </div>
+
+              {/* Service Rate Manager */}
+              {showServiceRates && profileData && (
+                <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+                  <ServiceRateManager therapistVatStatus={profileData.therapist.vatStatus} />
+                </div>
+              )}
+
+              {/* CSV Export Manager */}
+              {showCSVExports && profileData && (
+                <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+                  <CSVExportManager therapistId={profileData.therapist.id} />
+                </div>
+              )}
             </div>
           )}
         </div>
