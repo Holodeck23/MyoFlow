@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
 
     const from = new Date(fromDate);
     const to = new Date(toDate);
+    // Set end date to end of day to include all invoices created on that date
+    to.setHours(23, 59, 59, 999);
 
     if (isNaN(from.getTime()) || isNaN(to.getTime())) {
       return NextResponse.json(
