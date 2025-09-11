@@ -271,3 +271,221 @@ export async function getNextInvoiceNumber(therapistId: string): Promise<string>
   const sequenceNumber = 1
   return generateInvoiceNumber(year, sequenceNumber)
 }
+
+/**
+ * Database-compatible invoice data with Austrian compliance fields
+ */
+export interface DatabaseInvoiceData {
+  id: string
+  therapistId: string
+  clientId?: string | null
+  appointmentId?: string | null
+  number: string
+  status: 'DRAFT' | 'SENT' | 'PAID' | 'VOID'
+  lines: unknown // JSON field
+  totalGrossCents: number
+  vatBreakdown: unknown // JSON field
+  kleinunternehmer: boolean
+  // New Austrian compliance fields
+  performanceDate?: Date | null
+  vatRate?: number | null // Decimal (e.g., 0.2000)
+  netCents?: number | null
+  vatCents?: number | null
+  tender?: string | null
+  pdfUrl?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+/**
+ * Processed invoice display data for Austrian compliance
+ */
+export interface InvoiceDisplayData {
+  // Basic invoice info
+  id: string
+  number: string
+  status: 'DRAFT' | 'SENT' | 'PAID' | 'VOID'
+  
+  // Dates (Austrian formatted)
+  invoiceDate: string // Formatted as DD.MM.YYYY
+  performanceDate?: string // Leistungsdatum, formatted as DD.MM.YYYY
+  
+  // Financial data (Austrian formatted)
+  totalGross: string // e.g., "€ 120,00"
+  totalNet?: string // e.g., "€ 100,00"  
+  totalVat?: string // e.g., "€ 20,00"
+  vatRatePercent?: number // e.g., 20 for 20%
+  
+  // Legal compliance
+  isKleinunternehmer: boolean
+  legalNotice?: string // KU disclaimer or therapy notice
+  tender?: string // Payment method
+  
+  // Display flags
+  showVatBreakdown: boolean
+  showPerformanceDate: boolean
+}
+
+/**
+ * Compute Austrian-compliant invoice display data from database record
+ * Handles KU vs VAT logic correctly and formats for Austrian standards
+ */
+export function computeInvoiceDisplay(invoice: DatabaseInvoiceData): InvoiceDisplayData {
+  // Format invoice date
+  const invoiceDate = formatInvoiceDate(invoice.createdAt)
+  
+  // Format performance date if available
+  const performanceDate = invoice.performanceDate 
+    ? formatInvoiceDate(invoice.performanceDate)
+    : undefined
+  
+  // Determine if Kleinunternehmer
+  const isKleinunternehmer = invoice.kleinunternehmer
+  
+  // Format financial amounts
+  const totalGross = formatAustrianCurrency(invoice.totalGrossCents)
+  let totalNet: string | undefined
+  let totalVat: string | undefined
+  let vatRatePercent: number | undefined
+  
+  // For non-KU invoices with Austrian compliance data
+  if (!isKleinunternehmer && invoice.netCents !== null && invoice.vatCents !== null && invoice.netCents !== undefined && invoice.vatCents !== undefined) {
+    totalNet = formatAustrianCurrency(invoice.netCents)
+    totalVat = formatAustrianCurrency(invoice.vatCents)
+    
+    // Convert decimal VAT rate to percentage (e.g., 0.2000 -> 20)
+    if (invoice.vatRate !== null && invoice.vatRate !== undefined) {
+      vatRatePercent = Math.round(invoice.vatRate * 100)
+    }
+  }
+  
+  // Generate appropriate legal notice
+  let legalNotice: string | undefined
+  if (isKleinunternehmer) {
+    legalNotice = getKleinunternehmerNotice()
+  } else {
+    // For regular VAT invoices, include therapy service notice
+    legalNotice = getTherapyServiceNotice()
+  }
+  
+  return {
+    id: invoice.id,
+    number: invoice.number,
+    status: invoice.status,
+    invoiceDate,
+    performanceDate,
+    totalGross,
+    totalNet,
+    totalVat,
+    vatRatePercent,
+    isKleinunternehmer,
+    legalNotice,
+    tender: invoice.tender || undefined,
+    showVatBreakdown: !isKleinunternehmer && (totalNet !== undefined && totalVat !== undefined),
+    showPerformanceDate: performanceDate !== undefined
+  }
+}
+
+/**
+ * Validate performance date against Austrian business rules
+ */
+export function validatePerformanceDate(performanceDate: Date, invoiceDate: Date = new Date()): { 
+  valid: boolean; 
+  error?: string 
+} {
+  // Performance date cannot be in the future
+  if (performanceDate > invoiceDate) {
+    return {
+      valid: false,
+      error: 'Leistungsdatum darf nicht in der Zukunft liegen'
+    }
+  }
+  
+  // Performance date should not be more than 1 year in the past
+  const oneYearAgo = new Date(invoiceDate)
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+  
+  if (performanceDate < oneYearAgo) {
+    return {
+      valid: false,
+      error: 'Leistungsdatum sollte nicht älter als 1 Jahr sein'
+    }
+  }
+  
+  return { valid: true }
+}
+
+/**
+ * Format performance date for Austrian invoice display
+ * Alias for formatInvoiceDate for clarity in performance date context
+ */
+export function formatPerformanceDate(date: Date): string {
+  return formatInvoiceDate(date)
+}
+
+/**
+ * Determine appropriate VAT rate based on service type and therapist status
+ * Austrian massage therapy services typically use standard 20% rate
+ */
+export function determineServiceVatRate(
+  therapistKleinunternehmer: boolean,
+  serviceCategory?: 'MASSAGE' | 'YOGA' | 'CONSULTING' | 'OTHER'
+): VatRate {
+  if (therapistKleinunternehmer) {
+    return 'KLEINUNTERNEHMER'
+  }
+  
+  // Austrian tax rates for different service categories
+  switch (serviceCategory) {
+    case 'MASSAGE':
+    case 'YOGA':
+    case 'OTHER':
+      return 'UST_20' // Standard rate for wellness services
+    case 'CONSULTING':
+      return 'UST_20' // Standard rate for consulting services
+    default:
+      return 'UST_20' // Default to standard rate
+  }
+}
+
+/**
+ * Calculate Austrian invoice compliance data for database storage
+ */
+export function calculateInvoiceComplianceData(
+  lines: InvoiceLine[],
+  performanceDate: Date,
+  tender?: string
+): {
+  performanceDate: Date
+  vatRate: number | null
+  netCents: number | null
+  vatCents: number | null
+  tender: string | null
+} {
+  const totals = calculateInvoiceTotals(lines)
+  
+  // If all lines are Kleinunternehmer, no VAT calculations needed
+  const isKleinunternehmer = lines.every(line => line.vatRate === 'KLEINUNTERNEHMER')
+  
+  if (isKleinunternehmer) {
+    return {
+      performanceDate,
+      vatRate: null,
+      netCents: null,
+      vatCents: null,
+      tender: tender || null
+    }
+  }
+  
+  // For VAT invoices, determine the primary VAT rate
+  const vatRates = lines.map(line => getVatRateDecimal(line.vatRate)).filter(rate => rate > 0)
+  const primaryVatRate = vatRates.length > 0 ? Math.max(...vatRates) : null
+  
+  return {
+    performanceDate,
+    vatRate: primaryVatRate,
+    netCents: totals.totalNetCents,
+    vatCents: totals.totalVatCents,
+    tender: tender || null
+  }
+}
