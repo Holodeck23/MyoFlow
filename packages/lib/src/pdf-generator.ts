@@ -6,6 +6,7 @@ import {
   type InvoiceLine,
   type VATBreakdown
 } from './austrian-invoicing'
+import { generateSEPAQRCode, validateAustrianIBAN, formatIBAN } from './sepa-qr'
 
 interface InvoiceWithRelations {
   id: string
@@ -73,7 +74,9 @@ export async function generateInvoicePDF(
   
   try {
     const page = await browser.newPage()
-    await page.setContent(generateInvoiceHTML(invoice, therapistInfo), {
+    const htmlContent = await generateInvoiceHTML(invoice, therapistInfo)
+    
+    await page.setContent(htmlContent, {
       waitUntil: 'networkidle0'
     })
 
@@ -94,13 +97,30 @@ export async function generateInvoicePDF(
   }
 }
 
-function generateInvoiceHTML(
+async function generateInvoiceHTML(
   invoice: InvoiceWithRelations,
   therapistInfo: TherapistInfo
-): string {
+): Promise<string> {
   const isKU = therapistInfo.kleinunternehmer
   const showVAT =
     !isKU && invoice.vatBreakdown.some(vat => vat.vatRate > 0)
+  
+  // Generate SEPA QR code for Austrian banking if IBAN is available and valid
+  let sepaQRCode: string | null = null
+  if (therapistInfo.iban && validateAustrianIBAN(therapistInfo.iban)) {
+    try {
+      sepaQRCode = await generateSEPAQRCode({
+        beneficiaryName: therapistInfo.name,
+        beneficiaryIBAN: therapistInfo.iban,
+        amount: invoice.totalGrossCents / 100,
+        reference: `Rechnung ${invoice.number}`,
+        bic: therapistInfo.bic
+      })
+    } catch (error) {
+      console.warn('Failed to generate SEPA QR code:', error)
+      // Continue without QR code if generation fails
+    }
+  }
   
   return `
     <!DOCTYPE html>
@@ -343,8 +363,15 @@ function generateInvoiceHTML(
           ${invoice.Client && (invoice.Client.street || invoice.Client.postalCode || invoice.Client.city || invoice.Client.country)
             ? `<div>${invoice.Client.street || ''}</div>
                <div>${[invoice.Client.postalCode, invoice.Client.city].filter(Boolean).join(' ')}${invoice.Client.country ? ', ' + invoice.Client.country : ''}</div>`
-            : `<div style="color: #dc2626; font-style: italic;">Adresse erforderlich für vollständige Rechnung</div>
-               <div style="font-size: 10pt; color: #6b7280;">Kleinbetragsrechnung (≤ €400) - Adresse optional</div>`}
+            : `${(invoice.totalGrossCents / 100) <= 400 
+                ? `<div style="color: #059669; font-style: italic;">
+                     <strong>Kleinbetragsrechnung (≤ €400)</strong><br>
+                     Kundenadresse gemäß UStG nicht erforderlich
+                   </div>`
+                : `<div style="color: #dc2626; font-style: italic;">
+                     <strong>Achtung:</strong> Kundenadresse für Rechnungen über €400 gesetzlich erforderlich<br>
+                     <span style="font-size: 9pt;">Bitte ergänzen Sie die vollständige Rechnungsadresse.</span>
+                   </div>`}`}
           ${invoice.Client?.email ? `<div>E-Mail: ${invoice.Client.email}</div>` : ''}
           ${invoice.Client?.phone ? `<div>Tel: ${invoice.Client.phone}</div>` : ''}
         </div>
@@ -410,41 +437,67 @@ function generateInvoiceHTML(
       <div class="totals-section">
         <table class="totals-table">
           ${showVAT 
-            ? invoice.vatBreakdown.map(vat => `
+            ? `<tr>
+                 <td class="label" style="font-size: 9pt; color: #6b7280;">Umsatzsteueraufstellung:</td>
+                 <td class="amount"></td>
+               </tr>
+               ${invoice.vatBreakdown.map((vat, index) => `
                 <tr>
-                  <td class="label">Nettobetrag (${vat.vatRate}%):</td>
+                  <td class="label">Nettobetrag ${getVATRateLabel(vat.vatRate)}:</td>
                   <td class="amount">${formatEuro(vat.netCents / 100)}</td>
                 </tr>
                 <tr>
-                  <td class="label">USt (${vat.vatRate}%):</td>
+                  <td class="label">USt ${getVATRateLabel(vat.vatRate)}:</td>
                   <td class="amount">${formatEuro(vat.vatCents / 100)}</td>
                 </tr>
-              `).join('') 
+                ${index < invoice.vatBreakdown.length - 1 ? '<tr><td colspan="2" style="border-bottom: 1px solid #f3f4f6; padding: 2px;"></td></tr>' : ''}
+              `).join('')}` 
             : `
                 <tr>
-                  <td class="label">Zwischensumme (steuerfrei):</td>
+                  <td class="label">Nettobetrag (steuerfrei):</td>
                   <td class="amount">${formatEuro(invoice.totalGrossCents / 100)}</td>
                 </tr>
                 <tr>
                   <td class="label">USt 0% (Kleinunternehmer):</td>
                   <td class="amount">€0,00</td>
                 </tr>
+                <tr>
+                  <td colspan="2" style="font-size: 8pt; color: #6b7280; text-align: center; padding: 5px;">
+                    ${getKleinunternehmerDisclaimer()}
+                  </td>
+                </tr>
               `}
           <tr class="total-row">
-            <td class="label">Gesamt:</td>
+            <td class="label">Gesamtbetrag:</td>
             <td class="amount">${formatEuro(invoice.totalGrossCents / 100)}</td>
           </tr>
         </table>
       </div>
 
       <div class="payment-info">
-        <div class="bold">Zahlungsinformationen:</div>
-        ${therapistInfo.iban ? `<div><strong>IBAN:</strong> ${therapistInfo.iban}</div>` : '<div><strong>IBAN:</strong> [Bitte um Kontaktaufnahme für Bankdaten]</div>'}
-        ${therapistInfo.bic ? `<div><strong>BIC:</strong> ${therapistInfo.bic}</div>` : ''}
-        <div><strong>Verwendungszweck:</strong> Rechnung ${invoice.number}</div>
-        <div><strong>Empfänger:</strong> ${therapistInfo.name}</div>
-        <div style="margin-top: 10px; font-style: italic; color: #6b7280;">
-          Bitte überweisen Sie den Rechnungsbetrag bis zum angegebenen Zahlungsziel.
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="flex: 1; padding-right: 20px;">
+            <div class="bold">Zahlungsinformationen:</div>
+            ${therapistInfo.iban ? `<div><strong>IBAN:</strong> ${formatIBAN(therapistInfo.iban)}</div>` : '<div><strong>IBAN:</strong> [Bitte um Kontaktaufnahme für Bankdaten]</div>'}
+            ${therapistInfo.bic ? `<div><strong>BIC:</strong> ${therapistInfo.bic}</div>` : ''}
+            <div><strong>Verwendungszweck:</strong> Rechnung ${invoice.number}</div>
+            <div><strong>Empfänger:</strong> ${therapistInfo.name}</div>
+            <div><strong>Betrag:</strong> ${formatEuro(invoice.totalGrossCents / 100)}</div>
+            <div style="margin-top: 10px; font-style: italic; color: #6b7280;">
+              Bitte überweisen Sie den Rechnungsbetrag bis zum angegebenen Zahlungsziel.
+            </div>
+          </div>
+          ${sepaQRCode ? `
+            <div style="flex-shrink: 0; text-align: center; background: white; padding: 15px; border: 1px solid #e5e5e5; border-radius: 8px;">
+              <div style="font-size: 10pt; font-weight: bold; margin-bottom: 10px; color: #1f2937;">
+                SEPA QR-Code
+              </div>
+              <img src="${sepaQRCode}" alt="SEPA QR Code für Banküberweisung" style="width: 120px; height: 120px; display: block; margin: 0 auto;" />
+              <div style="font-size: 8pt; color: #6b7280; margin-top: 8px; max-width: 140px;">
+                Mit Banking-App scannen für automatische Überweisung
+              </div>
+            </div>
+          ` : ''}
         </div>
       </div>
 
@@ -470,9 +523,25 @@ function generateInvoiceHTML(
             </div>
           </div>
           
-          <div style="margin-top: 10px; font-size: 8pt; color: #6b7280;">
-            <strong>Wichtiger Hinweis:</strong> Als Therapieleistung handelt es sich um eine Dienstleistung im Bereich 
-            der Gesundheitsförderung. Diese Leistung ersetzt keine ärztliche Behandlung oder medizinische Therapie.
+          <div style="margin-top: 15px; font-size: 8pt; color: #6b7280; border-top: 1px solid #f3f4f6; padding-top: 10px;">
+            <div style="margin-bottom: 8px;"><strong>Rechtliche Hinweise zur Therapieleistung:</strong></div>
+            <div style="margin-bottom: 5px;">
+              • <strong>Gewerbeschein:</strong> Therapieleistungen nach Gewerbeordnung (GewO 1994, BGBl. Nr. 194/1994)
+            </div>
+            <div style="margin-bottom: 5px;">
+              • <strong>Gesundheitsförderung:</strong> Dienstleistung zur Entspannung und Wohlbefinden - kein Heilversprechen
+            </div>
+            <div style="margin-bottom: 5px;">
+              • <strong>Medizinische Behandlung:</strong> Diese Leistung ersetzt keine ärztliche Behandlung oder medizinische Therapie
+            </div>
+            <div style="margin-bottom: 5px;">
+              • <strong>Bei Beschwerden:</strong> Konsultieren Sie bei gesundheitlichen Problemen immer einen Arzt
+            </div>
+            ${therapistInfo.kleinunternehmer ? `
+              <div style="margin-top: 8px; padding: 5px; background-color: #fef7cd; border-left: 3px solid #eab308;">
+                <strong>Kleinunternehmer-Regelung:</strong> Gemäß § 6 Abs. 1 Z 27 UStG wird keine Umsatzsteuer ausgewiesen.
+              </div>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -488,5 +557,15 @@ function getStatusLabel(status: string): string {
     case 'PAID': return 'Bezahlt'
     case 'VOID': return 'Storniert'
     default: return status
+  }
+}
+
+function getVATRateLabel(vatRate: number): string {
+  switch (vatRate) {
+    case 0: return '(0% - steuerfrei)'
+    case 10: return '(10% - ermäßigt)'
+    case 13: return '(13% - ermäßigt)'
+    case 20: return '(20% - Normalsteuersatz)'
+    default: return `(${vatRate}%)`
   }
 }
