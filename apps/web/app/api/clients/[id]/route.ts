@@ -1,30 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@myoflow/db'
+import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
+import { encryptString, decryptString, logAudit, requireRole } from '@myoflow/lib'
 
 const UpdateClientSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  healthFlags: z.string().optional(),
 })
 
 async function getTherapistId(session: any): Promise<string> {
   if (!session?.user?.id) {
     throw new Error('Unauthorized')
   }
+  requireRole(session.user.role as Role | undefined, [Role.OWNER, Role.STAFF])
 
   let therapist = await prisma.therapist.findFirst({
     where: { userId: session.user.id }
   })
 
   if (!therapist) {
-    // Upsert user to handle potential duplicates
     const user = await prisma.user.upsert({
       where: { id: session.user.id },
-      update: {}, // Don't update if exists
+      update: {},
       create: {
         id: session.user.id,
         email: session.user.email || 'unknown@example.com',
@@ -32,7 +34,6 @@ async function getTherapistId(session: any): Promise<string> {
       }
     })
 
-    // Now create the therapist
     therapist = await prisma.therapist.create({
       data: {
         userId: user.id,
@@ -52,6 +53,9 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
 
     const client = await prisma.client.findFirst({
@@ -81,7 +85,30 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(client)
+    const { healthFlagsEnc, Notes, ...clientRest } = client
+    const safeClient = {
+      ...clientRest,
+      healthFlags: healthFlagsEnc
+        ? await decryptString(healthFlagsEnc)
+        : null,
+      Notes: await Promise.all(
+        Notes.map(async ({ bodyEnc, ...rest }) => ({
+          ...rest,
+          body: bodyEnc ? await decryptString(bodyEnc) : null
+        }))
+      )
+    }
+
+    await logAudit({
+      actorUserId: session.user.id,
+      therapistId,
+      entity: 'client',
+      entityId: params.id,
+      action: 'read',
+      ip: request.ip ?? undefined
+    })
+
+    return NextResponse.json(safeClient)
   } catch (error) {
     console.error('Error fetching client:', error)
     return NextResponse.json(
@@ -97,10 +124,14 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
 
     const body = await request.json()
     const validatedData = UpdateClientSchema.parse(body)
+    const { healthFlags, ...rest } = validatedData
 
     const client = await prisma.client.findFirst({
       where: {
@@ -119,15 +150,34 @@ export async function PUT(
     const updatedClient = await prisma.client.update({
       where: { id: params.id },
       data: {
-        ...validatedData,
-        email: validatedData.email || null
+        ...rest,
+        email: rest.email || null,
+        healthFlagsEnc:
+          typeof healthFlags === 'string'
+            ? await encryptString(healthFlags)
+            : client.healthFlagsEnc
       }
     })
 
-    return NextResponse.json(updatedClient)
+    await logAudit({
+      actorUserId: session.user.id,
+      therapistId,
+      entity: 'client',
+      entityId: params.id,
+      action: 'update',
+      ip: request.ip ?? undefined
+    })
+
+    const { healthFlagsEnc: updatedHealth, ...updatedRest } = updatedClient
+    return NextResponse.json({
+      ...updatedRest,
+      healthFlags:
+        healthFlags ??
+        (updatedHealth ? await decryptString(updatedHealth) : null)
+    })
   } catch (error) {
     console.error('Error updating client:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
@@ -148,6 +198,9 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
 
     const client = await prisma.client.findFirst({
@@ -166,6 +219,15 @@ export async function DELETE(
 
     await prisma.client.delete({
       where: { id: params.id }
+    })
+
+    await logAudit({
+      actorUserId: session.user.id,
+      therapistId,
+      entity: 'client',
+      entityId: params.id,
+      action: 'delete',
+      ip: request.ip ?? undefined
     })
 
     return NextResponse.json({ success: true })
