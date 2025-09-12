@@ -82,12 +82,14 @@ export async function GET(
         ;(client as any).healthFlags = await decrypt(client.healthFlagsEnc)
         delete (client as any).healthFlagsEnc
       }
-      client.Notes = await Promise.all(
+      // Decrypt notes for therapists, transforming bodyEnc to body
+      const decryptedNotes = await Promise.all(
         client.Notes.map(async note => {
           const { bodyEnc, ...rest } = note
           return { ...rest, body: await decrypt(bodyEnc) }
         })
       )
+      ;(client as any).Notes = decryptedNotes
     }
 
     return NextResponse.json(client)
