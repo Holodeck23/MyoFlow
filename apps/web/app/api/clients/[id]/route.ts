@@ -16,32 +16,28 @@ async function getTherapistId(session: any): Promise<string> {
     throw new Error('Unauthorized')
   }
 
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: session.user.id }
+  // First ensure user exists with atomic upsert
+  const user = await prisma.user.upsert({
+    where: { id: session.user.id },
+    update: {}, // Don't update if exists
+    create: {
+      id: session.user.id,
+      email: session.user.email || 'unknown@example.com',
+      name: session.user.name || session.user.email || 'Unknown User'
+    }
   })
 
-  if (!therapist) {
-    // Upsert user to handle potential duplicates
-    const user = await prisma.user.upsert({
-      where: { id: session.user.id },
-      update: {}, // Don't update if exists
-      create: {
-        id: session.user.id,
-        email: session.user.email || 'unknown@example.com',
-        name: session.user.name || session.user.email || 'Unknown User'
-      }
-    })
-
-    // Now create the therapist
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
-  }
+  // Then upsert therapist atomically to avoid race conditions
+  const therapist = await prisma.therapist.upsert({
+    where: { userId: user.id },
+    update: {}, // Don't overwrite existing data
+    create: {
+      userId: user.id,
+      slug: session.user.email?.split('@')[0] || 'therapist',
+      designation: 'HEILMASSEUR',
+      vatStatus: 'KLEINUNTERNEHMER'
+    }
+  })
 
   return therapist.id
 }

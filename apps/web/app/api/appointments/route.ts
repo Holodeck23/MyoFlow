@@ -29,10 +29,10 @@ async function getTherapistId(): Promise<string> {
     throw new Error('Not authenticated')
   }
 
-  // Find or create user and therapist
-  const user = await prisma.user.upsert({
+  // First ensure user exists with atomic upsert
+  await prisma.user.upsert({
     where: { id: session.user.id },
-    update: {},
+    update: {}, // Don't overwrite existing data
     create: {
       id: session.user.id,
       email: session.user.email || 'unknown@example.com',
@@ -40,22 +40,18 @@ async function getTherapistId(): Promise<string> {
     },
   })
 
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
+  // Then upsert therapist atomically to avoid race conditions
+  const therapist = await prisma.therapist.upsert({
+    where: { userId: session.user.id },
+    update: {}, // Don't overwrite existing data on subsequent calls
+    create: {
+      userId: session.user.id,
+      slug: `therapist-${session.user.id}`,
+      designation: 'HEILMASSEUR',
+      vatStatus: 'KLEINUNTERNEHMER',
+      kleinunternehmer: true,
+    },
   })
-
-  if (!therapist) {
-    // Create therapist with Austrian defaults
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
-  }
 
   return therapist.id
 }
