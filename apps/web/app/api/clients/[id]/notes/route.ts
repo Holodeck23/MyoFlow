@@ -3,9 +3,10 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { encrypt, decrypt } from '@myoflow/lib/security/crypto'
 
 const CreateNoteSchema = z.object({
-  bodyEnc: z.string().min(1, 'Note content is required'),
+  body: z.string().min(1, 'Note content is required'),
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -50,6 +51,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const client = await prisma.client.findFirst({
       where: {
@@ -75,7 +77,17 @@ export async function GET(
       }
     })
 
-    return NextResponse.json(notes)
+    const result =
+      role === 'ACCOUNTANT'
+        ? notes
+        : await Promise.all(
+            notes.map(async n => {
+              const { bodyEnc, ...rest } = n
+              return { ...rest, body: await decrypt(bodyEnc) }
+            })
+          )
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching notes:', error)
     return NextResponse.json(
@@ -92,6 +104,7 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const client = await prisma.client.findFirst({
       where: {
@@ -112,13 +125,18 @@ export async function POST(
 
     const note = await prisma.note.create({
       data: {
-        ...validatedData,
+        bodyEnc: await encrypt(validatedData.body),
         clientId: params.id,
         therapistId
       }
     })
 
-    return NextResponse.json(note, { status: 201 })
+    if (role === 'ACCOUNTANT') {
+      return NextResponse.json(note, { status: 201 })
+    }
+
+    const { bodyEnc, ...rest } = note
+    return NextResponse.json({ ...rest, body: validatedData.body }, { status: 201 })
   } catch (error) {
     console.error('Error creating note:', error)
     

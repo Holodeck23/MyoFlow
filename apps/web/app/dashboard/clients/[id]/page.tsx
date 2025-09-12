@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 interface Note {
   id: string
-  bodyEnc: string
+  body: string
   createdAt: string
 }
 
@@ -107,7 +107,7 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          bodyEnc: newNote.trim()
+          body: newNote.trim()
         })
       })
 
@@ -334,7 +334,7 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                 <div className="space-y-3">
                   {client.Notes.map(note => (
                     <div key={note.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{note.bodyEnc}</p>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{note.body}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(note.createdAt).toLocaleString()}
                       </p>
