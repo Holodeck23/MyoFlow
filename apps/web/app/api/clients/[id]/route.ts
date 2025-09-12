@@ -3,12 +3,14 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { encrypt, decrypt } from '@myoflow/lib/security/crypto'
 
 const UpdateClientSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  healthFlags: z.string().optional()
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -47,6 +49,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const client = await prisma.client.findFirst({
       where: {
@@ -74,6 +77,18 @@ export async function GET(
         { status: 404 }
       )
     }
+    if (role !== 'ACCOUNTANT') {
+      if (client.healthFlagsEnc) {
+        ;(client as any).healthFlags = await decrypt(client.healthFlagsEnc)
+        delete (client as any).healthFlagsEnc
+      }
+      client.Notes = await Promise.all(
+        client.Notes.map(async note => {
+          const { bodyEnc, ...rest } = note
+          return { ...rest, body: await decrypt(bodyEnc) }
+        })
+      )
+    }
 
     return NextResponse.json(client)
   } catch (error) {
@@ -92,9 +107,11 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const body = await request.json()
     const validatedData = UpdateClientSchema.parse(body)
+    const { healthFlags, ...rest } = validatedData
 
     const client = await prisma.client.findFirst({
       where: {
@@ -113,12 +130,29 @@ export async function PUT(
     const updatedClient = await prisma.client.update({
       where: { id: params.id },
       data: {
-        ...validatedData,
-        email: validatedData.email || null
+        ...rest,
+        email: rest.email || null,
+        ...(healthFlags !== undefined
+          ? { healthFlagsEnc: healthFlags ? await encrypt(healthFlags) : null }
+          : {})
       }
     })
 
-    return NextResponse.json(updatedClient)
+    let healthFlagsPlain: string | null = null
+    if (role !== 'ACCOUNTANT') {
+      if (healthFlags !== undefined) {
+        healthFlagsPlain = healthFlags || null
+      } else if (updatedClient.healthFlagsEnc) {
+        healthFlagsPlain = await decrypt(updatedClient.healthFlagsEnc)
+      }
+    }
+
+    if (role === 'ACCOUNTANT') {
+      return NextResponse.json(updatedClient)
+    }
+
+    const { healthFlagsEnc, ...restClient } = updatedClient
+    return NextResponse.json({ ...restClient, healthFlags: healthFlagsPlain })
   } catch (error) {
     console.error('Error updating client:', error)
     

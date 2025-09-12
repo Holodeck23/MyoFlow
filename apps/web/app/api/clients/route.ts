@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { encrypt, decrypt } from '@myoflow/lib/security/crypto'
 
 const CreateClientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -13,6 +14,7 @@ const CreateClientSchema = z.object({
   city: z.string().optional(),
   country: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  healthFlags: z.string().optional()
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -48,6 +50,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''
@@ -75,7 +78,18 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(clients)
+    const result = await Promise.all(
+      clients.map(async c => {
+        if (role === 'ACCOUNTANT') return c
+        const { healthFlagsEnc, ...rest } = c
+        return {
+          ...rest,
+          healthFlags: healthFlagsEnc ? await decrypt(healthFlagsEnc) : null
+        }
+      })
+    )
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching clients:', error)
     return NextResponse.json(
@@ -89,24 +103,35 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const therapistId = await getTherapistId(session)
+    const role = session?.user?.role
 
     const body = await request.json()
     const validatedData = CreateClientSchema.parse(body)
+    const { healthFlags, ...rest } = validatedData
 
     const client = await prisma.client.create({
       data: {
-        ...validatedData,
+        ...rest,
         therapistId,
-        email: validatedData.email || null,
-        tags: validatedData.tags || [],
-        street: validatedData.street || null,
-        postalCode: validatedData.postalCode || null,
-        city: validatedData.city || null,
-        country: validatedData.country || null,
+        email: rest.email || null,
+        tags: rest.tags || [],
+        street: rest.street || null,
+        postalCode: rest.postalCode || null,
+        city: rest.city || null,
+        country: rest.country || null,
+        healthFlagsEnc: healthFlags ? await encrypt(healthFlags) : null,
       }
     })
 
-    return NextResponse.json(client, { status: 201 })
+    if (role === 'ACCOUNTANT') {
+      return NextResponse.json(client, { status: 201 })
+    }
+
+    const { healthFlagsEnc, ...restClient } = client
+    return NextResponse.json(
+      { ...restClient, healthFlags: healthFlags || null },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error creating client:', error)
     
