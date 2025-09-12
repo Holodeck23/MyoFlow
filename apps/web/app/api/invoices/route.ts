@@ -33,8 +33,7 @@ const InvoiceQuerySchema = z.object({
   end: z.string().datetime().optional()
 })
 
-async function getTherapistId(): Promise<string> {
-  const session = await getServerSession(authOptions)
+async function getTherapistId(session: any): Promise<string> {
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
@@ -94,7 +93,11 @@ async function getNextInvoiceNumber(therapistId: string): Promise<string> {
 // GET /api/invoices - List invoices
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const { searchParams } = new URL(request.url)
     
     const query = InvoiceQuerySchema.safeParse({
@@ -175,7 +178,11 @@ export async function GET(request: NextRequest) {
 // POST /api/invoices - Create invoice
 export async function POST(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const body = await request.json()
     
     const validation = CreateInvoiceSchema.safeParse(body)

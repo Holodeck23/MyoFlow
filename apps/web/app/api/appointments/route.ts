@@ -23,8 +23,7 @@ const AppointmentQuerySchema = z.object({
   status: z.enum(['BOOKED', 'COMPLETED', 'CANCELLED', 'NO_SHOW']).optional(),
 })
 
-async function getTherapistId(): Promise<string> {
-  const session = await getServerSession(authOptions)
+async function getTherapistId(session: any): Promise<string> {
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
@@ -57,7 +56,11 @@ async function getTherapistId(): Promise<string> {
 // GET /api/appointments - List appointments
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const { searchParams } = new URL(request.url)
     
     const query = AppointmentQuerySchema.safeParse({
@@ -146,7 +149,11 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments - Create appointment
 export async function POST(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const body = await request.json()
     
     const validation = CreateAppointmentSchema.safeParse(body)

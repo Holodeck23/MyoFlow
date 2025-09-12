@@ -49,6 +49,9 @@ async function getTherapistId(session: any): Promise<string> {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
     const role = session?.user?.role
 
@@ -102,6 +105,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
     const role = session?.user?.role
 
