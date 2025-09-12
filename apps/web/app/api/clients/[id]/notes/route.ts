@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@myoflow/db'
+import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
-import { encrypt, decrypt } from '@myoflow/lib/security/crypto'
+import { encryptString, decryptString, logAudit, requireRole } from '@myoflow/lib'
 
 const CreateNoteSchema = z.object({
   body: z.string().min(1, 'Note content is required'),
@@ -13,16 +13,16 @@ async function getTherapistId(session: any): Promise<string> {
   if (!session?.user?.id) {
     throw new Error('Unauthorized')
   }
+  requireRole(session.user.role as Role | undefined, [Role.OWNER, Role.STAFF])
 
   let therapist = await prisma.therapist.findFirst({
     where: { userId: session.user.id }
   })
 
   if (!therapist) {
-    // Upsert user to handle potential duplicates
     const user = await prisma.user.upsert({
       where: { id: session.user.id },
-      update: {}, // Don't update if exists
+      update: {},
       create: {
         id: session.user.id,
         email: session.user.email || 'unknown@example.com',
@@ -30,7 +30,6 @@ async function getTherapistId(session: any): Promise<string> {
       }
     })
 
-    // Now create the therapist
     therapist = await prisma.therapist.create({
       data: {
         userId: user.id,
@@ -50,6 +49,9 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
     const role = session?.user?.role
 
@@ -77,17 +79,23 @@ export async function GET(
       }
     })
 
-    const result =
-      role === 'ACCOUNTANT'
-        ? notes
-        : await Promise.all(
-            notes.map(async n => {
-              const { bodyEnc, ...rest } = n
-              return { ...rest, body: await decrypt(bodyEnc) }
-            })
-          )
+    const safeNotes = await Promise.all(
+      notes.map(async ({ bodyEnc, ...rest }) => ({
+        ...rest,
+        body: bodyEnc ? await decryptString(bodyEnc) : null
+      }))
+    )
 
-    return NextResponse.json(result)
+    await logAudit({
+      actorUserId: session.user.id,
+      therapistId,
+      entity: 'note',
+      entityId: params.id,
+      action: 'list',
+      ip: request.ip ?? undefined
+    })
+
+    return NextResponse.json(safeNotes)
   } catch (error) {
     console.error('Error fetching notes:', error)
     return NextResponse.json(
@@ -103,6 +111,9 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const therapistId = await getTherapistId(session)
     const role = session?.user?.role
 
@@ -121,25 +132,32 @@ export async function POST(
     }
 
     const body = await request.json()
-    const validatedData = CreateNoteSchema.parse(body)
+    const { body: plain } = CreateNoteSchema.parse(body)
 
     const note = await prisma.note.create({
       data: {
-        bodyEnc: await encrypt(validatedData.body),
+        bodyEnc: await encryptString(plain),
         clientId: params.id,
         therapistId
       }
     })
 
-    if (role === 'ACCOUNTANT') {
-      return NextResponse.json(note, { status: 201 })
-    }
+    await logAudit({
+      actorUserId: session.user.id,
+      therapistId,
+      entity: 'note',
+      entityId: note.id,
+      action: 'create',
+      ip: request.ip ?? undefined
+    })
 
-    const { bodyEnc, ...rest } = note
-    return NextResponse.json({ ...rest, body: validatedData.body }, { status: 201 })
+    return NextResponse.json(
+      { ...note, body: plain },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error creating note:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },

@@ -49,5 +49,13 @@ export * from './src/types'
 // i18n utilities
 export * from './i18n/config'
 
+// Security utilities
+export * from './security/crypto'
+export * from './security/permissions'
+export * from './security/intakeToken'
+
+// Audit logging
+export * from './audit/log'
+
 // Version
 export const MYOFLOW_LIB_VERSION = '0.0.0'
