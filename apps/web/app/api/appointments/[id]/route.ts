@@ -15,39 +15,31 @@ const UpdateAppointmentSchema = z.object({
   notes: z.string().optional(),
 })
 
-async function getTherapistId(): Promise<string> {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+async function getTherapistId(session: any): Promise<string> {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
 
-  // Find or create user and therapist
-  const user = await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {},
-    create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
+  // Find existing user by email (the reliable identifier)
+  let user = await prisma.user.findUnique({
+    where: { email: session.user.email }
   })
 
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
-  })
-
-  if (!therapist) {
-    // Create therapist with Austrian defaults
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
+  if (!user) {
+    throw new Error('User not found in database')
   }
+
+  // Find or create therapist profile
+  const therapist = await prisma.therapist.upsert({
+    where: { userId: user.id },
+    update: {}, // Don't overwrite existing data
+    create: {
+      userId: user.id,
+      slug: session.user.email?.split('@')[0] || 'therapist',
+      designation: 'HEILMASSEUR',
+      vatStatus: 'KLEINUNTERNEHMER'
+    }
+  })
 
   return therapist.id
 }
@@ -58,7 +50,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const appointmentId = params.id
 
     const appointment = await prisma.appointment.findFirst({
@@ -123,7 +119,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const appointmentId = params.id
     const body = await request.json()
     
@@ -290,7 +290,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    const therapistId = await getTherapistId(session)
     const appointmentId = params.id
 
     // Check if appointment exists and belongs to therapist

@@ -15,34 +15,30 @@ const UpdateTemplateSchema = z.object({
 })
 
 async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized')
+  if (!session?.user?.email) {
+    throw new Error('Not authenticated')
   }
 
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: session.user.id }
+  // Find existing user by email (the reliable identifier)
+  let user = await prisma.user.findUnique({
+    where: { email: session.user.email }
   })
 
-  if (!therapist) {
-    const user = await prisma.user.upsert({
-      where: { id: session.user.id },
-      update: {},
-      create: {
-        id: session.user.id,
-        email: session.user.email || 'unknown@example.com',
-        name: session.user.name || session.user.email || 'Unknown User'
-      }
-    })
-
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
+  if (!user) {
+    throw new Error('User not found in database')
   }
+
+  // Find or create therapist profile
+  const therapist = await prisma.therapist.upsert({
+    where: { userId: user.id },
+    update: {}, // Don't overwrite existing data
+    create: {
+      userId: user.id,
+      slug: session.user.email?.split('@')[0] || 'therapist',
+      designation: 'HEILMASSEUR',
+      vatStatus: 'KLEINUNTERNEHMER'
+    }
+  })
 
   return therapist.id
 }
