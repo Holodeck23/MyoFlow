@@ -148,6 +148,9 @@ importers:
 
   packages/lib:
     dependencies:
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
       '@types/qrcode':
         specifier: ^1.5.5
         version: 1.5.5
