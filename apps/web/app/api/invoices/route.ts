@@ -35,36 +35,31 @@ const InvoiceQuerySchema = z.object({
 
 async function getTherapistId(): Promise<string> {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
 
-  // Find or create user and therapist
-  const user = await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {},
+  // Find existing user by email (the reliable identifier)
+  let user = await prisma.user.findUnique({
+    where: { email: session.user.email }
+  })
+
+  if (!user) {
+    throw new Error('User not found in database')
+  }
+
+  // Find or create therapist profile
+  const therapist = await prisma.therapist.upsert({
+    where: { userId: user.id },
+    update: {}, // Don't overwrite existing data
     create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
-      name: session.user.name || session.user.email || 'Unknown User',
+      userId: user.id,
+      slug: `therapist-${user.id}`,
+      designation: 'HEILMASSEUR',
+      vatStatus: 'KLEINUNTERNEHMER',
+      kleinunternehmer: true,
     },
   })
-
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
-  })
-
-  if (!therapist) {
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
-  }
 
   return therapist.id
 }

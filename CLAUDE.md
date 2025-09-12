@@ -158,6 +158,15 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 - Puppeteer deprecation warnings (non-blocking, latest version used)
 - Missing test infrastructure (Vitest, Jest) - **Priority: Sprint 1.6**
 
+### **Database Constraint Race Condition Resolution (September 12, 2025):**
+- ✅ **Issue Identified** - API routes failing due to user email constraint violations after race condition "fixes"
+- ✅ **Root Cause Analysis** - Switched from working email-based lookups to problematic ID-based upserts  
+- ✅ **Surgical Fix Applied** - Reverted all `getTherapistId()` functions to email-based user lookups
+- ✅ **Routes Fixed** - appointments, clients, invoices, and therapist profile APIs now working
+- ✅ **Sample Data Restored** - Reseeded database with Austrian test data (3 clients, 2 appointments, 2 invoices)
+- ✅ **Settings Page Operational** - All dashboard pages now load correctly without constraint errors
+- ✅ **Service Rate Templates Working** - Complete CRUD functionality with Austrian VAT compliance preserved
+
 ### **Agent OS Integration Enhanced (September 7, 2025):**
 - ✅ **MyoFlow Context Added** - Enhanced analyze-product.md with Austrian compliance, current tech stack, and known gaps
 - ✅ **Invoice PDF Austrian Compliance Spec** - Complete ready-to-execute spec with technical, API, and database sub-specs

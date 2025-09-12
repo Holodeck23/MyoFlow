@@ -16,22 +16,20 @@ const CreateClientSchema = z.object({
 })
 
 async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized')
+  if (!session?.user?.email) {
+    throw new Error('Not authenticated')
   }
 
-  // First ensure user exists with atomic upsert
-  const user = await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {}, // Don't update if exists
-    create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
-      name: session.user.name || session.user.email || 'Unknown User'
-    }
+  // Find existing user by email (the reliable identifier)
+  let user = await prisma.user.findUnique({
+    where: { email: session.user.email }
   })
 
-  // Then upsert therapist atomically to avoid race conditions
+  if (!user) {
+    throw new Error('User not found in database')
+  }
+
+  // Find or create therapist profile
   const therapist = await prisma.therapist.upsert({
     where: { userId: user.id },
     update: {}, // Don't overwrite existing data

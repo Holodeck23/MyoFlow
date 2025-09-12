@@ -25,28 +25,26 @@ const AppointmentQuerySchema = z.object({
 
 async function getTherapistId(): Promise<string> {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
 
-  // First ensure user exists with atomic upsert
-  await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {}, // Don't overwrite existing data
-    create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
+  // Find existing user by email (the reliable identifier)
+  let user = await prisma.user.findUnique({
+    where: { email: session.user.email }
   })
 
-  // Then upsert therapist atomically to avoid race conditions
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: session.user.id },
+  if (!user) {
+    throw new Error('User not found in database')
+  }
+
+  // Find or create therapist profile
+  let therapist = await prisma.therapist.upsert({
+    where: { userId: user.id },
     update: {}, // Don't overwrite existing data on subsequent calls
     create: {
-      userId: session.user.id,
-      slug: `therapist-${session.user.id}`,
+      userId: user.id,
+      slug: `therapist-${user.id}`,
       designation: 'HEILMASSEUR',
       vatStatus: 'KLEINUNTERNEHMER',
       kleinunternehmer: true,
