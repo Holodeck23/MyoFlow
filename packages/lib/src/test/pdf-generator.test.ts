@@ -38,7 +38,7 @@ describe('PDF Generator Integration', () => {
     kleinunternehmer: true,
     vatNumber: null,
     businessRegistration: null,
-    iban: 'AT123456789012345678'
+    iban: 'AT611904300234573201' // Valid Bank Austria IBAN
   }
 
   const mockInvoice = {

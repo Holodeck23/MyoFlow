@@ -147,14 +147,14 @@ export function formatEuro(amount: number): string {
 }
 
 /**
- * Format Austrian date for invoices
+ * Format Austrian date for invoices (DD.MM.YYYY)
+ * Using deterministic formatting to avoid locale dependencies in CI
  */
 export function formatInvoiceDate(date: Date): string {
-  return date.toLocaleDateString('de-AT', {
-    day: '2-digit',
-    month: '2-digit', 
-    year: 'numeric'
-  })
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
 }
 
 /**
