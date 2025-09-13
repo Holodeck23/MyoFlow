@@ -1,10 +1,10 @@
 // Austrian tax helpers (legacy)
-export { 
-  KLEINUNTERNEHMER_LIMIT, 
-  getVatRate, 
-  vatLineItems, 
-  kleinunternehmerFooter, 
-  formatCurrency 
+export {
+  KLEINUNTERNEHMER_LIMIT,
+  getVatRate,
+  vatLineItems,
+  kleinunternehmerFooter,
+  formatCurrency
 } from './at/receipt'
 
 // Austrian invoicing utilities (main) - export everything except conflicting formatDate
@@ -48,6 +48,9 @@ export * from './src/types'
 
 // i18n utilities
 export * from './i18n/config'
+
+// Encryption utilities
+export * from './src/encryption'
 
 // Version
 export const MYOFLOW_LIB_VERSION = '0.0.0'
