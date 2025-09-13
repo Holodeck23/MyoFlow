@@ -29,7 +29,7 @@ export default async function IntakePage({ params }: { params: { token: string }
 
   return (
     <div>
-      <h1>Welcome {client.firstName} {client.lastName}</h1>
+      <h1>Welcome {client.name}</h1>
     </div>
   )
 }
