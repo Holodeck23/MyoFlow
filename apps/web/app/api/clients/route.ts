@@ -18,25 +18,27 @@ const CreateClientSchema = z.object({
 })
 
 async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Unauthorized')
   }
-  requireRole(session.user.role as Role | undefined, [Role.OWNER, Role.STAFF])
+
+  // Find or create user using email as unique identifier
+  const user = await prisma.user.upsert({
+    where: { email: session.user.email },
+    update: {
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
+    create: {
+      email: session.user.email,
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
+  })
 
   let therapist = await prisma.therapist.findFirst({
-    where: { userId: session.user.id }
+    where: { userId: user.id }
   })
 
   if (!therapist) {
-    const user = await prisma.user.upsert({
-      where: { id: session.user.id },
-      update: {},
-      create: {
-        id: session.user.id,
-        email: session.user.email || 'unknown@example.com',
-        name: session.user.name || session.user.email || 'Unknown User'
-      }
-    })
 
     therapist = await prisma.therapist.create({
       data: {
