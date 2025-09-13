@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Logo } from '@/components/ui/Logo'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { DashboardNav } from '@/app/components/DashboardNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge, EncryptionBadge } from '@/components/ui/Badge'
 import { formatAustrianPhoneNumber, formatAustrianDate } from '@/lib/austrian-formatting'
@@ -99,47 +99,11 @@ export default function ClientsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Professional MyoFlow Navigation */}
-      <nav className="bg-white shadow-professional border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-6">
-              <Link href="/dashboard" className="hover:opacity-80 transition-professional">
-                <Logo size="sm" />
-              </Link>
-              <div className="h-6 w-px bg-border"></div>
-              <nav className="flex space-x-6">
-                <Link 
-                  href="/dashboard" 
-                  className="text-neutral-gray-600 hover:text-medical-blue font-medium text-sm transition-professional"
-                >
-                  Dashboard
-                </Link>
-                <span className="text-medical-blue font-semibold text-sm">
-                  Klienten
-                </span>
-              </nav>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-neutral-gray-600">
-                <div className="w-8 h-8 bg-medical-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-medical-blue font-semibold text-xs">
-                    {session.user?.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="hidden sm:block">{session.user?.email}</span>
-              </div>
-              
-              <Button asChild>
-                <Link href="/dashboard/clients/new">
-                  Neuen Klienten hinzufügen
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <DashboardNav active="clients">
+        <Button asChild>
+          <Link href="/dashboard/clients/new">Neuen Klienten hinzufügen</Link>
+        </Button>
+      </DashboardNav>
 
       {/* Professional Main Content */}
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
