@@ -13,7 +13,7 @@ export function DashboardNav({ active, children }: DashboardNavProps) {
   const { data: session } = useSession()
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', key: 'dashboard' },
+    { href: '/dashboard', label: 'Übersicht', key: 'dashboard' },
     { href: '/dashboard/clients', label: 'Klienten', key: 'clients' },
     { href: '/dashboard/appointments', label: 'Termine', key: 'appointments' },
     { href: '/dashboard/invoices', label: 'Rechnungen', key: 'invoices' },
