@@ -18,17 +18,34 @@ const ServiceRateTemplateSchema = z.object({
 })
 
 async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Unauthorized')
   }
 
-  // Find therapist
-  const therapist = await prisma.therapist.findFirst({
-    where: { userId: session.user.id }
+  const user = await prisma.user.upsert({
+    where: { email: session.user.email },
+    update: {
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
+    create: {
+      email: session.user.email,
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
+  })
+
+  let therapist = await prisma.therapist.findFirst({
+    where: { userId: user.id }
   })
 
   if (!therapist) {
-    throw new Error('Therapist not found')
+    therapist = await prisma.therapist.create({
+      data: {
+        userId: user.id,
+        slug: session.user.email?.split('@')[0] || 'therapist',
+        designation: 'HEILMASSEUR',
+        vatStatus: 'KLEINUNTERNEHMER'
+      }
+    })
   }
 
   return therapist.id

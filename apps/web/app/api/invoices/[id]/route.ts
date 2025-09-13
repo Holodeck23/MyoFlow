@@ -17,16 +17,17 @@ const UpdateInvoiceSchema = z.object({
 
 async function getTherapistId(): Promise<string> {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
 
   const user = await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {},
+    where: { email: session.user.email },
+    update: {
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
     create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
+      email: session.user.email,
       name: session.user.name || session.user.email || 'Unknown User',
     },
   })
@@ -39,7 +40,7 @@ async function getTherapistId(): Promise<string> {
     therapist = await prisma.therapist.create({
       data: {
         userId: user.id,
-        slug: `therapist-${user.id}`,
+        slug: session.user.email?.split('@')[0] || 'therapist',
         designation: 'HEILMASSEUR',
         vatStatus: 'KLEINUNTERNEHMER',
         kleinunternehmer: true,
