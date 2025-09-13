@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
-import { encryptString, decryptString, logAudit, requireRole } from '@myoflow/lib'
+import { encryptString, decryptString, logAudit } from '@myoflow/lib'
 
 const CreateClientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -21,9 +21,8 @@ async function getTherapistId(session: any): Promise<string> {
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
-  requireRole(session.user.role as Role | undefined, [Role.OWNER, Role.STAFF])
 
-  // Find existing user by email (the reliable identifier)  
+  // Find existing user by email (the reliable identifier)
   let user = await prisma.user.findUnique({
     where: { email: session.user.email }
   })
