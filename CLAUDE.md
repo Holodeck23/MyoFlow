@@ -8,11 +8,12 @@
 
 ## 🎯 **Current Session Objectives**
 
-**Primary Goal:** Webpack Module Resolution & Repository Maintenance  
-**Current Branch:** `feature/agents-communication` (8 commits ahead of origin)  
-**Completed Features:** ✅ Webpack "./24.js" error resolved, PR #14 successfully merged, Repository cleaned up  
-**Ready for:** Client profile tabbed interface implementation  
-**Status:** Development environment stable and ready for new session
+**Primary Goal:** Repository Cleanup & Clean Single-Purpose Branch Strategy
+**Session Date:** September 13, 2025
+**Current Branch:** `main` (clean slate post nuclear option)
+**Completed Action:** ✅ Nuclear option executed - deleted problematic consolidated branches
+**Ready for:** Clean single-purpose feature implementation
+**Status:** Repository reset, systematic implementation strategy planned
 
 ---
 
@@ -228,6 +229,107 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 **Success:** €500 MRR from 10+ therapists
 
+## 🚀 **Single-Purpose Branch Implementation Plan**
+
+### **Priority 1: Core Infrastructure (Must-Have)**
+
+#### **Sprint 2.1A: `fix/ci-infrastructure`** ⏱️ *Next Implementation*
+- **Scope:** CI stability only, no features
+- **Tasks:**
+  - Puppeteer CI configuration with system Chrome installation
+  - Environment variable standardization (DATA_ENCRYPTION_KEY)
+  - Build system improvements and test infrastructure
+  - TypeScript compilation fixes
+- **Success Criteria:** CI passes consistently, all tests green
+- **Estimate:** 2-3 hours implementation + testing
+
+#### **Sprint 2.1B: `feat/client-data-encryption`**
+- **Scope:** Security infrastructure only
+- **Tasks:**
+  - Security utilities and crypto functions (libsodium)
+  - Database schema for encrypted fields (`healthFlagsEnc`, `bodyEnc`)
+  - API route encryption/decryption integration
+  - Client health flags encryption end-to-end
+- **Dependencies:** CI infrastructure must be stable first
+- **Estimate:** 4-5 hours implementation + testing
+
+### **Priority 2: Austrian Compliance (Business Critical)**
+
+#### **Sprint 2.2A: `feat/austrian-invoice-database`**
+- **Scope:** Data layer only
+- **Tasks:**
+  - Database schema: Austrian compliance fields (UID, KU, VAT)
+  - Migration: Add invoice Austrian compliance fields
+  - Core data models, no business logic
+- **Dependencies:** Core infrastructure complete
+- **Estimate:** 2-3 hours
+
+#### **Sprint 2.2B: `feat/austrian-business-logic`**
+- **Scope:** Business calculations only
+- **Tasks:**
+  - Austrian business utilities (VAT calculations, formatting)
+  - SEPA QR code generation logic
+  - Austrian date/currency formatting helpers
+  - Comprehensive unit test suite
+- **Dependencies:** Database schema in place
+- **Estimate:** 4-6 hours
+
+#### **Sprint 2.2C: `feat/pdf-invoice-generation`**
+- **Scope:** PDF output only
+- **Tasks:**
+  - Puppeteer PDF generation templates
+  - Austrian-compliant invoice layouts
+  - PDF API endpoints and integration
+  - End-to-end PDF workflow
+- **Dependencies:** Business logic + CI infrastructure
+- **Estimate:** 3-4 hours
+
+### **Priority 3: API Stabilization (Quality)**
+
+#### **Sprint 2.3A: `fix/api-route-authentication`**
+- **Scope:** Authentication consistency only
+- **Tasks:**
+  - Standardize `getTherapistId()` across all routes
+  - Fix database constraint race conditions
+  - Improve API error handling and validation
+  - Session management consistency
+- **Dependencies:** Encryption system stable
+- **Estimate:** 3-4 hours
+
+#### **Sprint 2.3B: `feat/therapist-profile-management`**
+- **Scope:** Profile management only
+- **Tasks:**
+  - Therapist profile CRUD API routes
+  - Service rate template management
+  - Profile completion tracking logic
+  - Settings page integration
+- **Dependencies:** API authentication standardized
+- **Estimate:** 3-5 hours
+
+### **Priority 4: UI/UX Polish (Nice-to-Have)**
+
+#### **Sprint 2.4A: `feat/language-toggle-system`**
+- **Scope:** Internationalization only
+- **Tasks:**
+  - German/English language toggle component
+  - i18n infrastructure setup
+  - UI string translations (Austrian German)
+  - Context provider for language state
+- **Dependencies:** Core features stable
+- **Estimate:** 2-3 hours
+
+#### **Sprint 2.4B: `feat/dashboard-improvements`**
+- **Scope:** UI polish only
+- **Tasks:**
+  - Dashboard navigation updates
+  - Favicon and branding consistency
+  - Public intake form improvements
+  - Responsive design enhancements
+- **Dependencies:** Language system complete
+- **Estimate:** 2-4 hours
+
+---
+
 ### **Future Sprint Planning (Updated with Perplexity Insights)**
 
 #### **Sprint 1.6: Test Infrastructure & Quality (Priority: High)**
@@ -340,13 +442,25 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 4. ✅ Sequential invoice numbering (YYYY-NNN format) and storage
 5. ✅ Client-appointment integration with smart filtering
 
-### **Current Sprint - Agent OS Integration & Invoice PDF Austrian Compliance (IN PROGRESS 🚧):**
-1. ✅ Agent OS structure enhanced with MyoFlow-specific context
-2. ✅ Complete Austrian invoice PDF compliance spec created
-3. ✅ Technical specifications for KU/VAT logic and CSV exports
-4. 📋 Execute invoice PDF Austrian compliance tasks
-5. 📋 Service rate defaults in therapist profile settings
-6. 📋 CSV exports for BMD/RZL/DATEV accounting software
+### **Nuclear Option & Clean Slate Strategy (September 13, 2025) - COMPLETED ✅:**
+
+**Problem Identified:**
+- Two problematic branches with CI failures and tangled dependencies
+- `feature/consolidated-clean-branch` - consolidated too many features
+- `codex/encrypt-client-healthflags-and-note-body` - infrastructure conflicts
+
+**Nuclear Option Executed:**
+1. ✅ **Feature Inventory** - Catalogued all functionality across both branches
+2. ✅ **Branch Deletion** - Deleted both local and remote problematic branches
+3. ✅ **Clean Slate Reset** - Repository returned to stable `main` branch
+4. ✅ **Single-Purpose Strategy** - Planned 9 focused branches with clear scope
+
+**Features Inventoried for Reimplementation:**
+- 🔐 Client data encryption system (healthFlags, note bodies)
+- 🧾 Austrian invoice compliance (database, business logic, PDF generation)
+- 🔧 CI infrastructure improvements (Puppeteer, environment vars)
+- 🌐 UI/UX enhancements (language toggle, dashboard improvements)
+- 🐛 API route stabilization (authentication, constraint fixes)
 
 ---
 
@@ -375,6 +489,10 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 ## 🔄 **Update Log**
 
+**2025-09-13 18:45:** Nuclear option executed - deleted problematic branches, created single-purpose implementation plan
+**2025-09-13 18:30:** Comprehensive feature inventory completed across both failed branches
+**2025-09-13 18:15:** CI failure root cause analysis - infrastructure issues identified (Puppeteer, QRCode, date formatting, IBAN)
+**2025-09-13 18:00:** Decision to abandon consolidated approach, implement systematic single-purpose strategy
 **2025-09-07 16:00:** Agent OS enhanced with MyoFlow-specific Austrian compliance context and ready-to-execute invoice PDF spec  
 **2025-09-07 15:45:** Created complete Austrian invoice PDF compliance specification with technical, API, and database sub-specs  
 **2025-09-07 15:30:** Established coordination with Codex on parallel infrastructure tasks (subdomain routing, address data, CI)  
@@ -390,4 +508,37 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 ---
 
-**Current Priority:** Execute Austrian invoice PDF compliance spec and coordinate with Codex infrastructure tasks
+**Current Priority:** Begin systematic single-purpose branch implementation starting with CI infrastructure
+
+## 🎯 **NEXT STEPS - START HERE**
+
+### **Immediate Action Required:**
+
+**1. Start with Infrastructure Foundation**
+```bash
+git checkout -b fix/ci-infrastructure
+```
+
+**2. Implement CI Fixes (Estimated: 2-3 hours)**
+- Add Puppeteer system Chrome installation to CI configuration
+- Standardize DATA_ENCRYPTION_KEY environment variable
+- Fix TypeScript compilation issues identified in previous failures
+- Add proper test infrastructure and build system improvements
+- Verify all 77 tests pass consistently
+
+**3. Success Criteria Before Moving to Next Branch:**
+- ✅ CI pipeline passes completely
+- ✅ All existing tests green (77/77)
+- ✅ TypeScript builds without errors
+- ✅ Puppeteer tests run in CI environment
+- ✅ Clean PR ready for merge to main
+
+**4. After CI Success, Proceed to:**
+`feat/client-data-encryption` → `feat/austrian-invoice-database` → etc.
+
+### **Key Success Principles:**
+- **One branch = one purpose** (no exceptions)
+- **Each branch must pass CI before proceeding**
+- **Small, reviewable changes only**
+- **Build incrementally on previous work**
+- **Test thoroughly before moving forward**
