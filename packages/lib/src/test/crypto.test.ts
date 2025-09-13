@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import sodium from 'libsodium-wrappers'
-import { encrypt, decrypt } from '../../security/crypto'
+import { encryptString, decryptString } from '../../security/crypto'
 
 describe('crypto', () => {
   beforeAll(async () => {
@@ -9,14 +9,14 @@ describe('crypto', () => {
       sodium.randombytes_buf(sodium.crypto_secretbox_KEYBYTES),
       sodium.base64_variants.ORIGINAL
     )
-    process.env.ENCRYPTION_KEY_B64 = key
+    process.env.DATA_ENCRYPTION_KEY = key
   })
 
   it('encrypts and decrypts data', async () => {
     const plaintext = 'sensitive information'
-    const ciphertext = await encrypt(plaintext)
+    const ciphertext = await encryptString(plaintext)
     expect(ciphertext).not.toBe(plaintext)
-    const decrypted = await decrypt(ciphertext)
+    const decrypted = await decryptString(ciphertext)
     expect(decrypted).toBe(plaintext)
   })
 })
