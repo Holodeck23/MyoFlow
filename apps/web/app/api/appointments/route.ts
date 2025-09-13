@@ -25,17 +25,18 @@ const AppointmentQuerySchema = z.object({
 
 async function getTherapistId(): Promise<string> {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
 
-  // Find or create user and therapist
+  // Find or create user and therapist using email as unique identifier
   const user = await prisma.user.upsert({
-    where: { id: session.user.id },
-    update: {},
+    where: { email: session.user.email },
+    update: {
+      name: session.user.name || session.user.email || 'Unknown User',
+    },
     create: {
-      id: session.user.id,
-      email: session.user.email || 'unknown@example.com',
+      email: session.user.email,
       name: session.user.name || session.user.email || 'Unknown User',
     },
   })
