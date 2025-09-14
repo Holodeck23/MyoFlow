@@ -10,6 +10,7 @@ import { DashboardNav } from '@/app/components/DashboardNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge, EncryptionBadge } from '@/components/ui/Badge'
 import { formatAustrianPhoneNumber, formatAustrianDate } from '@/lib/austrian-formatting'
+import { useTranslation } from '@myoflow/lib'
 
 interface Client {
   id: string
@@ -24,6 +25,7 @@ interface Client {
 export default function ClientsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t } = useTranslation()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -55,19 +57,19 @@ export default function ClientsPage() {
       if (selectedTag) params.append('tag', selectedTag)
 
       const response = await fetch(`/api/clients?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch clients')
+      if (!response.ok) throw new Error(t('clients.fetchError', 'Failed to fetch clients'))
       
       const data = await response.json()
       setClients(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load clients')
+      setError(err instanceof Error ? err.message : t('clients.loadError', 'Failed to load clients'))
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteClient = async (clientId: string, clientName: string) => {
-    if (!confirm(`Are you sure you want to delete ${clientName}? This action cannot be undone.`)) {
+    if (!confirm(`${t('clients.deleteConfirm', 'Are you sure you want to delete')} ${clientName}? ${t('clients.deleteConfirmContinue', 'This action cannot be undone.')}`)) {
       return
     }
 
@@ -76,11 +78,11 @@ export default function ClientsPage() {
         method: 'DELETE'
       })
       
-      if (!response.ok) throw new Error('Failed to delete client')
+      if (!response.ok) throw new Error(t('clients.deleteError', 'Failed to delete client'))
       
       setClients(clients.filter(client => client.id !== clientId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete client')
+      alert(err instanceof Error ? err.message : t('clients.deleteError', 'Failed to delete client'))
     }
   }
 
@@ -89,7 +91,7 @@ export default function ClientsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-medical-blue"></div>
-          <p className="text-neutral-gray-600 font-medium">Laden...</p>
+          <p className="text-neutral-gray-600 font-medium">{t('common.loading', 'Laden...')}</p>
         </div>
       </div>
     )
@@ -101,7 +103,7 @@ export default function ClientsPage() {
     <div className="min-h-screen bg-background">
       <DashboardNav active="clients">
         <Button asChild>
-          <Link href="/dashboard/clients/new">Neuen Klienten hinzufügen</Link>
+          <Link href="/dashboard/clients/new">{t('clients.addNew', 'Neuen Klienten hinzufügen')}</Link>
         </Button>
       </DashboardNav>
 
@@ -110,9 +112,9 @@ export default function ClientsPage() {
         <div className="space-y-6">
           {/* Header Section */}
           <div>
-            <h1 className="text-2xl font-semibold text-neutral-gray-900">Klienten verwalten</h1>
+            <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('clients.title', 'Klienten verwalten')}</h1>
             <p className="mt-2 text-neutral-gray-600">
-              Verwalten Sie Ihre Klientendaten sicher und GDPR-konform.
+              {t('clients.subtitle', 'Verwalten Sie Ihre Klientendaten sicher und GDPR-konform.')}
               <EncryptionBadge className="ml-2" />
             </p>
           </div>
@@ -124,7 +126,7 @@ export default function ClientsPage() {
                 <div className="flex-1">
                   <Input
                     type="text"
-                    placeholder="Klienten suchen..."
+                    placeholder={t('clients.searchPlaceholder', 'Klienten suchen...')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full"
@@ -138,7 +140,7 @@ export default function ClientsPage() {
                       onChange={(e) => setSelectedTag(e.target.value)}
                       className="w-full px-3 py-2 border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-medical-blue-500 focus:border-transparent transition-professional"
                     >
-                      <option value="">Alle Tags</option>
+                      <option value="">{t('clients.allTags', 'Alle Tags')}</option>
                       {allTags.map(tag => (
                         <option key={tag} value={tag}>{tag}</option>
                       ))}
@@ -157,7 +159,7 @@ export default function ClientsPage() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  <span>Fehler: {error}</span>
+                  <span>{t('common.error', 'Fehler')}: {error}</span>
                 </div>
               </CardContent>
             </Card>
@@ -171,16 +173,16 @@ export default function ClientsPage() {
                     </svg>
                   </div>
                   <h3 className="text-lg font-medium text-neutral-gray-900 mb-2">
-                    {search || selectedTag ? 'Keine Klienten gefunden' : 'Noch keine Klienten hinzugefügt'}
+                    {search || selectedTag ? t('clients.noClientsFound', 'Keine Klienten gefunden') : t('clients.noClientsYet', 'Noch keine Klienten hinzugefügt')}
                   </h3>
                   <p className="text-neutral-gray-600 mb-6">
                     {search || selectedTag
-                      ? 'Versuchen Sie, Ihre Suche oder Filter anzupassen.'
-                      : 'Fügen Sie Ihren ersten Klienten hinzu, um zu beginnen.'}
+                      ? t('clients.adjustSearch', 'Versuchen Sie, Ihre Suche oder Filter anzupassen.')
+                      : t('clients.addFirstClient', 'Fügen Sie Ihren ersten Klienten hinzu, um zu beginnen.')}
                   </p>
                   <Button asChild>
                     <Link href="/dashboard/clients/new">
-                      {search || selectedTag ? 'Neuen Klienten hinzufügen' : 'Ersten Klienten hinzufügen'}
+                      {search || selectedTag ? t('clients.addNew', 'Neuen Klienten hinzufügen') : t('clients.addFirst', 'Ersten Klienten hinzufügen')}
                     </Link>
                   </Button>
                 </div>
@@ -196,7 +198,7 @@ export default function ClientsPage() {
                         <div>
                           <CardTitle className="text-lg">{client.name}</CardTitle>
                           <p className="text-sm text-neutral-gray-500 mt-1">
-                            Aktualisiert am {formatAustrianDate(new Date(client.updatedAt))}
+                            {t('clients.updatedOn', 'Aktualisiert am')} {formatAustrianDate(new Date(client.updatedAt))}
                           </p>
                         </div>
                         <EncryptionBadge />
@@ -225,7 +227,7 @@ export default function ClientsPage() {
                           )}
                           {!client.email && !client.phone && (
                             <div className="text-sm text-neutral-gray-400 italic">
-                              Keine Kontaktdaten verfügbar
+                              {t('clients.noContactInfo', 'Keine Kontaktdaten verfügbar')}
                             </div>
                           )}
                         </div>
@@ -252,7 +254,7 @@ export default function ClientsPage() {
                       asChild
                     >
                       <Link href={`/dashboard/clients/${client.id}/edit`}>
-                        Bearbeiten
+                        {t('common.edit', 'Bearbeiten')}
                       </Link>
                     </Button>
                     <Button
@@ -265,7 +267,7 @@ export default function ClientsPage() {
                       }}
                       className="text-austrian-red-600 hover:text-austrian-red-700 hover:bg-austrian-red-50"
                     >
-                      Löschen
+                      {t('common.delete', 'Löschen')}
                     </Button>
                   </div>
                 </Card>

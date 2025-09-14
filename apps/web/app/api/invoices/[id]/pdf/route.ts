@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
+import { generateInvoicePDF } from '@myoflow/lib/src/pdf-generator'
 import {
-  generateInvoicePDF,
   type InvoiceLine,
   type VATBreakdown
 } from '@myoflow/lib'

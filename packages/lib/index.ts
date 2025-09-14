@@ -34,11 +34,11 @@ export {
   getNextInvoiceNumber
 } from './src/austrian-invoicing'
 
-// PDF generation
-export * from './src/pdf-generator'
+// PDF generation - Server-side only, not exported to avoid client-side bundling issues
+// Import directly from './src/pdf-generator' in API routes when needed
 
-// SEPA QR codes for Austrian banking
-export * from './src/sepa-qr'
+// SEPA QR codes for Austrian banking - Server-side only
+// Import directly from './src/sepa-qr' in API routes when needed
 
 // CSV export for accounting software
 export * from './src/csv-export'
@@ -48,6 +48,8 @@ export * from './src/types'
 
 // i18n utilities
 export * from './i18n/config'
+export * from './i18n/context'
+export * from './i18n/hooks'
 
 // Encryption utilities
 export * from './src/encryption'
