@@ -7,6 +7,7 @@ import Link from 'next/link'
 import ServiceRateManager from '@/app/components/ServiceRateManager'
 import CSVExportManager from '@/app/components/CSVExportManager'
 import { DashboardNav } from '@/app/components/DashboardNav'
+import { useTranslation } from '@myoflow/lib'
 
 interface TherapistProfile {
   id: string
@@ -32,6 +33,7 @@ interface ProfileData {
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t } = useTranslation()
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -68,7 +70,7 @@ export default function SettingsPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-lg">{t('common.loading', 'Loading...')}</div>
       </div>
     )
   }

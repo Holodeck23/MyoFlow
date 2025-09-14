@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { DashboardNav } from '@/app/components/DashboardNav'
+import { useTranslation } from '@myoflow/lib'
 
 interface Appointment {
   id: string
@@ -36,6 +37,7 @@ interface Appointment {
 export default function AppointmentsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t } = useTranslation()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -55,12 +57,12 @@ export default function AppointmentsPage() {
     try {
       const response = await fetch('/api/appointments')
       if (!response.ok) {
-        throw new Error('Failed to fetch appointments')
+        throw new Error(t('appointments.fetchError', 'Failed to fetch appointments'))
       }
       const data = await response.json()
       setAppointments(data.appointments)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : t('common.error', 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -109,7 +111,7 @@ export default function AppointmentsPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading appointments...</div>
+        <div className="text-lg">{t('appointments.loading', 'Loading appointments...')}</div>
       </div>
     )
   }
@@ -126,25 +128,25 @@ export default function AppointmentsPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">
-              Appointments
+              {t('appointments.title', 'Termine')}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Manage your scheduled appointments
+              {t('appointments.subtitle', 'Verwalten Sie Ihre geplanten Termine')}
             </p>
           </div>
 
           {error && (
             <div className="p-6 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">Error: {error}</p>
+              <p className="text-red-800">{t('common.error', 'Error')}: {error}</p>
             </div>
           )}
 
           <div className="overflow-hidden">
             {appointments.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-gray-500">No appointments found.</p>
+                <p className="text-gray-500">{t('appointments.noAppointments', 'Keine Termine gefunden.')}</p>
                 <p className="text-sm text-gray-400 mt-2">
-                  Create your first appointment to get started.
+                  {t('appointments.createFirst', 'Erstellen Sie Ihren ersten Termin, um zu beginnen.')}
                 </p>
               </div>
             ) : (
@@ -172,15 +174,15 @@ export default function AppointmentsPage() {
                         
                         <div className="mt-2 space-y-1">
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Service:</span>
+                            <span className="font-medium">{t('appointments.service', 'Service')}:</span>
                             <span className="ml-2">{appointment.Service.name}</span>
                             <span className="ml-2 text-gray-400">
                               ({appointment.Service.durationMin} min, {formatPrice(appointment.Service.priceCents)})
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Location:</span>
+                            <span className="font-medium">{t('appointments.location', 'Location')}:</span>
                             <span className="ml-2">{appointment.Location.name}</span>
                             {appointment.Location.address && (
                               <span className="ml-2 text-gray-400">
@@ -188,9 +190,9 @@ export default function AppointmentsPage() {
                               </span>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Time:</span>
+                            <span className="font-medium">{t('appointments.start', 'Time')}:</span>
                             <span className="ml-2">
                               {formatDate(appointment.start)} at {formatTime(appointment.start)} - {formatTime(appointment.end)}
                             </span>
@@ -198,7 +200,7 @@ export default function AppointmentsPage() {
                           
                           {appointment.notes && (
                             <div className="flex items-start text-sm text-gray-600">
-                              <span className="font-medium">Notes:</span>
+                              <span className="font-medium">{t('appointments.notes', 'Notes')}:</span>
                               <span className="ml-2">{appointment.notes}</span>
                             </div>
                           )}
