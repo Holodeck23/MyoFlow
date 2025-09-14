@@ -174,15 +174,15 @@ export default function AppointmentsPage() {
                         
                         <div className="mt-2 space-y-1">
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Service:</span>
+                            <span className="font-medium">{t('appointments.service', 'Service')}:</span>
                             <span className="ml-2">{appointment.Service.name}</span>
                             <span className="ml-2 text-gray-400">
                               ({appointment.Service.durationMin} min, {formatPrice(appointment.Service.priceCents)})
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Location:</span>
+                            <span className="font-medium">{t('appointments.location', 'Location')}:</span>
                             <span className="ml-2">{appointment.Location.name}</span>
                             {appointment.Location.address && (
                               <span className="ml-2 text-gray-400">
@@ -190,9 +190,9 @@ export default function AppointmentsPage() {
                               </span>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium">Time:</span>
+                            <span className="font-medium">{t('appointments.start', 'Time')}:</span>
                             <span className="ml-2">
                               {formatDate(appointment.start)} at {formatTime(appointment.start)} - {formatTime(appointment.end)}
                             </span>
@@ -200,7 +200,7 @@ export default function AppointmentsPage() {
                           
                           {appointment.notes && (
                             <div className="flex items-start text-sm text-gray-600">
-                              <span className="font-medium">Notes:</span>
+                              <span className="font-medium">{t('appointments.notes', 'Notes')}:</span>
                               <span className="ml-2">{appointment.notes}</span>
                             </div>
                           )}
