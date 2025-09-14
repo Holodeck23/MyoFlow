@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Logo } from '@/components/ui/Logo'
+import { LanguageToggle } from '@myoflow/ui'
+import { useTranslation } from '@myoflow/lib'
 
 interface DashboardNavProps {
   active: 'dashboard' | 'clients' | 'appointments' | 'invoices' | 'settings'
@@ -11,13 +13,14 @@ interface DashboardNavProps {
 
 export function DashboardNav({ active, children }: DashboardNavProps) {
   const { data: session } = useSession()
+  const { t } = useTranslation()
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', key: 'dashboard' },
-    { href: '/dashboard/clients', label: 'Klienten', key: 'clients' },
-    { href: '/dashboard/appointments', label: 'Termine', key: 'appointments' },
-    { href: '/dashboard/invoices', label: 'Rechnungen', key: 'invoices' },
-    { href: '/dashboard/settings', label: 'Einstellungen', key: 'settings' },
+    { href: '/dashboard', label: t('nav.dashboard', 'Dashboard'), key: 'dashboard' },
+    { href: '/dashboard/clients', label: t('nav.clients', 'Clients'), key: 'clients' },
+    { href: '/dashboard/appointments', label: t('nav.appointments', 'Appointments'), key: 'appointments' },
+    { href: '/dashboard/invoices', label: t('nav.invoices', 'Invoices'), key: 'invoices' },
+    { href: '/dashboard/settings', label: t('nav.settings', 'Settings'), key: 'settings' },
   ] as const
 
   return (
@@ -51,8 +54,10 @@ export function DashboardNav({ active, children }: DashboardNavProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-neutral-gray-600">
+          <div className="flex items-center space-x-6">
+            <LanguageToggle variant="switch" className="hidden sm:flex" />
+            <div className="h-6 w-px bg-border hidden sm:block" />
+            <div className="flex items-center space-x-3 text-sm text-neutral-gray-600">
               <div className="w-8 h-8 bg-medical-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-medical-blue font-semibold text-xs">
                   {session?.user?.email?.charAt(0).toUpperCase()}

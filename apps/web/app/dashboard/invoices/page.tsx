@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { DashboardNav } from '@/app/components/DashboardNav'
+import { useTranslation } from '@myoflow/lib'
 
 interface Invoice {
   id: string
@@ -30,6 +31,7 @@ interface Invoice {
 export default function InvoicesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { t } = useTranslation()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,12 +51,12 @@ export default function InvoicesPage() {
     try {
       const response = await fetch('/api/invoices')
       if (!response.ok) {
-        throw new Error('Failed to fetch invoices')
+        throw new Error(t('invoices.fetchError', 'Failed to fetch invoices'))
       }
       const data = await response.json()
       setInvoices(data.invoices)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : t('common.error', 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -94,7 +96,7 @@ export default function InvoicesPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading invoices...</div>
+        <div className="text-lg">{t('invoices.loading', 'Loading invoices...')}</div>
       </div>
     )
   }
@@ -112,32 +114,32 @@ export default function InvoicesPage() {
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <div>
               <h2 className="text-lg font-medium text-gray-900">
-                Austrian Tax-Compliant Invoices
+                {t('invoices.title', 'Rechnungen')}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Manage invoices with Kleinunternehmer and VAT compliance
+                {t('invoices.subtitle', 'Verwalten Sie Rechnungen mit Kleinunternehmer- und USt-Compliance')}
               </p>
             </div>
             <Link
               href="/dashboard/invoices/new"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              Create Invoice
+              {t('invoices.createNew', 'Neue Rechnung erstellen')}
             </Link>
           </div>
 
           {error && (
             <div className="p-6 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">Error: {error}</p>
+              <p className="text-red-800">{t('common.error', 'Error')}: {error}</p>
             </div>
           )}
 
           <div className="overflow-hidden">
             {invoices.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-gray-500">No invoices found.</p>
+                <p className="text-gray-500">{t('invoices.noInvoices', 'Keine Rechnungen gefunden.')}</p>
                 <p className="text-sm text-gray-400 mt-2">
-                  Create your first Austrian-compliant invoice to get started.
+                  {t('invoices.createFirst', 'Erstellen Sie Ihre erste österreichisch-konforme Rechnung, um zu beginnen.')}
                 </p>
               </div>
             ) : (

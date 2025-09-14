@@ -176,9 +176,15 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.13
+      '@types/react':
+        specifier: ^18.3.24
+        version: 18.3.24
       '@vitest/coverage-v8':
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@20.19.13)(jiti@1.21.7)(tsx@4.20.5)(yaml@2.8.1))
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
       typescript:
         specifier: ^5.0.0
         version: 5.9.2
