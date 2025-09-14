@@ -72,7 +72,7 @@
     "client": "Klient",
     "service": "Leistung",
     "location": "Standort",
-    "start": "Start",
+    "start": "Zeit",
     "end": "Ende",
     "status": "Status",
     "notes": "Notizen"
