@@ -1,9 +1,8 @@
-// Components
-export * from './components/button'
-export * from './components/card'
-export * from './components/input'
-export * from './components/label'
-export * from './components/language-toggle'
+// Components - exported from web app components
+export * from '../../apps/web/src/components/ui/button'
+export * from '../../apps/web/src/components/ui/card'
+export * from '../../apps/web/src/components/ui/input'
+export * from '../../apps/web/src/components/ui/label'
 
 // Utils
 export * from './lib/utils'

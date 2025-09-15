@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Kleinunternehmer Status - Most Important */}
-      <div className="bg-gradient-to-r from-medical-blue to-medical-blue-700 rounded-lg p-6 text-white">
+      <div className="bg-gradient-to-br from-medical-blue via-blue-600 to-medical-blue-800 rounded-lg p-6 text-white shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">{t('dashboard.kleinunternehmerStatus', 'Kleinunternehmer Status 2025')}</h2>
@@ -89,10 +89,10 @@ export default function Dashboard() {
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
+              <Users className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.totalClients', 'Klienten Gesamt')}</p>
@@ -101,10 +101,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-gradient-to-br from-white to-green-50 rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md">
+              <Calendar className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.todayAppointments', 'Termine Heute')}</p>
@@ -113,10 +113,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-gradient-to-br from-white to-purple-50 rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Euro className="h-6 w-6 text-purple-600" />
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md">
+              <Euro className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.monthlyAverage', 'Monatsdurchschnitt')}</p>
@@ -125,10 +125,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-gradient-to-br from-white to-orange-50 rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <AlertTriangle className="h-6 w-6 text-orange-600" />
+            <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md">
+              <AlertTriangle className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.actionRequired', 'Handlungsbedarf')}</p>
