@@ -2,10 +2,10 @@
 
 import { signIn, getProviders } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { UserPlus, KeyRound } from 'lucide-react'
 import Link from 'next/link'
 
