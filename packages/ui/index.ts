@@ -2,7 +2,7 @@
 export * from '../../apps/web/src/components/ui/button'
 export * from '../../apps/web/src/components/ui/card'
 export * from '../../apps/web/src/components/ui/input'
-export * from '../../apps/web/src/components/ui/label'
+export * from '../../apps/web/src/components/ui/Label'
 
 // Utils
 export * from './lib/utils'
