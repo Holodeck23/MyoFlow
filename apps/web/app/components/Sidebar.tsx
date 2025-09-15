@@ -2,20 +2,27 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { name: 'Calendar', href: '/dashboard/calendar', icon: '📅' },
-  { name: 'Inbox', href: '/dashboard/inbox', icon: '📥' },
-  { name: 'Clients', href: '/dashboard/clients', icon: '👥' },
-  { name: 'Appointments', href: '/dashboard/appointments', icon: '📋' },
-  { name: 'Invoices', href: '/dashboard/invoices', icon: '🧾' },
-  { name: 'Action Required', href: '/dashboard/actions', icon: '⚠️' },
-  { name: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
-]
+import { useTranslation } from '@myoflow/lib'
+import {
+  Home,
+  Users,
+  Calendar,
+  FileText,
+  Settings,
+  Plus
+} from 'lucide-react'
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { t } = useTranslation()
+
+  const navigation = [
+    { name: t('sidebar.dashboard', 'Dashboard'), href: '/dashboard', icon: Home, bgColor: 'bg-blue-500' },
+    { name: t('sidebar.clients', 'Klienten'), href: '/dashboard/clients', icon: Users, bgColor: 'bg-indigo-500' },
+    { name: t('sidebar.appointments', 'Termine'), href: '/dashboard/appointments', icon: Calendar, bgColor: 'bg-green-500' },
+    { name: t('sidebar.invoices', 'Rechnungen'), href: '/dashboard/invoices', icon: FileText, bgColor: 'bg-purple-500' },
+    { name: t('sidebar.settings', 'Einstellungen'), href: '/dashboard/settings', icon: Settings, bgColor: 'bg-gray-500' },
+  ]
 
   return (
     <div className="flex h-screen w-16 flex-col bg-medical-blue">
@@ -27,32 +34,33 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-1 flex-col items-center space-y-1 py-4">
+      <nav className="flex flex-1 flex-col items-center space-y-3 py-6">
         {navigation.map((item) => {
           const isActive = pathname === item.href
+          const IconComponent = item.icon
           return (
             <Link
               key={item.name}
               href={item.href}
               className={`
-                group flex h-12 w-12 items-center justify-center rounded-lg text-sm font-medium transition-colors
+                group flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200 shadow-lg
                 ${isActive
-                  ? 'bg-white text-medical-blue'
-                  : 'text-white hover:bg-medical-blue-700 hover:text-white'
+                  ? 'bg-white text-medical-blue scale-110 shadow-xl'
+                  : `${item.bgColor} text-white hover:scale-105 hover:shadow-xl`
                 }
               `}
               title={item.name}
             >
-              <span className="text-lg">{item.icon}</span>
+              <IconComponent size={24} />
             </Link>
           )
         })}
       </nav>
 
       {/* Quick Add Button */}
-      <div className="pb-4">
-        <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-austrian-red text-white hover:bg-austrian-red-700 transition-colors">
-          <span className="text-lg">➕</span>
+      <div className="pb-6">
+        <button className="flex h-14 w-14 items-center justify-center rounded-xl bg-austrian-red text-white hover:bg-austrian-red-700 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <Plus size={24} />
         </button>
       </div>
     </div>

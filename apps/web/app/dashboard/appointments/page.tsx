@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { DashboardNav } from '@/app/components/DashboardNav'
 import { useTranslation } from '@myoflow/lib'
 
 interface Appointment {
@@ -121,10 +120,18 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardNav active="appointments" />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('appointments.title', 'Termine verwalten')}</h1>
+          <p className="mt-2 text-neutral-gray-600">
+            {t('appointments.subtitle', 'Verwalten Sie Ihre geplanten Termine und Buchungen.')}
+          </p>
+        </div>
+      </div>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main>
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">

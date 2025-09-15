@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import ServiceRateManager from '@/app/components/ServiceRateManager'
 import CSVExportManager from '@/app/components/CSVExportManager'
-import { DashboardNav } from '@/app/components/DashboardNav'
 import { useTranslation } from '@myoflow/lib'
 
 interface TherapistProfile {
@@ -95,19 +94,19 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardNav active="settings" />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('settings.title', 'Einstellungen')}</h1>
+          <p className="mt-2 text-neutral-gray-600">
+            {t('settings.subtitle', 'Verwalten Sie Ihr Praxisprofil und Ihre Präferenzen.')}
+          </p>
+        </div>
+      </div>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main>
         <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-medium text-gray-900">
-              Settings
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your practice profile and preferences
-            </p>
-          </div>
 
           {profileData && (
             <div className="p-6">
