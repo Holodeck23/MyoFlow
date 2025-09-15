@@ -1,1 +1,109 @@
-@tailwind base; @tailwind components; @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Austrian Medical Blue - Primary Theme */
+    --background: 250 250 250; /* neutral-50 */
+    --foreground: 23 23 23; /* neutral-900 */
+
+    --card: 255 255 255; /* white */
+    --card-foreground: 23 23 23; /* neutral-900 */
+
+    --popover: 255 255 255; /* white */
+    --popover-foreground: 23 23 23; /* neutral-900 */
+
+    /* Austrian Medical Blue (#1565C0) as primary */
+    --primary: 21 101 192; /* #1565C0 Austrian Medical Blue */
+    --primary-foreground: 255 255 255; /* white */
+
+    /* Austrian Red (#C8102E) as accent */
+    --secondary: 245 245 245; /* neutral-100 */
+    --secondary-foreground: 23 23 23; /* neutral-900 */
+
+    --muted: 245 245 245; /* neutral-100 */
+    --muted-foreground: 115 115 115; /* neutral-500 */
+
+    /* Austrian Red for accents */
+    --accent: 200 16 46; /* #C8102E Austrian Red */
+    --accent-foreground: 255 255 255; /* white */
+
+    --destructive: 220 38 38; /* red-600 */
+    --destructive-foreground: 255 255 255; /* white */
+
+    --border: 229 229 229; /* neutral-200 */
+    --input: 229 229 229; /* neutral-200 */
+    --ring: 21 101 192; /* Austrian Medical Blue */
+
+    --radius: 0.5rem; /* 8px for medical interfaces */
+
+    /* Austrian Medical Success/Warning States */
+    --success: 5 150 105; /* #059669 */
+    --success-foreground: 255 255 255;
+    --warning: 217 119 6; /* #D97706 */
+    --warning-foreground: 255 255 255;
+    --info: 3 105 161; /* #0369A1 */
+    --info-foreground: 255 255 255;
+
+    /* GDPR Compliance Colors */
+    --gdpr-encrypted: 22 163 74; /* #16A34A */
+    --gdpr-sensitive: 220 38 38; /* #DC2626 */
+    --gdpr-audit: 124 58 237; /* #7C3AED */
+    --gdpr-compliant: 5 150 105; /* #059669 */
+
+    /* Kleinunternehmer Tracking */
+    --kleinunternehmer-progress: 22 163 74; /* #16A34A */
+    --kleinunternehmer-threshold: 217 119 6; /* #D97706 */
+    --kleinunternehmer-warning: 220 38 38; /* #DC2626 */
+    --kleinunternehmer-safe: 5 150 105; /* #059669 */
+  }
+
+  .dark {
+    --background: 10 10 10; /* neutral-950 */
+    --foreground: 250 250 250; /* neutral-50 */
+
+    --card: 10 10 10; /* neutral-950 */
+    --card-foreground: 250 250 250; /* neutral-50 */
+
+    --popover: 10 10 10; /* neutral-950 */
+    --popover-foreground: 250 250 250; /* neutral-50 */
+
+    --primary: 21 101 192; /* Austrian Medical Blue stays same */
+    --primary-foreground: 255 255 255; /* white */
+
+    --secondary: 38 38 38; /* neutral-800 */
+    --secondary-foreground: 250 250 250; /* neutral-50 */
+
+    --muted: 38 38 38; /* neutral-800 */
+    --muted-foreground: 163 163 163; /* neutral-400 */
+
+    --accent: 200 16 46; /* Austrian Red stays same */
+    --accent-foreground: 255 255 255; /* white */
+
+    --destructive: 127 29 29; /* red-900 */
+    --destructive-foreground: 250 250 250; /* neutral-50 */
+
+    --border: 38 38 38; /* neutral-800 */
+    --input: 38 38 38; /* neutral-800 */
+    --ring: 21 101 192; /* Austrian Medical Blue */
+
+    /* Dark mode variants maintain Austrian compliance colors */
+    --success: 5 150 105;
+    --success-foreground: 255 255 255;
+    --warning: 217 119 6;
+    --warning-foreground: 255 255 255;
+    --info: 3 105 161;
+    --info-foreground: 255 255 255;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
