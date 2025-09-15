@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 // Austrian compliance validation schemas
 const UidNumberSchema = z.string().regex(/^ATU[0-9]{8}$/, 'UID number must be in format ATU12345678').optional().or(z.literal(''))
 const BusinessEmailSchema = z.string().email('Invalid email format').optional().or(z.literal(''))
