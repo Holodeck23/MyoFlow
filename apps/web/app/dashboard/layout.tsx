@@ -36,23 +36,23 @@ export default function DashboardLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col">
         {/* Top header with user info */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-white border-b border-gray-200 px-8 py-5 shadow-sm">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">MyoFlow</h1>
+              <h1 className="text-xl font-bold text-gray-900">MyoFlow</h1>
               <p className="text-sm text-gray-600">
-                Signed in as <span className="font-medium text-gray-900">{session.user?.email}</span>
+                Angemeldet als <span className="font-medium text-gray-900">{session.user?.email}</span>
               </p>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>All systems operational</span>
+            <div className="flex items-center space-x-3 text-sm text-gray-600">
+              <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm"></div>
+              <span className="font-medium">Alle Systeme funktionsfähig</span>
             </div>
           </div>
         </header>
 
         {/* Main content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-8 bg-gray-50">
           {children}
         </main>
       </div>
