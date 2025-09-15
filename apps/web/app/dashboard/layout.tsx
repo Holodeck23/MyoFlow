@@ -1,10 +1,10 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Sidebar } from '@/app/components/Sidebar'
-import { Languages, Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react'
+import { Languages, Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -48,6 +48,16 @@ export default function DashboardLayout({
             <div className="flex items-center space-x-6">
               {/* Language Toggle */}
               <LanguageToggle />
+
+              {/* Logout Button */}
+              <button
+                onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
+                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-white/80 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                title="Abmelden"
+              >
+                <LogOut size={16} />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
 
               {/* System Status */}
               <div className="flex items-center space-x-3 text-sm text-white/80">

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { UserPlus, KeyRound } from 'lucide-react'
+import Link from 'next/link'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -53,14 +55,23 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="max-w-md w-full">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold text-primary">
-            Sign in to MyoFlow
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-blue-500 to-cyan-600 p-4">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+      </div>
+
+      <Card className="max-w-lg w-full bg-white/95 backdrop-blur-sm shadow-2xl border-0 relative z-10">
+        <CardHeader className="text-center space-y-4 pb-8">
+          <div className="mx-auto h-48 w-48 flex items-center justify-center">
+            <img src="/shield-logo.png" alt="MyoFlow" className="h-48 w-48 object-contain drop-shadow-xl" />
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medical-blue-600 to-medical-blue-800 bg-clip-text text-transparent">
+            Welcome to MyoFlow
           </CardTitle>
-          <CardDescription className="text-lg">
-            Austrian Practice Management for Massage Therapists
+          <CardDescription className="text-lg text-gray-600">
+            Österreichische Therapiepraxis-Management-Software
           </CardDescription>
         </CardHeader>
 
@@ -154,7 +165,7 @@ export default function SignIn() {
             <Button
               type="submit"
               disabled={isLoading || !email || !password}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-medical-blue-600 to-medical-blue-700 hover:from-medical-blue-700 hover:to-medical-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
               size="lg"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
@@ -162,14 +173,39 @@ export default function SignIn() {
           </form>
 
           {message && (
-            <div className={`text-sm text-center p-3 rounded-md ${
+            <div className={`text-sm text-center p-3 rounded-lg ${
               message.includes('Invalid') || message.includes('Unable') || message.includes('Error')
-                ? 'text-destructive-foreground bg-destructive/10 border border-destructive/20'
-                : 'text-success-foreground bg-[rgb(var(--success))]/10 border border-[rgb(var(--success))]/20'
+                ? 'text-red-700 bg-red-50 border border-red-200'
+                : 'text-green-700 bg-green-50 border border-green-200'
             }`}>
               {message}
             </div>
           )}
+
+          {/* Additional Actions */}
+          <div className="space-y-4 border-t border-gray-100 pt-6">
+            <div className="flex items-center justify-between text-sm">
+              <Link
+                href="/auth/forgot-password"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1 hover:underline"
+              >
+                <KeyRound size={16} />
+                <span>Forgot Password?</span>
+              </Link>
+
+              <Link
+                href="/auth/register"
+                className="text-austrian-red hover:text-austrian-red-700 font-medium flex items-center space-x-1 hover:underline"
+              >
+                <UserPlus size={16} />
+                <span>Create Account</span>
+              </Link>
+            </div>
+
+            <div className="text-center text-xs text-gray-500">
+              Secure Austrian healthcare practice management • GDPR compliant
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

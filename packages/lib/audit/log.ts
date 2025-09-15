@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+// Audit logging types - no Prisma dependency in shared package
 export interface AuditLogEntry {
   actorUserId?: string
   therapistId: string
@@ -12,12 +9,5 @@ export interface AuditLogEntry {
   meta?: any
 }
 
-export async function logAudit(entry: AuditLogEntry) {
-  return prisma.auditLog.create({
-    data: {
-      ...entry,
-      ip: entry.ip || undefined,
-      meta: entry.meta || undefined
-    }
-  })
-}
+// Note: logAudit implementation moved to API routes
+// Use: POST /api/audit with AuditLogEntry data

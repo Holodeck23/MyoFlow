@@ -28,12 +28,23 @@ export function Sidebar() {
     <div className="flex min-h-screen w-16 flex-col bg-medical-blue">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center justify-center">
-        <div className="h-12 w-12 rounded-xl bg-white/90 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg border border-white/20">
-          <img
-            src="/shield-logo.png"
-            alt="MyoFlow Logo"
-            className="h-9 w-9 object-contain"
-          />
+        <div className="h-12 w-12 rounded-xl bg-white/90 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-lg border border-white/20">
+          <svg
+            width="36"
+            height="36"
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M50 10 L20 25 L20 55 C20 75 35 90 50 95 C65 90 80 75 80 55 L80 25 Z"
+              fill="#DC2626"
+            />
+            <path
+              d="M35 45 L35 35 L37 35 L37 45 L40 45 L40 35 L42 35 L42 45 L45 45 L45 35 L47 35 L47 45 L50 45 L50 35 L52 35 L52 45 L55 45 L55 40 L57 40 L57 55 C57 60 52 65 45 65 L35 65 C30 65 25 60 25 55 L25 45 C25 42 28 40 32 40 L35 40 Z"
+              fill="white"
+            />
+          </svg>
         </div>
       </div>
 
