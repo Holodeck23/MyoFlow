@@ -25,7 +25,7 @@ export default function RootLayout({
         <meta name="description" content="Professionelle Praxisverwaltungssoftware für österreichische Therapeuten" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={`${inter.className} antialiased bg-background text-neutral-gray-700`}>
+      <body className={`${inter.className} antialiased bg-background text-foreground`}>
         <SessionProvider>
           <LocaleProvider>
             <RootContent>

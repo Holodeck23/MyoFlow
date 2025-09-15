@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { DashboardNav } from '@/app/components/DashboardNav'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge, EncryptionBadge } from '@/components/ui/Badge'
 import { formatAustrianPhoneNumber, formatAustrianDate } from '@/lib/austrian-formatting'
 import { useTranslation } from '@myoflow/lib'
@@ -91,7 +91,7 @@ export default function ClientsPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-medical-blue"></div>
-          <p className="text-neutral-gray-600 font-medium">{t('common.loading', 'Laden...')}</p>
+          <p className="text-neutral-gray-600 font-medium">{t('common.loading', 'Loading...')}</p>
         </div>
       </div>
     )
