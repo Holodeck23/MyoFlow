@@ -1,8 +1,8 @@
 // Austrian Medical Design System UI Components
 // Core shadcn/ui components with Austrian medical theming
 
-export { Button, buttonVariants } from './button'
-export type { ButtonProps } from './button'
+export { Button, buttonVariants } from './Button'
+export type { ButtonProps } from './Button'
 
 export {
   Card,
@@ -14,17 +14,17 @@ export {
   MedicalCard,
   GDPRCard,
   KleinunternehmerCard
-} from './card'
+} from './Card'
 
 export {
   Input,
   PLZInput,
   UIDInput,
   IBANInput
-} from './input'
-export type { InputProps } from './input'
+} from './Input'
+export type { InputProps } from './Input'
 
-export { Label } from './label'
+export { Label } from './Label'
 
 // Utility function for component class merging
 export { cn } from '@/lib/utils'
