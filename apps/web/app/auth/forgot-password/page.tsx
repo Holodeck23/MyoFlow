@@ -65,7 +65,7 @@ export default function ForgotPassword() {
                   placeholder="Enter your email address"
                 />
                 <p className="text-xs text-gray-500">
-                  We'll send password reset instructions to this email
+                  We&apos;ll send password reset instructions to this email
                 </p>
               </div>
 
@@ -110,7 +110,7 @@ export default function ForgotPassword() {
 
             {isSuccess && (
               <div className="text-center text-xs text-gray-500 mt-4">
-                Didn't receive the email? Check your spam folder or contact support@myoflow.at
+                Didn&apos;t receive the email? Check your spam folder or contact support@myoflow.at
               </div>
             )}
           </div>
