@@ -9,7 +9,7 @@ import {
   Calendar,
   FileText,
   Settings,
-  Plus
+  Bug
 } from 'lucide-react'
 
 export function Sidebar() {
@@ -17,19 +17,23 @@ export function Sidebar() {
   const { t } = useTranslation()
 
   const navigation = [
-    { name: t('sidebar.dashboard', 'Dashboard'), href: '/dashboard', icon: Home, bgColor: 'bg-blue-500' },
-    { name: t('sidebar.clients', 'Klienten'), href: '/dashboard/clients', icon: Users, bgColor: 'bg-indigo-500' },
-    { name: t('sidebar.appointments', 'Termine'), href: '/dashboard/appointments', icon: Calendar, bgColor: 'bg-green-500' },
-    { name: t('sidebar.invoices', 'Rechnungen'), href: '/dashboard/invoices', icon: FileText, bgColor: 'bg-purple-500' },
-    { name: t('sidebar.settings', 'Einstellungen'), href: '/dashboard/settings', icon: Settings, bgColor: 'bg-gray-500' },
+    { name: t('sidebar.dashboard', 'Dashboard'), href: '/dashboard', icon: Home, gradient: 'from-emerald-400 to-emerald-500' },
+    { name: t('sidebar.clients', 'Klienten'), href: '/dashboard/clients', icon: Users, gradient: 'from-sky-400 to-sky-500' },
+    { name: t('sidebar.appointments', 'Termine'), href: '/dashboard/appointments', icon: Calendar, gradient: 'from-violet-400 to-violet-500' },
+    { name: t('sidebar.invoices', 'Rechnungen'), href: '/dashboard/invoices', icon: FileText, gradient: 'from-amber-400 to-amber-500' },
+    { name: t('sidebar.settings', 'Einstellungen'), href: '/dashboard/settings', icon: Settings, gradient: 'from-slate-400 to-slate-500' },
   ]
 
   return (
-    <div className="flex h-screen w-16 flex-col bg-medical-blue">
+    <div className="flex min-h-screen w-16 flex-col bg-medical-blue">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center justify-center">
-        <div className="h-8 w-8 rounded bg-white flex items-center justify-center">
-          <span className="text-medical-blue font-bold text-sm">M</span>
+        <div className="h-12 w-12 rounded-xl bg-white/90 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg border border-white/20">
+          <img
+            src="/shield-logo.png"
+            alt="MyoFlow Logo"
+            className="h-9 w-9 object-contain"
+          />
         </div>
       </div>
 
@@ -43,10 +47,10 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={`
-                group flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200 shadow-lg
+                group flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl
                 ${isActive
-                  ? 'bg-white text-medical-blue scale-110 shadow-xl'
-                  : `${item.bgColor} text-white hover:scale-105 hover:shadow-xl`
+                  ? 'bg-gradient-to-br from-white to-gray-100 text-medical-blue scale-110 shadow-2xl'
+                  : `bg-gradient-to-br ${item.gradient} text-white hover:scale-105 hover:shadow-2xl`
                 }
               `}
               title={item.name}
@@ -57,10 +61,15 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Quick Add Button */}
-      <div className="pb-6">
-        <button className="flex h-14 w-14 items-center justify-center rounded-xl bg-austrian-red text-white hover:bg-austrian-red-700 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-          <Plus size={24} />
+      {/* Bug Report Button */}
+      <div className="pb-6 flex justify-center">
+        <button
+          onClick={() => window.open('mailto:bugs@myoflow.at?subject=Bug Report&body=Describe the issue here...', '_blank')}
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white hover:scale-105 hover:shadow-xl transition-all duration-200 shadow-lg"
+          title="Bug melden"
+          style={{ backgroundColor: '#DC2626' }}
+        >
+          <Bug size={20} />
         </button>
       </div>
     </div>

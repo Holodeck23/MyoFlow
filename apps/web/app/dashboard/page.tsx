@@ -14,10 +14,13 @@ export default function Dashboard() {
   const { t } = useTranslation()
 
   // Mock data - in real app this would come from API
-  const currentYearRevenue = 42750 // €42,750
-  const kleinunternehmerThreshold = 55000 // €55,000
-  const remainingThreshold = kleinunternehmerThreshold - currentYearRevenue // €12,250
+  const currentYearRevenue = 38420 // €38,420 (more realistic monthly progression)
+  const kleinunternehmerThreshold = 55000 // €55,000 Austrian threshold
+  const remainingThreshold = kleinunternehmerThreshold - currentYearRevenue // €16,580
   const thresholdProgress = (currentYearRevenue / kleinunternehmerThreshold) * 100
+  const monthsIntoYear = 9 // September
+  const averageMonthlyRevenue = currentYearRevenue / monthsIntoYear
+  const projectedYearEnd = averageMonthlyRevenue * 12
 
   const todayAppointments = [
     { time: '09:00', client: 'Maria Huber', service: 'Klassische Massage', duration: '60 min' },
@@ -33,12 +36,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.welcome', 'Willkommen zurück!')}</h1>
-        <p className="text-gray-600">{t('dashboard.overview', 'Hier ist Ihr Praxis-Überblick für heute')}</p>
-      </div>
-
       {/* Kleinunternehmer Status - Most Important */}
       <div className="bg-gradient-to-r from-medical-blue to-medical-blue-700 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between mb-4">
@@ -49,18 +46,22 @@ export default function Dashboard() {
           <Euro className="h-8 w-8 text-medical-blue-200" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-2xl font-bold">{formatAustrianCurrency(currentYearRevenue)}</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.currentAnnualRevenue', 'Aktueller Jahresumsatz')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.currentYearRevenue', 'Jahresumsatz (Jan-Sep)')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold">{formatAustrianCurrency(remainingThreshold)}</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.remainingBudget', 'Verbleibendes Budget')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.remainingAllowance', 'Noch verfügbar')}</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{formatAustrianCurrency(Math.round(projectedYearEnd))}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.projectedTotal', 'Hochgerechnetes Jahresende')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold">{thresholdProgress.toFixed(1)}%</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.thresholdReached', 'Der Grenze erreicht')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.thresholdUsed', 'Grenze ausgeschöpft')}</div>
           </div>
         </div>
 
@@ -74,7 +75,14 @@ export default function Dashboard() {
 
         <div className="flex justify-between text-sm text-medical-blue-100">
           <span>€0</span>
-          <span>{thresholdProgress > 80 ? t('dashboard.warningNearLimit', '⚠️ Achtung: Nähert sich der Grenze') : t('dashboard.safeUnderLimit', 'Sicher unter der Grenze')}</span>
+          <span>
+            {projectedYearEnd > kleinunternehmerThreshold
+              ? t('dashboard.warningProjectedExceed', '⚠️ Hochrechnung überschreitet Grenze!')
+              : thresholdProgress > 80
+                ? t('dashboard.warningNearLimit', '⚠️ Achtung: Nähert sich der Grenze')
+                : t('dashboard.safeUnderLimit', '✅ Sicher unter der Grenze')
+            }
+          </span>
           <span>€55.000</span>
         </div>
       </div>
@@ -111,8 +119,8 @@ export default function Dashboard() {
               <Euro className="h-6 w-6 text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{t('dashboard.monthlyRevenue', 'Monatserlös')}</p>
-              <p className="text-2xl font-bold text-gray-900">€4,320</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.monthlyAverage', 'Monatsdurchschnitt')}</p>
+              <p className="text-2xl font-bold text-gray-900">{formatAustrianCurrency(Math.round(averageMonthlyRevenue))}</p>
             </div>
           </div>
         </div>
