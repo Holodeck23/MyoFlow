@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
-import { encryptString, decryptString, logAudit, requireRole } from '@myoflow/lib'
+import { encryptString, decryptString, requireRole } from '@myoflow/lib'
+import { logAudit } from '@myoflow/db'
 
 const UpdateClientSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),

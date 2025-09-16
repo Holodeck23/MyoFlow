@@ -1,3 +1,6 @@
+// Austrian Medical Design System Tailwind Configuration
+// Temporarily using direct colors to avoid import issues during CSS processing
+
 /** @type {import("tailwindcss").Config} */
 module.exports = {
   content: [
@@ -5,85 +8,181 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/ui/src/**/*.{js,jsx,tsx}",
+    "../../packages/lib/src/**/*.{js,jsx,tsx}",
   ],
   theme: {
     extend: {
-      // MyoFlow Brand Colors
+      // Austrian Medical Color System - Direct implementation
       colors: {
-        // Primary brand colors
+        // Austrian Medical colors moved to CSS variables below
+
+        // Medical semantic colors
+        success: {
+          DEFAULT: '#059669',
+          '50': '#ECFDF5',
+          '600': '#059669',
+        },
+        warning: {
+          DEFAULT: '#D97706',
+          '50': '#FFFBEB',
+          '600': '#D97706',
+        },
+        danger: {
+          DEFAULT: '#DC2626',
+          '50': '#FEF2F2',
+          '600': '#DC2626',
+        },
+        info: {
+          DEFAULT: '#0369A1',
+          '50': '#F0F9FF',
+          '600': '#0284C7',
+        },
+
+        // Professional neutral grays
+        neutral: {
+          '50': '#FAFAFA',
+          '100': '#F5F5F5',
+          '200': '#E5E5E5',
+          '300': '#D4D4D4',
+          '400': '#A3A3A3',
+          '500': '#737373',
+          '600': '#525252',
+          '700': '#404040',
+          '800': '#262626',
+          '900': '#171717',
+          '950': '#0A0A0A'
+        },
+
+        // GDPR compliance colors
+        gdpr: {
+          encrypted: '#16A34A',
+          sensitive: '#DC2626',
+          audit: '#7C3AED',
+          compliant: '#059669'
+        },
+
+        // Austrian cultural elements
+        cultural: {
+          flagRed: '#ED2939',
+          flagWhite: '#FFFFFF',
+          alpine: '#2563EB',
+          mozart: '#F59E0B'
+        },
+
+        // Kleinunternehmer specific colors
+        kleinunternehmer: {
+          progress: '#16A34A',
+          threshold: '#D97706',
+          warning: '#DC2626',
+          safe: '#059669'
+        },
+
+        // Legacy color mappings for existing components
         'medical-blue': {
-          DEFAULT: '#1e40af',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#1e40af', // Brand primary
-          700: '#1e3a8a',
-          800: '#1e3a8a',
-          900: '#1e3a8a',
+          DEFAULT: '#1565C0',
+          '50': '#EFF6FF',
+          '100': '#DBEAFE',
+          '200': '#BFDBFE',
+          '300': '#93C5FD',
+          '400': '#60A5FA',
+          '500': '#3B82F6',
+          '600': '#1565C0',
+          '700': '#1D4ED8',
+          '800': '#1E40AF',
+          '900': '#1E3A8A',
         },
         'austrian-red': {
-          DEFAULT: '#dc2626',
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626', // Brand accent
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
+          DEFAULT: '#C8102E',
+          '50': '#FEF2F2',
+          '100': '#FEE2E2',
+          '200': '#FECACA',
+          '300': '#FCA5A5',
+          '400': '#F87171',
+          '500': '#EF4444',
+          '600': '#C8102E',
+          '700': '#B91C1C',
+          '800': '#991B1B',
+          '900': '#7F1D1D',
         },
-        // Neutral colors
         'neutral-gray': {
-          DEFAULT: '#374151',
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151', // Brand neutral
-          800: '#1f2937',
-          900: '#111827',
+          DEFAULT: '#525252',
+          '50': '#FAFAFA',
+          '100': '#F5F5F5',
+          '200': '#E5E5E5',
+          '300': '#D4D4D4',
+          '400': '#A3A3A3',
+          '500': '#737373',
+          '600': '#525252',
+          '700': '#404040',
+          '800': '#262626',
+          '900': '#171717',
         },
-        // Background colors
-        'background': {
-          DEFAULT: '#f8fafc',
-          dark: '#0f172a',
+
+        // shadcn/ui CSS variables integration
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
-        'border': {
-          DEFAULT: '#e2e8f0',
-          dark: '#334155',
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+
+        // Background and border colors (legacy)
+        'background-legacy': {
+          DEFAULT: '#FAFAFA',
+          dark: '#0A0A0A',
+        },
+        'border-legacy': {
+          DEFAULT: '#E5E5E5',
+          dark: '#404040',
         }
       },
-      // MyoFlow Typography
+
+      // Austrian Medical Typography - Direct implementation
       fontFamily: {
-        'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: [
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          '"Noto Sans"',
+          'sans-serif'
+        ]
       },
-      // Professional spacing system
-      spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
-      },
-      // Professional border radius
-      borderRadius: {
-        'xl': '0.75rem',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
-      },
-      // Professional shadows for cards and components
-      boxShadow: {
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'professional': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-      },
-      // Animation for professional interactions
+
+      // Animation for professional medical interactions
       transitionProperty: {
         'professional': 'all',
       },

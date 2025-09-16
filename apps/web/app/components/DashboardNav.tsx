@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Logo } from '@/components/ui/Logo'
-import { LanguageToggle } from '@myoflow/ui'
 import { useTranslation } from '@myoflow/lib'
 
 interface DashboardNavProps {
@@ -55,8 +54,6 @@ export function DashboardNav({ active, children }: DashboardNavProps) {
           </div>
 
           <div className="flex items-center space-x-6">
-            <LanguageToggle variant="switch" className="hidden sm:flex" />
-            <div className="h-6 w-px bg-border hidden sm:block" />
             <div className="flex items-center space-x-3 text-sm text-neutral-gray-600">
               <div className="w-8 h-8 bg-medical-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-medical-blue font-semibold text-xs">

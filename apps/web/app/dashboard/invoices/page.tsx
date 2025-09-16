@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { DashboardNav } from '@/app/components/DashboardNav'
 import { useTranslation } from '@myoflow/lib'
 
 interface Invoice {
@@ -106,27 +105,25 @@ export default function InvoicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DashboardNav active="invoices" />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('invoices.title', 'Rechnungen verwalten')}</h1>
+          <p className="mt-2 text-neutral-gray-600">
+            {t('invoices.subtitle', 'Verwalten Sie Rechnungen mit Kleinunternehmer- und USt-Compliance.')}
+          </p>
+        </div>
+        <Link
+          href="/dashboard/invoices/new"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-medical-blue hover:bg-medical-blue-600 transition-professional"
+        >
+          {t('invoices.createNew', 'Neue Rechnung erstellen')}
+        </Link>
+      </div>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main>
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-medium text-gray-900">
-                {t('invoices.title', 'Rechnungen')}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {t('invoices.subtitle', 'Verwalten Sie Rechnungen mit Kleinunternehmer- und USt-Compliance')}
-              </p>
-            </div>
-            <Link
-              href="/dashboard/invoices/new"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              {t('invoices.createNew', 'Neue Rechnung erstellen')}
-            </Link>
-          </div>
 
           {error && (
             <div className="p-6 bg-red-50 border-b border-red-200">

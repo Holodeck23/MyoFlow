@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@myoflow/db';
-import { 
-  exportToBMD, 
-  exportToRZL, 
-  exportToDATEV, 
+import {
+  exportToBMD,
+  exportToRZL,
+  exportToDATEV,
   generateExportFilename,
   validateInvoiceForExport,
-  InvoiceForExport 
+  InvoiceForExport
 } from '@myoflow/lib';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -115,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     // Validate invoices
     const validationErrors: string[] = [];
-    invoicesForExport.forEach((invoice, index) => {
+    invoicesForExport.forEach((invoice) => {
       const errors = validateInvoiceForExport(invoice);
       if (errors.length > 0) {
         validationErrors.push(`Invoice ${invoice.number}: ${errors.join(', ')}`);
