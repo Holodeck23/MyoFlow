@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Austrian Medical Blue primary buttons
-        default: "bg-primary text-primary-foreground shadow hover:bg-[#C8102E]",
+        default: "bg-[#1565C0] text-white shadow hover:bg-[#C8102E]",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
