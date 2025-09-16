@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
 import { useTranslation } from '@myoflow/lib'
 
 interface Invoice {
@@ -114,12 +115,11 @@ export default function InvoicesPage() {
             {t('invoices.subtitle', 'Verwalten Sie Rechnungen mit Kleinunternehmer- und USt-Compliance.')}
           </p>
         </div>
-        <Link
-          href="/dashboard/invoices/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-medical-blue hover:bg-medical-blue-600 transition-professional"
-        >
-          {t('invoices.createNew', 'Neue Rechnung erstellen')}
-        </Link>
+        <Button asChild>
+          <Link href="/dashboard/invoices/new">
+            {t('invoices.createNew', 'Neue Rechnung erstellen')}
+          </Link>
+        </Button>
       </div>
 
       <main>

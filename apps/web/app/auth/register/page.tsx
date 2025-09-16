@@ -155,7 +155,7 @@ export default function Register() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-austrian-red-600 to-medical-blue-600 hover:from-austrian-red-700 hover:to-medical-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="w-full"
               size="lg"
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
