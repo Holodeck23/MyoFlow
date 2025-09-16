@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/Button'
 
 interface CSVExportManagerProps {
   therapistId?: string
@@ -160,10 +161,11 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
                 />
               </div>
               <p className="text-xs text-gray-600 mb-3">{format.description}</p>
-              <button
+              <Button
                 onClick={() => handleExport(format.value)}
                 disabled={loading}
-                className="w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
+                size="sm"
               >
                 {loading ? (
                   <>
@@ -176,7 +178,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
                 ) : (
                   `Export ${format.label}`
                 )}
-              </button>
+              </Button>
             </div>
           ))}
         </div>

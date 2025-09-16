@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
 import ServiceRateManager from '@/app/components/ServiceRateManager'
 import CSVExportManager from '@/app/components/CSVExportManager'
 import { useTranslation } from '@myoflow/lib'
@@ -222,12 +223,13 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500 mb-3">
                     Manage default pricing for different massage types
                   </p>
-                  <button
+                  <Button
                     onClick={() => setShowServiceRates(!showServiceRates)}
-                    className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                    variant="outline"
+                    size="sm"
                   >
                     {showServiceRates ? 'Hide' : 'Manage'} Service Rates
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
@@ -235,12 +237,13 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500 mb-3">
                     CSV exports for BMD/RZL/DATEV accounting software
                   </p>
-                  <button
+                  <Button
                     onClick={() => setShowCSVExports(!showCSVExports)}
-                    className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                    variant="outline"
+                    size="sm"
                   >
                     {showCSVExports ? 'Hide' : 'Manage'} CSV Exports
-                  </button>
+                  </Button>
                 </div>
               </div>
 
