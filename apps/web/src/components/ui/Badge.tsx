@@ -15,7 +15,7 @@ const Badge = forwardRef<HTMLDivElement, BadgeProps>(
       secondary: 'bg-neutral-gray-100 text-neutral-gray-600',
       success: 'bg-green-100 text-green-800',
       danger: 'bg-austrian-red-100 text-austrian-red-800',
-      warning: 'bg-yellow-100 text-yellow-800',
+      warning: 'bg-warning-50 text-warning-600',
       encryption: 'bg-medical-blue-50 text-medical-blue-700 border border-medical-blue-200',
     }
     

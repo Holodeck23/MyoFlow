@@ -2,6 +2,12 @@
 
 import { signIn, getProviders } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { UserPlus, KeyRound } from 'lucide-react'
+import Link from 'next/link'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -49,25 +55,35 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Sign in to MyoFlow
-          </h1>
-          <p className="text-gray-600">
-            Austrian Practice Management for Massage Therapists
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-blue-500 to-cyan-600 p-4">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+      </div>
 
-        <div className="mt-8 space-y-6">
+      <Card className="max-w-lg w-full bg-white/95 backdrop-blur-sm shadow-2xl border-0 relative z-10">
+        <CardHeader className="text-center space-y-4 pb-8">
+          <div className="mx-auto h-48 w-48 flex items-center justify-center">
+            <img src="/shield-logo.png" alt="MyoFlow" className="h-48 w-48 object-contain drop-shadow-xl" />
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medical-blue-600 to-medical-blue-800 bg-clip-text text-transparent">
+            Welcome to MyoFlow
+          </CardTitle>
+          <CardDescription className="text-lg text-gray-600">
+            Österreichische Therapiepraxis-Management-Software
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
           {/* Google Sign-In - only show if Google provider is available */}
           {providers?.google && (
             <>
-              <button
+              <Button
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
-                className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="outline"
+                className="w-full h-11"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -76,15 +92,15 @@ export default function SignIn() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 Sign in with Google
-              </button>
+              </Button>
 
               {/* Divider - only show if both providers are available */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                  <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-50 text-gray-500">Or continue with email</span>
+                  <span className="px-2 bg-background text-muted-foreground">Or continue with email</span>
                 </div>
               </div>
             </>
@@ -92,41 +108,42 @@ export default function SignIn() {
 
           {/* Email Sign-In */}
           <form className="space-y-4" onSubmit={handleEmailSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <div className="space-y-2">
+              <Label htmlFor="email" variant="required">
                 Email address
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your email address"
+                variant="medical"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <div className="space-y-2">
+              <Label htmlFor="password" variant="required">
                 Password
-              </label>
-              <div className="mt-1 relative">
-                <input
+              </Label>
+              <div className="relative">
+                <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your password"
+                  variant="medical"
+                  className="pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,31 +157,57 @@ export default function SignIn() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Demo: use &quot;demo123&quot; for test@myoflow.at or &quot;demo&quot; for other emails
               </p>
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading || !email || !password}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-medical-blue-600 to-medical-blue-700 hover:from-medical-blue-700 hover:to-medical-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              size="lg"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
+            </Button>
           </form>
 
           {message && (
-            <div className={`text-sm text-center ${
+            <div className={`text-sm text-center p-3 rounded-lg ${
               message.includes('Invalid') || message.includes('Unable') || message.includes('Error')
-                ? 'text-red-600' 
-                : 'text-green-600'
+                ? 'text-red-700 bg-red-50 border border-red-200'
+                : 'text-green-700 bg-green-50 border border-green-200'
             }`}>
               {message}
             </div>
           )}
-        </div>
-      </div>
+
+          {/* Additional Actions */}
+          <div className="space-y-4 border-t border-gray-100 pt-6">
+            <div className="flex items-center justify-between text-sm">
+              <Link
+                href="/auth/forgot-password"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1 hover:underline"
+              >
+                <KeyRound size={16} />
+                <span>Forgot Password?</span>
+              </Link>
+
+              <Link
+                href="/auth/register"
+                className="text-austrian-red hover:text-austrian-red-700 font-medium flex items-center space-x-1 hover:underline"
+              >
+                <UserPlus size={16} />
+                <span>Create Account</span>
+              </Link>
+            </div>
+
+            <div className="text-center text-xs text-gray-500">
+              Secure Austrian healthcare practice management • GDPR compliant
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

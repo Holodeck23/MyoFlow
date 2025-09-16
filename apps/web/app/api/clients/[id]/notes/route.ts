@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
-import { encryptString, decryptString, logAudit } from '@myoflow/lib'
+import { encryptString, decryptString } from '@myoflow/lib'
+import { logAudit } from '@myoflow/db'
 
 const CreateNoteSchema = z.object({
   body: z.string().min(1, 'Note content is required'),
