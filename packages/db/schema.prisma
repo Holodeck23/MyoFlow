@@ -133,24 +133,31 @@ model Therapist {
   iban                 String?
   brandColor           String?
   logoUrl              String?
-  
+
   // Business Information Fields
   businessName         String?
   businessAddress      String?
   businessPhone        String?
   businessEmail        String?
   businessWebsite      String?
-  
+
   // Austrian Compliance Fields
   uidNumber            String?
   chamberRegistration  String?
   invoiceFooter        String?
-  
+
   // Practice Preferences
   defaultReminderDays  Int                  @default(1)
   enableEmailReminders Boolean              @default(true)
   enableSmsReminders   Boolean              @default(false)
-  
+
+  // Travel Preferences
+  travelServiceRadius  Int?                 // Maximum travel distance in km
+  travelRatePerKm      Int?                 // Rate per km in cents
+  defaultTravelBuffer  Int                  @default(30) // Default travel buffer in minutes
+  enableTravelService  Boolean              @default(false)
+  maxDailyTravelKm     Int?                 // Daily travel limit in km
+
   // Profile Management
   profileCompletedAt   DateTime?
   createdAt            DateTime             @default(now())
@@ -199,14 +206,38 @@ model Location {
   therapistId     String
   name            String
   type            LocationType
+
+  // Address Components (Austrian format)
+  street          String?
+  streetNumber    String?
+  postalCode      String?       // Austrian postal codes (1010-9991)
+  city            String?
+  state           String?       // Austrian state (Bundesland)
+  country         String?       @default("Austria")
+
+  // Legacy address field for backward compatibility
   address         String?
+
+  // Geocoding and Travel
+  latitude        Float?
+  longitude       Float?
+  geocodedAt      DateTime?
   travelBufferMin Int           @default(0)
+  isValidated     Boolean       @default(false)
+
+  // Austrian-specific fields
+  districtCode    String?       // Vienna district codes, etc.
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt @default(now())
+
   Therapist       Therapist     @relation(fields: [therapistId], references: [id])
   Appointments    Appointment[]
   BusinessHours   BusinessHours[]
   BlockedTimes    BlockedTime[]
-  
+
   @@index([therapistId, type])
+  @@index([postalCode, city])
 }
 
 model Client {
@@ -260,6 +291,13 @@ model Appointment {
   recurrenceType  RecurrenceType    @default(NONE)
   recurrenceId    String?
   recurrenceEnd   DateTime?
+
+  // Travel-related fields
+  estimatedTravelTimeMin Int?        // Calculated travel time to location
+  travelDistanceKm      Float?       // Distance from previous appointment
+  travelCostCents       Int?         // Travel cost for this appointment
+  requiresTravelBuffer  Boolean      @default(false)
+
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   Therapist       Therapist         @relation(fields: [therapistId], references: [id])
@@ -268,9 +306,10 @@ model Appointment {
   Location        Location          @relation(fields: [locationId], references: [id])
   Invoice         Invoice?
   Reminders       AppointmentReminder[]
-  
+
   @@index([therapistId, start])
   @@index([therapistId, recurrenceId])
+  @@index([therapistId, locationId, start])
 }
 
 model BusinessHours {
