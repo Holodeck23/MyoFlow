@@ -12,6 +12,11 @@ interface Appointment {
   end: string
   status: string
   notes?: string
+  // Travel-related fields
+  estimatedTravelTimeMin?: number
+  travelDistanceKm?: number
+  travelCostCents?: number
+  requiresTravelBuffer: boolean
   Client: {
     id: string
     name: string
@@ -30,6 +35,15 @@ interface Appointment {
     name: string
     type: string
     address?: string
+    // Enhanced location fields
+    street?: string
+    streetNumber?: string
+    postalCode?: string
+    city?: string
+    state?: string
+    country?: string
+    latitude?: number
+    longitude?: number
   }
 }
 
@@ -191,7 +205,12 @@ export default function AppointmentsPage() {
                           <div className="flex items-center text-sm text-gray-600">
                             <span className="font-medium">{t('appointments.location', 'Location')}:</span>
                             <span className="ml-2">{appointment.Location.name}</span>
-                            {appointment.Location.address && (
+                            {appointment.Location.postalCode && appointment.Location.city && (
+                              <span className="ml-2 text-gray-400">
+                                {appointment.Location.postalCode} {appointment.Location.city}
+                              </span>
+                            )}
+                            {appointment.Location.address && !appointment.Location.postalCode && (
                               <span className="ml-2 text-gray-400">
                                 {appointment.Location.address}
                               </span>
@@ -204,7 +223,25 @@ export default function AppointmentsPage() {
                               {formatDate(appointment.start)} at {formatTime(appointment.start)} - {formatTime(appointment.end)}
                             </span>
                           </div>
-                          
+
+                          {/* Travel Information */}
+                          {appointment.requiresTravelBuffer && (
+                            <div className="flex items-center text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              <span className="font-medium">🚗 Travel:</span>
+                              <div className="ml-2 flex space-x-3">
+                                {appointment.travelDistanceKm && (
+                                  <span>{appointment.travelDistanceKm.toFixed(1)}km</span>
+                                )}
+                                {appointment.estimatedTravelTimeMin && (
+                                  <span>{appointment.estimatedTravelTimeMin}min</span>
+                                )}
+                                {appointment.travelCostCents && (
+                                  <span className="font-medium">{formatPrice(appointment.travelCostCents)}</span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           {appointment.notes && (
                             <div className="flex items-start text-sm text-gray-600">
                               <span className="font-medium">{t('appointments.notes', 'Notes')}:</span>
