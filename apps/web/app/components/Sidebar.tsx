@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from '@myoflow/lib'
@@ -14,10 +15,13 @@ import {
   MessageCircle,
   Globe2,
   Settings,
-  Bug
+  Bug,
+  Menu,
+  ChevronLeft
 } from 'lucide-react'
 
 export function Sidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
   const { t } = useTranslation()
 
@@ -44,7 +48,8 @@ export function Sidebar() {
       name: t('sidebar.sessions', 'Sessions & Notes'),
       href: '/dashboard/sessions',
       icon: ClipboardList,
-      available: true
+      available: false,
+      comingSoon: 'v1.7'
     },
     {
       name: t('sidebar.invoices', 'Invoices & Payments'),
@@ -82,20 +87,36 @@ export function Sidebar() {
       available: false,
       comingSoon: 'v1.9'
     },
+    {
+      name: t('sidebar.settings', 'Settings'),
+      href: '/dashboard/settings',
+      icon: Settings,
+      available: true
+    },
   ]
 
   return (
-    <div className="flex min-h-screen w-64 flex-col bg-white border-r border-gray-200">
+    <div className={`flex min-h-screen ${isCollapsed ? 'w-16' : 'w-64'} flex-col bg-white border-r border-gray-200 transition-all duration-300`}>
       {/* Professional Branding Header */}
-      <div className="flex h-20 shrink-0 items-center px-6 border-b border-gray-100">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-medical-blue flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-lg">M</span>
+      <div className={`flex h-20 shrink-0 items-center border-b border-gray-100 ${isCollapsed ? 'px-3' : 'px-6'}`}>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-medical-blue flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-lg">M</span>
+            </div>
+            {!isCollapsed && (
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">MyoFlow Therapy</h1>
+                <p className="text-sm text-gray-500">Physiotherapie Praxis</p>
+              </div>
+            )}
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">MyoFlow Therapy</h1>
-            <p className="text-sm text-gray-500">Physiotherapie Praxis</p>
-          </div>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            {isCollapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
       </div>
 
@@ -111,28 +132,29 @@ export function Sidebar() {
               <Link
                 href={isAvailable ? item.href : '#'}
                 className={`
-                  group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200
+                  group flex items-center ${isCollapsed ? 'px-2 justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-lg transition-colors duration-200
                   ${isActive && isAvailable
-                    ? 'bg-medical-blue text-white'
+                    ? 'bg-[#1565C0] text-white'
                     : isAvailable
                     ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                     : 'text-gray-400 cursor-not-allowed'
                   }
                 `}
                 onClick={!isAvailable ? (e) => e.preventDefault() : undefined}
+                title={isCollapsed ? item.name : undefined}
               >
-                <IconComponent size={20} className="mr-3 flex-shrink-0" />
-                <span className="flex-1">{item.name}</span>
+                <IconComponent size={20} className={`flex-shrink-0 ${!isCollapsed && 'mr-3'}`} />
+                {!isCollapsed && <span className="flex-1">{item.name}</span>}
 
                 {/* Notification Badge */}
-                {item.badge && (
+                {item.badge && !isCollapsed && (
                   <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
                     {item.badge}
                   </span>
                 )}
 
                 {/* Coming Soon Badge */}
-                {!isAvailable && item.comingSoon && (
+                {!isAvailable && item.comingSoon && !isCollapsed && (
                   <span className="ml-2 bg-gray-200 text-gray-600 text-xs rounded-full px-2 py-0.5">
                     {item.comingSoon}
                   </span>

@@ -72,7 +72,7 @@ export default function ForgotPassword() {
               <Button
                 type="submit"
                 disabled={isLoading || !email}
-                className="w-full bg-gradient-to-r from-medical-blue-600 to-medical-blue-700 hover:from-medical-blue-700 hover:to-medical-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full"
                 size="lg"
               >
                 {isLoading ? 'Sending...' : 'Send Reset Instructions'}

@@ -55,19 +55,13 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-blue-500 to-cyan-600 p-4">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-      </div>
-
-      <Card className="max-w-lg w-full bg-white/95 backdrop-blur-sm shadow-2xl border-0 relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="max-w-md w-full bg-white shadow-xl border border-gray-200 rounded-lg">
         <CardHeader className="text-center space-y-4 pb-8">
           <div className="mx-auto h-48 w-48 flex items-center justify-center">
             <img src="/shield-logo.png" alt="MyoFlow" className="h-48 w-48 object-contain drop-shadow-xl" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medical-blue-600 to-medical-blue-800 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold text-gray-900">
             Welcome to MyoFlow
           </CardTitle>
           <CardDescription className="text-lg text-gray-600">
@@ -165,7 +159,7 @@ export default function SignIn() {
             <Button
               type="submit"
               disabled={isLoading || !email || !password}
-              className="w-full bg-gradient-to-r from-medical-blue-600 to-medical-blue-700 hover:from-medical-blue-700 hover:to-medical-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="w-full"
               size="lg"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}

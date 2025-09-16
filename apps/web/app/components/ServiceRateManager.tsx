@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/Button'
 
 interface ServiceRateTemplate {
   id: string
@@ -183,16 +184,16 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
             Manage default pricing for different service types
           </p>
         </div>
-        <button
+        <Button
           onClick={() => {
             setEditingTemplate(null)
             resetForm()
             setShowForm(true)
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+          size="sm"
         >
           Add New Template
-        </button>
+        </Button>
       </div>
 
       {showForm && (
@@ -310,23 +311,24 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
             </div>
 
             <div className="flex space-x-3">
-              <button
+              <Button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+                size="sm"
               >
                 {editingTemplate ? 'Update' : 'Create'} Template
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   setShowForm(false)
                   setEditingTemplate(null)
                   resetForm()
                 }}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400"
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -335,16 +337,17 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
       {templates.length === 0 ? (
         <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-gray-500 mb-4">No service rate templates found</p>
-          <button
+          <Button
             onClick={() => {
               setEditingTemplate(null)
               resetForm()
               setShowForm(true)
             }}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            variant="ghost"
+            size="sm"
           >
             Create your first template
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -379,18 +382,21 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   </div>
                 </div>
                 <div className="flex space-x-2 ml-4">
-                  <button
+                  <Button
                     onClick={() => handleEdit(template)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    variant="ghost"
+                    size="sm"
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => handleDelete(template)}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-600 hover:text-red-900"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
