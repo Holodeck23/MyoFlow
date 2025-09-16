@@ -9,9 +9,74 @@ import {
   Users,
   Clock
 } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+
+interface TodayAppointment {
+  id: string
+  start: string
+  end: string
+  status: string
+  // Travel fields
+  estimatedTravelTimeMin?: number
+  travelDistanceKm?: number
+  travelCostCents?: number
+  requiresTravelBuffer: boolean
+  Client: {
+    name: string
+  }
+  Service: {
+    name: string
+    durationMin: number
+  }
+  Location: {
+    name: string
+    type: string
+    postalCode?: string
+    city?: string
+  }
+}
 
 export default function Dashboard() {
   const { t } = useTranslation()
+  const { data: session } = useSession()
+  const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([])
+
+  useEffect(() => {
+    if (session) {
+      fetchTodayAppointments()
+    }
+  }, [session])
+
+  const fetchTodayAppointments = async () => {
+    try {
+      const today = new Date()
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString()
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString()
+
+      const response = await fetch(`/api/appointments?start=${startOfDay}&end=${endOfDay}`)
+      if (response.ok) {
+        const data = await response.json()
+        setTodayAppointments(data.appointments || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch today appointments:', error)
+    }
+  }
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('de-AT', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('de-AT', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(cents / 100)
+  }
 
   // Mock data - in real app this would come from API
   const currentYearRevenue = 38420 // €38,420 (more realistic monthly progression)
@@ -21,12 +86,6 @@ export default function Dashboard() {
   const monthsIntoYear = 9 // September
   const averageMonthlyRevenue = currentYearRevenue / monthsIntoYear
   const projectedYearEnd = averageMonthlyRevenue * 12
-
-  const todayAppointments = [
-    { time: '09:00', client: 'Maria Huber', service: 'Klassische Massage', duration: '60 min' },
-    { time: '11:00', client: 'Franz Müller', service: 'Physiotherapie', duration: '45 min' },
-    { time: '14:30', client: 'Anna Schmidt', service: 'Lymphdrainage', duration: '90 min' },
-  ]
 
   const recentActivity = [
     { type: 'invoice', description: 'Rechnung #2025-001 erstellt für Maria Huber', time: '2 hours ago', amount: '€75.00' },
@@ -147,18 +206,49 @@ export default function Dashboard() {
             <Calendar className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-3">
-            {todayAppointments.map((appointment, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-medium">{appointment.time}</span>
+            {todayAppointments.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">{t('dashboard.noAppointmentsToday', 'Keine Termine heute')}</p>
+            ) : (
+              todayAppointments.map((appointment) => (
+                <div key={appointment.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-medium">{formatTime(appointment.start)}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{appointment.Client.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {appointment.Service.name} • {appointment.Service.durationMin} min
+                      </p>
+                      {appointment.Location.postalCode && appointment.Location.city && (
+                        <p className="text-xs text-gray-500">
+                          {appointment.Location.name} • {appointment.Location.postalCode} {appointment.Location.city}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Travel Information on Dashboard */}
+                  {appointment.requiresTravelBuffer && (
+                    <div className="mt-2 flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      <span className="font-medium">🚗</span>
+                      <div className="ml-1 flex space-x-2">
+                        {appointment.travelDistanceKm && (
+                          <span>{appointment.travelDistanceKm.toFixed(1)}km</span>
+                        )}
+                        {appointment.estimatedTravelTimeMin && (
+                          <span>{appointment.estimatedTravelTimeMin}min</span>
+                        )}
+                        {appointment.travelCostCents && (
+                          <span className="font-medium">{formatPrice(appointment.travelCostCents)}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{appointment.client}</p>
-                  <p className="text-sm text-gray-600">{appointment.service} • {appointment.duration}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
