@@ -36,34 +36,54 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        {/* Top header with user info */}
-        <header className="bg-gradient-to-r from-blue-400 to-blue-500 border-b border-blue-300/20 px-8 py-3 shadow-lg">
+        {/* Professional Austrian Medical Header */}
+        <header className="bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-xl font-bold text-white">Willkommen bei MyoFlow</h1>
-              <p className="text-sm text-white/80">
-                Hier ist Ihr Praxis-Überblick für heute • <span className="font-medium text-white">{session.user?.email}</span>
-              </p>
+            <div className="flex items-center space-x-4">
+              {/* Austrian Medical Cross Logo */}
+              <div className="w-10 h-10 bg-medical-blue rounded-lg flex items-center justify-center shadow-sm">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-4v-4H6v-2h4V7h4v4h4v2h-4v4z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">MyoFlow Praxis</h1>
+                <p className="text-sm text-gray-600">
+                  Österreichische Therapie-Verwaltung
+                </p>
+              </div>
             </div>
-            <div className="flex items-center space-x-6">
+
+            <div className="flex items-center space-x-4">
+              {/* User Profile */}
+              <div className="flex items-center space-x-3 px-3 py-2 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-medical-blue rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {session.user?.email?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">
+                    {session.user?.name || 'Therapeut'}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {session.user?.email}
+                  </div>
+                </div>
+              </div>
+
               {/* Language Toggle */}
               <LanguageToggle />
 
               {/* Logout Button */}
               <button
                 onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-white/80 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
                 title="Abmelden"
               >
                 <LogOut size={16} />
-                <span className="text-sm font-medium">Logout</span>
+                <span className="text-sm font-medium">Abmelden</span>
               </button>
-
-              {/* System Status */}
-              <div className="flex items-center space-x-3 text-sm text-white/80">
-                <div className="w-2 h-2 bg-green-400 rounded-full shadow-sm animate-pulse"></div>
-                <span className="font-medium">Alle Systeme funktionsfähig</span>
-              </div>
             </div>
           </div>
         </header>
