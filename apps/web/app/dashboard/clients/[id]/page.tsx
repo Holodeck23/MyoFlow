@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
 
 interface Note {
   id: string
@@ -157,12 +158,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           <div className="bg-white rounded-lg shadow p-6 text-center">
             <h1 className="text-lg font-medium text-red-600 mb-2">Error</h1>
             <p className="text-gray-600">{error}</p>
-            <Link
-              href="/dashboard/clients"
-              className="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-            >
-              Back to Clients
-            </Link>
+            <Button asChild className="mt-4">
+              <Link href="/dashboard/clients">
+                Back to Clients
+              </Link>
+            </Button>
           </div>
         </main>
       </div>
@@ -189,12 +189,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
               <span className="text-sm text-gray-700">
                 {session.user?.email}
               </span>
-              <Link
-                href={`/dashboard/clients/${client.id}/edit`}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Edit Client
-              </Link>
+              <Button asChild size="sm">
+                <Link href={`/dashboard/clients/${client.id}/edit`}>
+                  Edit Client
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -219,12 +218,14 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                     >
                       Edit
                     </Link>
-                    <button
+                    <Button
                       onClick={handleDeleteClient}
-                      className="text-red-600 hover:text-red-900 text-sm"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-900"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -313,13 +314,13 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
                 <div className="flex justify-end mt-2">
-                  <button
+                  <Button
                     type="submit"
                     disabled={addingNote || !newNote.trim()}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md text-sm font-medium"
+                    size="sm"
                   >
                     {addingNote ? 'Adding...' : 'Add Note'}
-                  </button>
+                  </Button>
                 </div>
               </form>
 
@@ -347,24 +348,29 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
               <div className="space-y-3">
-                <button
+                <Button
                   disabled
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-400 rounded-md text-sm"
+                  variant="secondary"
+                  className="w-full"
+                  size="sm"
                 >
                   Schedule Appointment (Sprint 1.3)
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => document.querySelector('textarea')?.focus()}
-                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
+                  className="w-full"
+                  size="sm"
                 >
                   Add Note
-                </button>
-                <button
+                </Button>
+                <Button
                   disabled
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-400 rounded-md text-sm"
+                  variant="secondary"
+                  className="w-full"
+                  size="sm"
                 >
                   Generate Invoice (Sprint 1.4)
-                </button>
+                </Button>
               </div>
             </div>
           </div>

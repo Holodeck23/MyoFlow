@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Sidebar } from '@/app/components/Sidebar'
+import { Button } from '@/components/ui/Button'
 import { Languages, Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
 
 export default function DashboardLayout({
@@ -76,14 +77,15 @@ export default function DashboardLayout({
               <LanguageToggle />
 
               {/* Logout Button */}
-              <button
+              <Button
                 onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+                variant="outline"
+                size="sm"
                 title="Abmelden"
               >
                 <LogOut size={16} />
                 <span className="text-sm font-medium">Abmelden</span>
-              </button>
+              </Button>
             </div>
           </div>
         </header>
@@ -134,14 +136,16 @@ function LanguageToggle() {
   }
 
   return (
-    <button
+    <Button
       onClick={toggleLanguage}
-      className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+      variant="ghost"
+      size="sm"
+      className="bg-white/10 hover:bg-white/20 text-white/80 hover:text-white"
       title="Sprache wechseln / Switch language"
     >
       <Languages size={16} />
       <span className="text-sm font-medium">{language.toUpperCase()}</span>
-    </button>
+    </Button>
   )
 }
 
