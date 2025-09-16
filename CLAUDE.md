@@ -6,13 +6,61 @@
 
 ---
 
-## 🎯 **CRITICAL STRATEGIC PIVOT - September 15, 2025**
+## 🎯 **CRITICAL STRATEGIC PIVOT - September 16, 2025**
 
-**PRIMARY GOAL:** Figma-to-Production UI Transformation
-**Session Date:** September 15, 2025
-**Current Branch:** `feat/austrian-design-system-comprehensive` (⚠️ BROKEN - Heroicons import conflicts)
-**Strategic Decision:** COMPLETE UI REBUILD using professional Figma design as foundation
-**Status:** Created comprehensive spec `.agent-os/specs/2025-09-15-figma-ui-transition/` - AWAITING IMPLEMENTATION
+**PRIMARY GOAL:** Professional UI Transformation
+**Session Date:** September 16, 2025
+**Current Branch:** `feat/austrian-design-system-comprehensive` (✅ FIXED - CI now passes)
+**Strategic Decision:** COMPLETE UI REBUILD using professional design system as foundation
+**Status:** Ready for implementation - repository cleaned and stabilized
+
+## 🛠️ **SAFE MAJOR UI UPDATE WORKFLOW - September 16, 2025**
+
+### **Documented Workflow for Major Updates (Prevents CI Hell)**
+
+#### **Option 1: Feature Flag Approach (Safest for Production)**
+```typescript
+// Add to .env
+ENABLE_NEW_UI=false
+
+// In components
+const useNewUI = process.env.ENABLE_NEW_UI === 'true'
+return useNewUI ? <NewDashboard /> : <OldDashboard />
+```
+
+#### **Option 2: Parallel Branch Strategy (Recommended)**
+```bash
+# Create clean branch from stable main
+git checkout main && git pull
+git checkout -b feat/professional-ui-complete
+
+# Work in small, tested chunks
+# 1. Update design tokens only
+git add . && git commit -m "feat: add professional design tokens"
+pnpm build # Test locally ALWAYS
+git push
+
+# 2. Update one component at a time
+git add . && git commit -m "feat: update Button component"
+pnpm build # Test locally ALWAYS
+git push
+
+# Continue component by component
+```
+
+#### **Option 3: Stash-and-Test Pattern (For Claude Sessions)**
+```bash
+# When Claude suggests multiple changes
+git stash push -m "WIP: Claude suggestions batch 1"
+pnpm build # Test first batch
+git stash pop # If good, commit
+# OR git stash drop # If broken, start over
+```
+
+### **CRITICAL RULE: ONE CHANGE, ONE TEST**
+- Never accept multiple changes without testing between each
+- Always run `pnpm build` before committing
+- Tell Claude: "One change at a time, test between each"
 
 ### **The Game Changer: Professional Figma Design**
 - ✅ User generated comprehensive Austrian medical software spec and obtained stunning Figma design
