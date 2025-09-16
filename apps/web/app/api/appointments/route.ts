@@ -108,7 +108,17 @@ export async function GET(request: NextRequest) {
 
     const appointments = await prisma.appointment.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        start: true,
+        end: true,
+        status: true,
+        notes: true,
+        // Travel fields
+        estimatedTravelTimeMin: true,
+        travelDistanceKm: true,
+        travelCostCents: true,
+        requiresTravelBuffer: true,
         Client: {
           select: {
             id: true,
@@ -132,6 +142,15 @@ export async function GET(request: NextRequest) {
             name: true,
             type: true,
             address: true,
+            // Enhanced location fields
+            street: true,
+            streetNumber: true,
+            postalCode: true,
+            city: true,
+            state: true,
+            country: true,
+            latitude: true,
+            longitude: true,
           },
         },
       },

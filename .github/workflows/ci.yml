@@ -84,7 +84,7 @@ jobs:
 
       - name: Run database migrations
         run: |
-          pnpm --filter @myoflow/db prisma migrate dev --name init
+          pnpm --filter @myoflow/db prisma migrate deploy
           pnpm --filter @myoflow/db seed
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
@@ -107,6 +107,9 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test:run
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
+          DATA_ENCRYPTION_KEY: ${{ env.DATA_ENCRYPTION_KEY }}
 
       # - name: Start development server
       #   run: pnpm --filter @myoflow/web dev &
