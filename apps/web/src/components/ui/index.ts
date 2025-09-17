@@ -26,5 +26,11 @@ export type { InputProps } from './Input'
 
 export { Label } from './Label'
 
+export { Calendar } from './Calendar'
+export type { CalendarEvent, BlockedTimeSlot, CalendarAvailability } from './Calendar'
+
+export { TravelRouteMap } from './TravelRouteMap'
+export { VisualRouteMap } from './VisualRouteMap'
+
 // Utility function for component class merging
 export { cn } from '@/lib/utils'
