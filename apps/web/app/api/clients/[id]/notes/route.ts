@@ -6,6 +6,16 @@ import { z } from 'zod'
 import { encryptString, decryptString } from '@myoflow/lib'
 import { logAudit } from '@myoflow/db'
 
+type NoteRecord = {
+  id: string
+  therapistId: string
+  clientId: string
+  bodyEnc: string | null
+  createdAt: Date
+}
+
+type SafeNote = Omit<NoteRecord, 'bodyEnc'> & { body: string | null }
+
 const CreateNoteSchema = z.object({
   body: z.string().min(1, 'Note content is required'),
 })
@@ -79,11 +89,15 @@ export async function GET(
       }
     })
 
-    const safeNotes = await Promise.all(
-      notes.map(async ({ bodyEnc, ...rest }) => ({
-        ...rest,
-        body: bodyEnc ? await decryptString(bodyEnc) : null
-      }))
+    const safeNotes: SafeNote[] = await Promise.all(
+      notes.map(async (note: NoteRecord): Promise<SafeNote> => {
+        const { bodyEnc, ...rest } = note
+
+        return {
+          ...rest,
+          body: bodyEnc ? await decryptString(bodyEnc) : null
+        }
+      })
     )
 
     await logAudit({
