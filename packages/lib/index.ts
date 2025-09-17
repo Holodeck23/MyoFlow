@@ -40,6 +40,9 @@ export {
 // SEPA QR codes for Austrian banking - Server-side only
 // Import directly from './src/sepa-qr' in API routes when needed
 
+// Google Maps integration for Austrian addresses - Server-side only
+export * from './src/google-maps'
+
 // CSV export for accounting software
 export * from './src/csv-export'
 
