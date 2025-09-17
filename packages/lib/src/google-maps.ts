@@ -42,6 +42,116 @@ export interface TravelCalculation {
 }
 
 /**
+ * Fallback geocoding for Austrian addresses when Google Maps API is not available
+ * Uses approximate coordinates for major Austrian cities and postal code patterns
+ */
+function geocodeAustrianAddressFallback(
+  address: AustrianAddress | string
+): Promise<GeocodingResult | null> {
+  return new Promise((resolve) => {
+    try {
+      let postalCode: string | undefined
+      let city: string | undefined
+      let addressString: string
+
+      if (typeof address === 'string') {
+        addressString = address
+        // Extract postal code from string (4-digit number)
+        const postalMatch = address.match(/\b(\d{4})\b/)
+        postalCode = postalMatch?.[1]
+
+        // Extract city name (word after postal code or common Austrian cities)
+        const cityMatch = address.match(/(?:\d{4}\s+)?([A-ZÄÖÜ][a-zäöüß]+)/)
+        city = cityMatch?.[1]
+      } else {
+        postalCode = address.postalCode
+        city = address.city
+        addressString = `${address.street || ''} ${address.streetNumber || ''}, ${postalCode} ${city}`.trim()
+      }
+
+      // Austrian city coordinates lookup table
+      const austrianCities: Record<string, { lat: number; lng: number; state: string }> = {
+        'Wien': { lat: 48.2082, lng: 16.3738, state: 'Wien' },
+        'Vienna': { lat: 48.2082, lng: 16.3738, state: 'Wien' },
+        'Linz': { lat: 48.3069, lng: 14.2858, state: 'Oberösterreich' },
+        'Salzburg': { lat: 47.8095, lng: 13.0550, state: 'Salzburg' },
+        'Innsbruck': { lat: 47.2692, lng: 11.4041, state: 'Tirol' },
+        'Graz': { lat: 47.0707, lng: 15.4395, state: 'Steiermark' },
+        'Klagenfurt': { lat: 46.6242, lng: 14.3051, state: 'Kärnten' },
+        'Wels': { lat: 48.1598, lng: 14.0280, state: 'Oberösterreich' },
+        'Steyr': { lat: 48.0390, lng: 14.4210, state: 'Oberösterreich' },
+        'Leonding': { lat: 48.2611, lng: 14.2567, state: 'Oberösterreich' },
+        'Ried': { lat: 48.2167, lng: 13.4833, state: 'Oberösterreich' },
+        'Traun': { lat: 48.2217, lng: 14.2333, state: 'Oberösterreich' }
+      }
+
+      // Try exact city match first
+      if (city) {
+        const cityData = austrianCities[city]
+        if (cityData) {
+          const result: GeocodingResult = {
+            latitude: cityData.lat,
+            longitude: cityData.lng,
+            formattedAddress: addressString,
+            addressComponents: {
+              city: city,
+              postalCode: postalCode,
+              state: cityData.state,
+              country: 'Austria'
+            },
+            isValidated: false // Mark as fallback geocoding
+          }
+          resolve(result)
+          return
+        }
+      }
+
+      // Try postal code-based approximation for Upper Austria (4xxx)
+      if (postalCode && postalCode.startsWith('4')) {
+        const result: GeocodingResult = {
+          latitude: 48.3069, // Linz coordinates as approximation
+          longitude: 14.2858,
+          formattedAddress: addressString,
+          addressComponents: {
+            city: city || 'Upper Austria',
+            postalCode: postalCode,
+            state: 'Oberösterreich',
+            country: 'Austria'
+          },
+          isValidated: false
+        }
+        resolve(result)
+        return
+      }
+
+      // Default to Vienna if no match found
+      if (postalCode || city) {
+        const result: GeocodingResult = {
+          latitude: 48.2082,
+          longitude: 16.3738,
+          formattedAddress: addressString,
+          addressComponents: {
+            city: city || 'Vienna',
+            postalCode: postalCode,
+            state: 'Wien',
+            country: 'Austria'
+          },
+          isValidated: false
+        }
+        resolve(result)
+        return
+      }
+
+      // No usable address data found
+      resolve(null)
+    } catch (error) {
+      console.error('Fallback geocoding error:', error)
+      resolve(null)
+    }
+  })
+}
+
+/**
  * Geocode an Austrian address to get latitude/longitude coordinates
  */
 export async function geocodeAustrianAddress(
@@ -50,8 +160,8 @@ export async function geocodeAustrianAddress(
   try {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY
     if (!apiKey) {
-      console.warn('GOOGLE_MAPS_API_KEY not configured, skipping geocoding')
-      return null
+      console.warn('GOOGLE_MAPS_API_KEY not configured, using fallback geocoding')
+      return geocodeAustrianAddressFallback(address)
     }
 
     const client = getGoogleMapsClient()
