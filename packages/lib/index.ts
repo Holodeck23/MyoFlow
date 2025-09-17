@@ -46,6 +46,9 @@ export * from './src/google-maps'
 // CSV export for accounting software
 export * from './src/csv-export'
 
+// Austrian holidays
+export * from './src/austrian-holidays'
+
 // Types
 export * from './src/types'
 
