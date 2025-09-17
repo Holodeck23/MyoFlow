@@ -30,7 +30,7 @@ The current 58 markdown files in .agent-os/ include completed specs that serve a
 
 ## Spec Scope
 
-1. **Safe File Deletions** - Remove confirmed obsolete files (SPRINT_1.4_SUMMARY.md, TESTING_AUTH.md, .figma-ui-spec.md)
+1. **Safe File Deletions** - Remove confirmed obsolete files (SPRINT_1.4_SUMMARY.md, TESTING_AUTH.md)
 2. **Documentation Consolidation** - Merge related roadmap and development documentation into single authoritative files
 3. **Agent OS Archive** - Move completed spec directories to archive subdirectory for reference while cleaning active workspace
 4. **Content Preservation** - Ensure all valuable information is preserved through merging rather than deletion
