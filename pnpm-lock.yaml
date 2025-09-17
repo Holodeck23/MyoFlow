@@ -35,6 +35,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@googlemaps/react-wrapper':
+        specifier: ^1.2.0
+        version: 1.2.0(react@18.3.1)
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@18.3.1)
@@ -68,6 +71,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       lucide-react:
         specifier: ^0.294.0
         version: 0.294.0(react@18.3.1)
@@ -501,6 +507,14 @@ packages:
 
   '@googlemaps/google-maps-services-js@3.4.2':
     resolution: {integrity: sha512-QjxiJSt8woyPaaQIUUDNL1nRfCEXTiv8KfJSNq/YzKEUVXABT75GLG+Zo267UwOcq70n8OsZbaro5VrY962mJg==}
+
+  '@googlemaps/js-api-loader@1.16.10':
+    resolution: {integrity: sha512-c2erv2k7P2ilYzMmtYcMgAR21AULosQuUHJbStnrvRk2dG93k5cqptDrh9A8p+ZNlyhiqEOgHW7N9PAizdUM7Q==}
+
+  '@googlemaps/react-wrapper@1.2.0':
+    resolution: {integrity: sha512-8gloOyRDKcjfuMW2VvsDQ3jSnIpa+e1IBJkQL75ORMSQ/TVj6lyGeMLwGE94pj/IlTpWp7yo0LyJuVqxaK7ByA==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@googlemaps/url-signature@1.0.40':
     resolution: {integrity: sha512-Gme3JxGZWQ4NVpATajSpS2/inQzhUxRvr/FK6IFpcC7AHOAmx8blI0y1/Qi2jqil+WoQ3TkEqq/MaKVtuV68RQ==}
@@ -3906,6 +3920,13 @@ snapshots:
       retry-axios: 2.6.0(axios@1.12.2)
     transitivePeerDependencies:
       - debug
+
+  '@googlemaps/js-api-loader@1.16.10': {}
+
+  '@googlemaps/react-wrapper@1.2.0(react@18.3.1)':
+    dependencies:
+      '@googlemaps/js-api-loader': 1.16.10
+      react: 18.3.1
 
   '@googlemaps/url-signature@1.0.40':
     dependencies:
