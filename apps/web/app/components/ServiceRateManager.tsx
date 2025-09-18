@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
+import { useTranslation } from '@myoflow/lib'
 
 interface ServiceRateTemplate {
   id: string
@@ -19,6 +20,7 @@ interface ServiceRateManagerProps {
 }
 
 export default function ServiceRateManager({ therapistVatStatus }: ServiceRateManagerProps) {
+  const { t } = useTranslation()
   const [templates, setTemplates] = useState<ServiceRateTemplate[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -42,12 +44,12 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
     try {
       const response = await fetch('/api/service-rate-templates')
       if (!response.ok) {
-        throw new Error('Failed to fetch templates')
+        throw new Error(t('serviceRates.error.fetch', 'Failed to fetch templates'))
       }
       const data = await response.json()
       setTemplates(data.templates)
     } catch (err) {
-      setError('Failed to load service rate templates')
+      setError(t('serviceRates.error.load', 'Failed to load service rate templates'))
       console.error('Error fetching templates:', err)
     } finally {
       setLoading(false)
@@ -74,7 +76,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save template')
+        throw new Error(t('serviceRates.error.save', 'Failed to save template'))
       }
 
       await fetchTemplates()
@@ -82,7 +84,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
       setEditingTemplate(null)
       resetForm()
     } catch (err) {
-      setError('Failed to save template')
+      setError(t('serviceRates.error.save', 'Failed to save template'))
       console.error('Error saving template:', err)
     }
   }
@@ -102,7 +104,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
   }
 
   const handleDelete = async (template: ServiceRateTemplate) => {
-    if (!confirm(`Are you sure you want to delete "${template.name}"?`)) {
+    if (!confirm(`${t('serviceRates.confirmDelete', 'Are you sure you want to delete')} "${template.name}"?`)) {
       return
     }
 
@@ -112,12 +114,12 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete template')
+        throw new Error(t('serviceRates.error.delete', 'Failed to delete template'))
       }
 
       await fetchTemplates()
     } catch (err) {
-      setError('Failed to delete template')
+      setError(t('serviceRates.error.delete', 'Failed to delete template'))
       console.error('Error deleting template:', err)
     }
   }
@@ -143,20 +145,20 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'MASSAGE': return 'Massage'
-      case 'YOGA': return 'Yoga'
-      case 'CONSULTING': return 'Beratung'
-      case 'OTHER': return 'Andere'
+      case 'MASSAGE': return t('serviceRates.category.massage', 'Massage')
+      case 'YOGA': return t('serviceRates.category.yoga', 'Yoga')
+      case 'CONSULTING': return t('serviceRates.category.consulting', 'Beratung')
+      case 'OTHER': return t('serviceRates.category.other', 'Andere')
       default: return category
     }
   }
 
   const getVatRateLabel = (vatRate: string) => {
     switch (vatRate) {
-      case 'KLEINUNTERNEHMER': return '0% (Kleinunternehmer)'
-      case 'UST_10': return '10% (ermäßigt)'
-      case 'UST_13': return '13% (ermäßigt)'
-      case 'UST_20': return '20% (Normalsteuersatz)'
+      case 'KLEINUNTERNEHMER': return t('serviceRates.vat.kleinunternehmer', '0% (Kleinunternehmer)')
+      case 'UST_10': return t('serviceRates.vat.ust10', '10% (ermäßigt)')
+      case 'UST_13': return t('serviceRates.vat.ust13', '13% (ermäßigt)')
+      case 'UST_20': return t('serviceRates.vat.ust20', '20% (Normalsteuersatz)')
       default: return vatRate
     }
   }
@@ -164,7 +166,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-gray-500">Loading service rates...</div>
+        <div className="text-gray-500">{t('serviceRates.loading', 'Loading service rates...')}</div>
       </div>
     )
   }
@@ -179,9 +181,9 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
 
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">Service Rate Templates</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t('serviceRates.title', 'Service Rate Templates')}</h3>
           <p className="text-sm text-gray-500">
-            Manage default pricing for different service types
+            {t('serviceRates.subtitle', 'Manage default pricing for different service types')}
           </p>
         </div>
         <Button
@@ -192,21 +194,23 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
           }}
           size="sm"
         >
-          Add New Template
+          {t('serviceRates.addNew', 'Add New Template')}
         </Button>
       </div>
 
       {showForm && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 mb-4">
-            {editingTemplate ? 'Edit Template' : 'Add New Template'}
+            {editingTemplate
+              ? t('serviceRates.form.editTitle', 'Edit Template')
+              : t('serviceRates.form.addTitle', 'Add New Template')}
           </h4>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Service Name *
+                  {t('serviceRates.form.serviceName', 'Service Name *')}
                 </label>
                 <input
                   type="text"
@@ -214,13 +218,13 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="e.g., Klassische Massage 60min"
+                  placeholder={t('serviceRates.form.servicePlaceholder', 'e.g., Klassische Massage 60min')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category *
+                  {t('serviceRates.form.category', 'Category *')}
                 </label>
                 <select
                   required
@@ -228,16 +232,16 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="MASSAGE">Massage</option>
-                  <option value="YOGA">Yoga</option>
-                  <option value="CONSULTING">Beratung</option>
-                  <option value="OTHER">Andere</option>
+                  <option value="MASSAGE">{t('serviceRates.category.massage', 'Massage')}</option>
+                  <option value="YOGA">{t('serviceRates.category.yoga', 'Yoga')}</option>
+                  <option value="CONSULTING">{t('serviceRates.category.consulting', 'Beratung')}</option>
+                  <option value="OTHER">{t('serviceRates.category.other', 'Andere')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price (EUR) *
+                  {t('serviceRates.form.price', 'Price (EUR) *')}
                 </label>
                 <input
                   type="number"
@@ -247,13 +251,13 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   value={formData.priceCents / 100}
                   onChange={(e) => setFormData({ ...formData, priceCents: Math.round(parseFloat(e.target.value || '0') * 100) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  placeholder="80.00"
+                  placeholder={t('serviceRates.form.pricePlaceholder', '80.00')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (minutes) *
+                  {t('serviceRates.form.duration', 'Duration (minutes) *')}
                 </label>
                 <input
                   type="number"
@@ -268,7 +272,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  VAT Rate *
+                  {t('serviceRates.form.vatRate', 'VAT Rate *')}
                 </label>
                 <select
                   required
@@ -276,10 +280,10 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   onChange={(e) => setFormData({ ...formData, vatRate: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="KLEINUNTERNEHMER">0% (Kleinunternehmer)</option>
-                  <option value="UST_10">10% (ermäßigt)</option>
-                  <option value="UST_13">13% (ermäßigt)</option>
-                  <option value="UST_20">20% (Normalsteuersatz)</option>
+                  <option value="KLEINUNTERNEHMER">{t('serviceRates.vat.kleinunternehmer', '0% (Kleinunternehmer)')}</option>
+                  <option value="UST_10">{t('serviceRates.vat.ust10', '10% (ermäßigt)')}</option>
+                  <option value="UST_13">{t('serviceRates.vat.ust13', '13% (ermäßigt)')}</option>
+                  <option value="UST_20">{t('serviceRates.vat.ust20', '20% (Normalsteuersatz)')}</option>
                 </select>
               </div>
 
@@ -292,21 +296,21 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded"
                 />
                 <label htmlFor="isDefault" className="ml-2 text-sm text-gray-700">
-                  Set as default for this category
+                  {t('serviceRates.form.setDefault', 'Set as default for this category')}
                 </label>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                {t('serviceRates.form.description', 'Description')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                placeholder="Optional description of the service"
+                placeholder={t('serviceRates.form.descriptionPlaceholder', 'Optional description of the service')}
               />
             </div>
 
@@ -315,7 +319,9 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                 type="submit"
                 size="sm"
               >
-                {editingTemplate ? 'Update' : 'Create'} Template
+                {editingTemplate
+                  ? t('serviceRates.form.updateTemplate', 'Update Template')
+                  : t('serviceRates.form.createTemplate', 'Create Template')}
               </Button>
               <Button
                 type="button"
@@ -327,7 +333,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                 variant="secondary"
                 size="sm"
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
             </div>
           </form>
@@ -336,7 +342,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
 
       {templates.length === 0 ? (
         <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-500 mb-4">No service rate templates found</p>
+          <p className="text-gray-500 mb-4">{t('serviceRates.empty', 'No service rate templates found')}</p>
           <Button
             onClick={() => {
               setEditingTemplate(null)
@@ -346,7 +352,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
             variant="ghost"
             size="sm"
           >
-            Create your first template
+            {t('serviceRates.createFirst', 'Create your first template')}
           </Button>
         </div>
       ) : (
@@ -359,24 +365,24 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                     <h4 className="text-md font-medium text-gray-900">{template.name}</h4>
                     {template.isDefault && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Default
+                        {t('serviceRates.defaultBadge', 'Default')}
                       </span>
                     )}
                   </div>
                   <div className="mt-1 text-sm text-gray-600 space-y-1">
                     <div>
-                      <span className="font-medium">Category:</span> {getCategoryLabel(template.category)}
+                      <span className="font-medium">{t('serviceRates.labels.category', 'Category:')}</span> {getCategoryLabel(template.category)}
                     </div>
                     <div>
-                      <span className="font-medium">Price:</span> {formatPrice(template.priceCents)} 
+                      <span className="font-medium">{t('serviceRates.labels.price', 'Price:')}</span> {formatPrice(template.priceCents)} 
                       <span className="ml-2 text-xs text-gray-500">({getVatRateLabel(template.vatRate)})</span>
                     </div>
                     <div>
-                      <span className="font-medium">Duration:</span> {template.durationMin} minutes
+                      <span className="font-medium">{t('serviceRates.labels.duration', 'Duration:')}</span> {template.durationMin} {t('serviceRates.labels.minutes', 'minutes')}
                     </div>
                     {template.description && (
                       <div>
-                        <span className="font-medium">Description:</span> {template.description}
+                        <span className="font-medium">{t('serviceRates.labels.description', 'Description:')}</span> {template.description}
                       </div>
                     )}
                   </div>
@@ -387,7 +393,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                     variant="ghost"
                     size="sm"
                   >
-                    Edit
+                    {t('common.edit', 'Edit')}
                   </Button>
                   <Button
                     onClick={() => handleDelete(template)}
@@ -395,7 +401,7 @@ export default function ServiceRateManager({ therapistVatStatus }: ServiceRateMa
                     size="sm"
                     className="text-red-600 hover:text-red-900"
                   >
-                    Delete
+                    {t('common.delete', 'Delete')}
                   </Button>
                 </div>
               </div>

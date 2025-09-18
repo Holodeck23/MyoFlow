@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { Wrapper, Status } from '@googlemaps/react-wrapper'
+import { useTranslation } from '@myoflow/lib'
 
 // Google Maps TypeScript interfaces
 interface GoogleMapsAPI {
@@ -212,17 +213,19 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
 }
 
 function LoadingComponent() {
+  const { t } = useTranslation()
   return (
     <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-gray-600 text-sm">Karte wird geladen...</p>
+        <p className="text-gray-600 text-sm">{t('visualRouteMap.loading', 'Karte wird geladen...')}</p>
       </div>
     </div>
   )
 }
 
 function ErrorComponent({ appointments }: { appointments: TravelAppointment[] }) {
+  const { t } = useTranslation()
   const travelAppointments = appointments.filter(apt => apt.requiresTravelBuffer)
 
   if (travelAppointments.length === 0) {
@@ -230,7 +233,7 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
         <div className="text-center">
           <div className="text-4xl mb-2">🏠</div>
-          <p className="text-gray-500">No travel appointments today</p>
+          <p className="text-gray-500">{t('visualRouteMap.noTravelAppointments', 'No travel appointments today')}</p>
         </div>
       </div>
     )
@@ -252,15 +255,15 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
       const travelTime = apt.estimatedTravelTimeMin || 0
 
       // Add appointment segment
-      segments.push({
-        type: 'appointment',
-        duration: appointmentDuration,
-        client: apt.Client.name,
-        service: 'Service',
-        start: new Date(apt.start).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' }),
-        location: apt.Location.name,
-        isTravel: apt.requiresTravelBuffer
-      })
+        segments.push({
+          type: 'appointment',
+          duration: appointmentDuration,
+          client: apt.Client.name,
+          service: t('visualRouteMap.serviceLabel', 'Service'),
+          start: new Date(apt.start).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' }),
+          location: apt.Location.name,
+          isTravel: apt.requiresTravelBuffer
+        })
 
       // Add travel segment to next appointment (if any)
       if (i < allAppointments.length - 1 && travelTime > 0) {
@@ -268,7 +271,7 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
           type: 'travel',
           duration: travelTime,
           distance: apt.travelDistanceKm?.toFixed(1) || '0',
-          to: allAppointments[i + 1]?.Client.name || 'Next location'
+          to: allAppointments[i + 1]?.Client.name || t('visualRouteMap.nextLocation', 'Next location')
         })
       }
     }
@@ -283,7 +286,7 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
     <div className="h-64 bg-gradient-to-br from-blue-50 to-green-50 rounded-lg p-6 relative overflow-hidden">
       {/* Proportional Timeline Visualization */}
       <div className="relative h-full">
-        <h4 className="text-sm font-medium text-gray-700 mb-4">🕐 Daily Schedule Timeline</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-4">{t('visualRouteMap.timelineHeading', '🕐 Daily Schedule Timeline')}</h4>
 
         {/* Proportional Timeline */}
         <div className="relative h-16 bg-white rounded-lg shadow-sm overflow-hidden">
@@ -318,7 +321,7 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
                     key={index}
                     className="relative flex items-center justify-center bg-gray-300"
                     style={{ width: `${widthPercent}%` }}
-                    title={`Travel: ${segment.distance}km (${segment.duration}min)`}
+                    title={`${t('visualRouteMap.travelLabel', 'Travel')}: ${segment.distance}km (${segment.duration}min)`}
                   >
                     <div className="text-gray-600 text-xs">
                       🚗 {segment.duration}min
@@ -332,24 +335,24 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
 
         {/* Timeline Legend */}
         <div className="mt-4 flex flex-wrap gap-4 text-xs">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-blue-500 rounded mr-1"></div>
-            <span>Office appointments</span>
+           <div className="flex items-center">
+             <div className="w-3 h-3 bg-blue-500 rounded mr-1"></div>
+            <span>{t('visualRouteMap.legend.officeAppointments', 'Office appointments')}</span>
           </div>
           <div className="flex items-center">
             <div className="w-3 h-3 bg-orange-400 rounded mr-1"></div>
-            <span>Home visits</span>
+            <span>{t('visualRouteMap.legend.homeVisits', 'Home visits')}</span>
           </div>
           <div className="flex items-center">
             <div className="w-3 h-3 bg-gray-300 rounded mr-1"></div>
-            <span>Travel time</span>
+            <span>{t('visualRouteMap.legend.travelTime', 'Travel time')}</span>
           </div>
         </div>
 
         {/* Route Stats */}
         <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-6 text-xs">
           <div className="bg-white/80 px-3 py-1 rounded-full">
-            📍 {travelAppointments.length} stops
+            📍 {travelAppointments.length} {t('visualRouteMap.stats.stops', 'stops')}
           </div>
           <div className="bg-white/80 px-3 py-1 rounded-full">
             🚗 {travelAppointments.reduce((total, apt) => total + (apt.travelDistanceKm || 0), 0).toFixed(1)}km
@@ -370,6 +373,7 @@ export function VisualRouteMap({
   className = '',
   height = '400px'
 }: VisualRouteMapProps) {
+  const { t } = useTranslation()
   // Filter appointments for the selected date or today
   const targetDate = selectedDate || new Date()
   const dayAppointments = appointments.filter(apt => {
@@ -391,11 +395,11 @@ export function VisualRouteMap({
   if (travelAppointments.length === 0) {
     return (
       <div className={`bg-white rounded-lg shadow p-6 ${className}`}>
-        <h3 className="font-medium text-gray-900 mb-3">🗺️ Tagesroute</h3>
+        <h3 className="font-medium text-gray-900 mb-3">{t('visualRouteMap.title', '🗺️ Tagesroute')}</h3>
         <div className="text-center py-8">
           <div className="text-gray-400 text-4xl mb-2">🏠</div>
-          <p className="text-gray-500">Keine Hausbesuche heute</p>
-          <p className="text-xs text-gray-400 mt-1">Alle Termine in der Praxis</p>
+          <p className="text-gray-500">{t('visualRouteMap.noTravelAppointments', 'No travel appointments today')}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('visualRouteMap.allInPractice', 'Alle Termine in der Praxis')}</p>
         </div>
       </div>
     )
@@ -406,10 +410,10 @@ export function VisualRouteMap({
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-gray-900">
-            🗺️ Tagesroute - {targetDate.toLocaleDateString('de-AT')}
+            {t('visualRouteMap.titleWithDate', '🗺️ Tagesroute')} - {targetDate.toLocaleDateString('de-AT')}
           </h3>
           <div className="flex items-center space-x-4 text-sm text-gray-600">
-            <span>📍 {travelAppointments.length} Stops</span>
+            <span>📍 {travelAppointments.length} {t('visualRouteMap.stats.stops', 'stops')}</span>
             <span>🚗 {getTotalDistance().toFixed(1)}km</span>
             <span>⏱️ {getTotalTravelTime()}min</span>
           </div>
@@ -427,15 +431,15 @@ export function VisualRouteMap({
           <div className="flex items-center space-x-4 text-sm">
             <span className="flex items-center">
               <span className="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
-              🏠 Start: Praxis Linz
+              {t('visualRouteMap.summary.start', '🏠 Start: Praxis Linz')}
             </span>
             <span className="flex items-center">
               <span className="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
-              📍 {travelAppointments.length} Hausbesuche
+              📍 {travelAppointments.length} {t('visualRouteMap.summary.homeVisits', 'Hausbesuche')}
             </span>
           </div>
           <button className="text-sm text-blue-600 hover:text-blue-800">
-            📱 In Google Maps öffnen
+            {t('visualRouteMap.openInMaps', '📱 In Google Maps öffnen')}
           </button>
         </div>
       </div>

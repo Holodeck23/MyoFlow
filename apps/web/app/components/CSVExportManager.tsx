@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { useTranslation } from '@myoflow/lib'
 
 interface CSVExportManagerProps {
   therapistId?: string
 }
 
 export default function CSVExportManager({ therapistId }: CSVExportManagerProps) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const getLastMonth = () => {
     const date = new Date()
@@ -26,17 +28,17 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
     {
       value: 'BMD' as const,
       label: 'BMD',
-      description: 'BMD NTCS accounting software format with Austrian formatting'
+      description: t('csvExport.formats.bmd', 'BMD NTCS accounting software format with Austrian formatting')
     },
     {
       value: 'RZL' as const,
       label: 'RZL',
-      description: 'RZL accounting software format with semicolon separation'
+      description: t('csvExport.formats.rzl', 'RZL accounting software format with semicolon separation')
     },
     {
       value: 'DATEV' as const,
       label: 'DATEV',
-      description: 'DATEV format for German/Austrian tax preparation software'
+      description: t('csvExport.formats.datev', 'DATEV format for German/Austrian tax preparation software')
     }
   ]
 
@@ -57,7 +59,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
       
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Export failed')
+        throw new Error(errorData.error || t('csvExport.error.generic', 'Export failed'))
       }
 
       // Get filename from response headers
@@ -77,9 +79,11 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      setSuccess(`Successfully exported ${exportFormat} format`)
+      setSuccess(
+        `${t('csvExport.successPrefix', 'Successfully exported')} ${exportFormat} ${t('csvExport.successSuffix', 'format')}`
+      )
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed')
+      setError(err instanceof Error ? err.message : t('csvExport.error.generic', 'Export failed'))
     } finally {
       setLoading(false)
     }
@@ -89,10 +93,10 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
-          CSV Export for Accounting Software
+          {t('csvExport.title', 'CSV Export for Accounting Software')}
         </h3>
         <p className="text-sm text-gray-600 mb-6">
-          Export your invoice data in formats compatible with popular Austrian accounting software.
+          {t('csvExport.description', 'Export your invoice data in formats compatible with popular Austrian accounting software.')}
         </p>
       </div>
 
@@ -100,7 +104,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700 mb-1">
-            From Date
+            {t('csvExport.fromDate', 'From Date')}
           </label>
           <input
             type="date"
@@ -112,7 +116,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
         </div>
         <div>
           <label htmlFor="toDate" className="block text-sm font-medium text-gray-700 mb-1">
-            To Date
+            {t('csvExport.toDate', 'To Date')}
           </label>
           <input
             type="date"
@@ -135,14 +139,14 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label htmlFor="includeHeader" className="ml-2 block text-sm text-gray-700">
-            Include column headers in export
+            {t('csvExport.includeHeaders', 'Include column headers in export')}
           </label>
         </div>
       </div>
 
       {/* Format Selection and Export Buttons */}
       <div className="space-y-4">
-        <h4 className="text-sm font-medium text-gray-900">Select Export Format</h4>
+        <h4 className="text-sm font-medium text-gray-900">{t('csvExport.selectFormat', 'Select Export Format')}</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {exportFormats.map((format) => (
             <div
@@ -173,10 +177,10 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Exporting...
+                    {t('csvExport.exporting', 'Exporting...')}
                   </>
                 ) : (
-                  `Export ${format.label}`
+                  `${t('csvExport.exportButton', 'Export')} ${format.label}`
                 )}
               </Button>
             </div>
@@ -194,7 +198,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Export Error</h3>
+              <h3 className="text-sm font-medium text-red-800">{t('csvExport.errorTitle', 'Export Error')}</h3>
               <p className="text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>
@@ -210,7 +214,7 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">Export Successful</h3>
+              <h3 className="text-sm font-medium text-green-800">{t('csvExport.successTitle', 'Export Successful')}</h3>
               <p className="text-sm text-green-700 mt-1">{success}</p>
             </div>
           </div>
@@ -219,13 +223,13 @@ export default function CSVExportManager({ therapistId }: CSVExportManagerProps)
 
       {/* Usage Instructions */}
       <div className="bg-blue-50 p-4 rounded-md">
-        <h4 className="text-sm font-medium text-blue-800 mb-2">Usage Instructions</h4>
+        <h4 className="text-sm font-medium text-blue-800 mb-2">{t('csvExport.instructions.title', 'Usage Instructions')}</h4>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• <strong>BMD:</strong> Import via &ldquo;Datenimport&rdquo; → &ldquo;CSV-Import&rdquo; with semicolon separator</li>
-          <li>• <strong>RZL:</strong> Use &ldquo;Datenaustausch&rdquo; → &ldquo;Import&rdquo; and select CSV format</li>
-          <li>• <strong>DATEV:</strong> Import through &ldquo;Datenaustausch&rdquo; → &ldquo;Belege&rdquo; with ISO encoding</li>
-          <li>• Only finalized invoices (SENT, PAID) are included in exports</li>
-          <li>• VAT calculations respect your Kleinunternehmer status automatically</li>
+          <li>• <strong>BMD:</strong> {t('csvExport.instructions.bmd', 'Import via "Datenimport" -> "CSV-Import" with semicolon separator')}</li>
+          <li>• <strong>RZL:</strong> {t('csvExport.instructions.rzl', 'Use "Datenaustausch" -> "Import" and select CSV format')}</li>
+          <li>• <strong>DATEV:</strong> {t('csvExport.instructions.datev', 'Import through "Datenaustausch" -> "Belege" with ISO encoding')}</li>
+          <li>• {t('csvExport.instructions.finalized', 'Only finalized invoices (SENT, PAID) are included in exports')}</li>
+          <li>• {t('csvExport.instructions.vat', 'VAT calculations respect your Kleinunternehmer status automatically')}</li>
         </ul>
       </div>
     </div>

@@ -88,9 +88,23 @@ export default function Dashboard() {
   const projectedYearEnd = averageMonthlyRevenue * 12
 
   const recentActivity = [
-    { type: 'invoice', description: 'Rechnung #2025-001 erstellt für Maria Huber', time: '2 hours ago', amount: '€75.00' },
-    { type: 'appointment', description: 'Neuer Termin gebucht von Franz Müller', time: '4 hours ago' },
-    { type: 'payment', description: 'Zahlung erhalten von Anna Schmidt', time: '1 day ago', amount: '€120.00' },
+    {
+      type: 'invoice',
+      description: t('dashboard.activity.invoiceCreated', 'Invoice #2025-001 created for Maria Huber'),
+      time: t('dashboard.activity.hoursAgo', '2 hours ago'),
+      amount: '€75.00'
+    },
+    {
+      type: 'appointment',
+      description: t('dashboard.activity.newAppointment', 'New appointment booked by Franz Müller'),
+      time: t('dashboard.activity.hoursAgoFour', '4 hours ago')
+    },
+    {
+      type: 'payment',
+      description: t('dashboard.activity.paymentReceived', 'Payment received from Anna Schmidt'),
+      time: t('dashboard.activity.oneDayAgo', '1 day ago'),
+      amount: '€120.00'
+    },
   ]
 
   return (

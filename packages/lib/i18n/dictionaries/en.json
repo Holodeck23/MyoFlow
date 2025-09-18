@@ -34,7 +34,31 @@
     "scheduleAppointments": "Schedule and manage appointments",
     "austrianInvoicing": "Austrian tax-compliant invoicing",
     "profileSettings": "Profile and Austrian compliance",
-    "availableNow": "✅ Available now"
+    "availableNow": "✅ Available now",
+    "kleinunternehmerStatus": "Small business status 2025",
+    "revenueMonitoring": "Revenue threshold monitoring",
+    "currentYearRevenue": "Year-to-date revenue (Jan-Sep)",
+    "remainingAllowance": "Remaining allowance",
+    "projectedTotal": "Projected year-end",
+    "thresholdUsed": "Threshold used",
+    "warningProjectedExceed": "⚠️ Projection exceeds threshold!",
+    "warningNearLimit": "⚠️ Approaching the threshold",
+    "safeUnderLimit": "✅ Safely below the threshold",
+    "totalClients": "Total clients",
+    "todayAppointments": "Appointments today",
+    "monthlyAverage": "Monthly average",
+    "actionRequired": "Action required",
+    "todaysSchedule": "Today’s appointments",
+    "noAppointmentsToday": "No appointments today",
+    "recentActivity": "Recent activity",
+    "activity": {
+      "invoiceCreated": "Invoice #2025-001 created for Maria Huber",
+      "hoursAgo": "2 hours ago",
+      "newAppointment": "New appointment booked by Franz Müller",
+      "hoursAgoFour": "4 hours ago",
+      "paymentReceived": "Payment received from Anna Schmidt",
+      "oneDayAgo": "1 day ago"
+    }
   },
   "clients": {
     "title": "Manage clients",
@@ -75,7 +99,13 @@
     "start": "Start",
     "end": "End",
     "status": "Status",
-    "notes": "Notes"
+    "notes": "Notes",
+    "statusLabels": {
+      "booked": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No-show"
+    }
   },
   "invoices": {
     "title": "Invoices",
@@ -102,5 +132,249 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success"
+  },
+  "dashboardLayout": {
+    "header": {
+      "title": "MyoFlow Practice",
+      "subtitle": "Austrian Therapy Management"
+    },
+    "user": {
+      "fallbackName": "Therapist"
+    },
+    "languageToggle": "Switch language",
+    "footer": {
+      "tagline": "Austrian therapy practice management software",
+      "sections": {
+        "product": {
+          "title": "Product",
+          "features": "Features",
+          "pricing": "Pricing",
+          "faq": "FAQ"
+        },
+        "support": {
+          "title": "Support",
+          "helpCenter": "Help Center",
+          "contact": "Contact",
+          "status": "Status"
+        },
+        "legal": {
+          "title": "Legal",
+          "privacy": "Privacy",
+          "terms": "Terms",
+          "imprint": "Imprint"
+        },
+        "compliance": {
+          "title": "Compliance",
+          "gdpr": "GDPR",
+          "vat": "Austrian VAT",
+          "smallBusiness": "Small business"
+        }
+      },
+      "copyright": "© 2025 MyoFlow. All rights reserved. Made in Austria 🇦🇹",
+      "version": "Version 1.6.0 • Last updated: September 2025"
+    }
+  },
+  "sidebar": {
+    "brand": {
+      "title": "MyoFlow Therapy",
+      "subtitle": "Physiotherapy Practice"
+    },
+    "dashboard": "Dashboard",
+    "calendar": "Calendar & Appointments",
+    "clients": "Clients",
+    "sessions": "Sessions & Notes",
+    "invoices": "Invoices & Payments",
+    "products": "Products & Packages",
+    "reports": "Reports",
+    "messaging": "Messaging",
+    "booking": "Booking Page",
+    "settings": "Settings"
+  },
+  "calendarPage": {
+    "heading": "Calendar & Appointments",
+    "today": "Today",
+    "newAppointment": "+ New appointment",
+    "allAppointments": "All appointments",
+    "selectedDaySummary": "Appointments for the selected day",
+    "toList": "Go to list →",
+    "detailsCta": "Details →",
+    "todayPlan": "📅 Today’s plan",
+    "noAppointmentsToday": "No appointments today",
+    "legend": {
+      "title": "📊 Calendar legend",
+      "capacity": "Capacity",
+      "capacityLow": "1-4 appointments",
+      "capacityMedium": "5-7 appointments",
+      "capacityHigh": "8+ appointments",
+      "indicators": "Indicators",
+      "homeVisit": "Home visit",
+      "withTravel": "With travel",
+      "blocked": "Blocked"
+    },
+    "route": {
+      "title": "🗺️ Daily route",
+      "noVisits": "No home visits today",
+      "practice": "Practice",
+      "return": "Return",
+      "statsVisits": "Home visits"
+    },
+    "releaseNotes": {
+      "title": "🎯 Enhanced Calendar View - September 17, 2025",
+      "item1": "✅ Professional calendar with better colors and larger cells",
+      "item2": "✅ Appointments list (left) ↔ Calendar view (right) layout",
+      "item3": "✅ Availability blocking: Double-click any day to block 9-17 hours",
+      "item4": "✅ Travel route overview with estimated driving times",
+      "item5": "✅ Proper navigation: Calendar page with dedicated route",
+      "next": "🔄 Next: Mobile responsiveness and testing"
+    },
+    "dayDetailTitle": "Day detail view",
+    "dayDetailHint": "(15-minute blocks for scheduling)",
+    "blockedTimePrefix": "Time blocked"
+  },
+  "calendarComponent": {
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "withTravelSuffix": " (with travel)",
+    "syncTitle": "Sync external calendar",
+    "syncButton": "📅 Sync",
+    "available": "Available",
+    "blockedSlots": "blocked times",
+    "instructions": "💡 Click = filter day | Double-click = open detail"
+  },
+  "travelRouteMap": {
+    "title": "🗺️ Daily route",
+    "titleWithDate": "🗺️ Daily route",
+    "noVisits": "No home visits today",
+    "allInPractice": "All appointments at the practice",
+    "practiceStart": "🏠 Practice Linz",
+    "departure": "Departure",
+    "practiceReturn": "🏠 Back to the practice",
+    "endOfVisits": "End of home visits",
+    "arrival": "Arrival",
+    "totalDistance": "Total distance",
+    "travelTime": "Travel time",
+    "homeVisits": "Home visits",
+    "openInMaps": "📱 Open in Google Maps",
+    "exportRoute": "📋 Export route"
+  },
+  "visualRouteMap": {
+    "loading": "Loading map...",
+    "noTravelAppointments": "No travel appointments today",
+    "allInPractice": "All appointments at the practice",
+    "serviceLabel": "Service",
+    "nextLocation": "Next location",
+    "timelineHeading": "🕐 Daily schedule timeline",
+    "legend": {
+      "officeAppointments": "Office appointments",
+      "homeVisits": "Home visits",
+      "travelTime": "Travel time"
+    },
+    "stats": {
+      "stops": "stops"
+    },
+    "travelLabel": "Travel",
+    "title": "🗺️ Daily route",
+    "titleWithDate": "🗺️ Daily route",
+    "summary": {
+      "start": "🏠 Start: Practice Linz",
+      "homeVisits": "Home visits"
+    },
+    "openInMaps": "📱 Open in Google Maps"
+  },
+  "csvExport": {
+    "formats": {
+      "bmd": "BMD NTCS accounting software format with Austrian formatting",
+      "rzl": "RZL accounting software format with semicolon separation",
+      "datev": "DATEV format for German/Austrian tax preparation software"
+    },
+    "successPrefix": "Successfully exported",
+    "successSuffix": "format",
+    "error": {
+      "generic": "Export failed"
+    },
+    "title": "CSV Export for Accounting Software",
+    "description": "Export your invoice data in formats compatible with popular Austrian accounting software.",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "includeHeaders": "Include column headers in export",
+    "selectFormat": "Select Export Format",
+    "exporting": "Exporting...",
+    "exportButton": "Export",
+    "errorTitle": "Export Error",
+    "successTitle": "Export Successful",
+    "instructions": {
+      "title": "Usage Instructions",
+      "bmd": "Import via \"Datenimport\" -> \"CSV-Import\" with semicolon separator",
+      "rzl": "Use \"Datenaustausch\" -> \"Import\" and select CSV format",
+      "datev": "Import through \"Datenaustausch\" -> \"Belege\" with ISO encoding",
+      "finalized": "Only finalized invoices (SENT, PAID) are included in exports",
+      "vat": "VAT calculations respect your small business status automatically"
+    }
+  },
+  "serviceRates": {
+    "title": "Service Rate Templates",
+    "subtitle": "Manage default pricing for different service types",
+    "addNew": "Add New Template",
+    "createFirst": "Create your first template",
+    "empty": "No service rate templates found",
+    "defaultBadge": "Default",
+    "labels": {
+      "category": "Category:",
+      "price": "Price:",
+      "duration": "Duration:",
+      "minutes": "minutes",
+      "description": "Description:"
+    },
+    "form": {
+      "editTitle": "Edit Template",
+      "addTitle": "Add New Template",
+      "serviceName": "Service Name *",
+      "servicePlaceholder": "e.g., Classic massage 60min",
+      "category": "Category *",
+      "price": "Price (EUR) *",
+      "pricePlaceholder": "80.00",
+      "duration": "Duration (minutes) *",
+      "vatRate": "VAT Rate *",
+      "setDefault": "Set as default for this category",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description of the service",
+      "updateTemplate": "Update Template",
+      "createTemplate": "Create Template"
+    },
+    "category": {
+      "massage": "Massage",
+      "yoga": "Yoga",
+      "consulting": "Consulting",
+      "other": "Other"
+    },
+    "vat": {
+      "kleinunternehmer": "0% (Small business)",
+      "ust10": "10% (reduced)",
+      "ust13": "13% (reduced)",
+      "ust20": "20% (standard rate)"
+    },
+    "error": {
+      "fetch": "Failed to fetch templates",
+      "load": "Failed to load service rate templates",
+      "save": "Failed to save template",
+      "delete": "Failed to delete template"
+    },
+    "confirmDelete": "Are you sure you want to delete"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your practice profile and preferences.",
+    "placeholder": {
+      "title": "Settings overview",
+      "description": "Settings functionality is being developed in the user settings branch.",
+      "note": "This branch focuses on calendar implementation and appointment visualization."
+    }
   }
 }
