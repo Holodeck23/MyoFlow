@@ -34,7 +34,31 @@
     "scheduleAppointments": "Termine planen und verwalten",
     "austrianInvoicing": "Österreichische steuerkonformes Rechnungswesen",
     "profileSettings": "Profil und österreichische Compliance",
-    "availableNow": "✅ Verfügbar jetzt"
+    "availableNow": "✅ Verfügbar jetzt",
+    "kleinunternehmerStatus": "Kleinunternehmer Status 2025",
+    "revenueMonitoring": "Umsatzgrenzen-Überwachung",
+    "currentYearRevenue": "Jahresumsatz (Jan-Sep)",
+    "remainingAllowance": "Noch verfügbar",
+    "projectedTotal": "Hochgerechnetes Jahresende",
+    "thresholdUsed": "Grenze ausgeschöpft",
+    "warningProjectedExceed": "⚠️ Hochrechnung überschreitet Grenze!",
+    "warningNearLimit": "⚠️ Achtung: Grenze in Sichtweite",
+    "safeUnderLimit": "✅ Sicher unter der Grenze",
+    "totalClients": "Klienten Gesamt",
+    "todayAppointments": "Termine heute",
+    "monthlyAverage": "Monatsdurchschnitt",
+    "actionRequired": "Handlungsbedarf",
+    "todaysSchedule": "Heutige Termine",
+    "noAppointmentsToday": "Keine Termine heute",
+    "recentActivity": "Letzte Aktivitäten",
+    "activity": {
+      "invoiceCreated": "Rechnung #2025-001 erstellt für Maria Huber",
+      "hoursAgo": "vor 2 Stunden",
+      "newAppointment": "Neuer Termin gebucht von Franz Müller",
+      "hoursAgoFour": "vor 4 Stunden",
+      "paymentReceived": "Zahlung erhalten von Anna Schmidt",
+      "oneDayAgo": "vor 1 Tag"
+    }
   },
   "clients": {
     "title": "Klienten verwalten",
@@ -75,7 +99,13 @@
     "start": "Zeit",
     "end": "Ende",
     "status": "Status",
-    "notes": "Notizen"
+    "notes": "Notizen",
+    "statusLabels": {
+      "booked": "Bestätigt",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "noShow": "Nicht erschienen"
+    }
   },
   "invoices": {
     "title": "Rechnungen",
@@ -102,5 +132,249 @@
     "loading": "Lädt...",
     "error": "Fehler",
     "success": "Erfolgreich"
+  },
+  "dashboardLayout": {
+    "header": {
+      "title": "MyoFlow Praxis",
+      "subtitle": "Österreichische Therapie-Verwaltung"
+    },
+    "user": {
+      "fallbackName": "Therapeut"
+    },
+    "languageToggle": "Sprache wechseln",
+    "footer": {
+      "tagline": "Österreichische Therapiepraxis-Management-Software",
+      "sections": {
+        "product": {
+          "title": "Produkt",
+          "features": "Features",
+          "pricing": "Preise",
+          "faq": "FAQ"
+        },
+        "support": {
+          "title": "Support",
+          "helpCenter": "Hilfe Center",
+          "contact": "Kontakt",
+          "status": "Status"
+        },
+        "legal": {
+          "title": "Rechtliches",
+          "privacy": "Datenschutz",
+          "terms": "AGB",
+          "imprint": "Impressum"
+        },
+        "compliance": {
+          "title": "Compliance",
+          "gdpr": "DSGVO",
+          "vat": "Österreichische USt",
+          "smallBusiness": "Kleinunternehmer"
+        }
+      },
+      "copyright": "© 2025 MyoFlow. Alle Rechte vorbehalten. Made in Austria 🇦🇹",
+      "version": "Version 1.6.0 • Letzte Aktualisierung: September 2025"
+    }
+  },
+  "sidebar": {
+    "brand": {
+      "title": "MyoFlow Therapie",
+      "subtitle": "Physiotherapie Praxis"
+    },
+    "dashboard": "Dashboard",
+    "calendar": "Kalender & Termine",
+    "clients": "Klienten",
+    "sessions": "Sitzungen & Notizen",
+    "invoices": "Rechnungen & Zahlungen",
+    "products": "Produkte & Pakete",
+    "reports": "Berichte",
+    "messaging": "Nachrichten",
+    "booking": "Buchungsseite",
+    "settings": "Einstellungen"
+  },
+  "calendarPage": {
+    "heading": "Kalender & Termine",
+    "today": "Heute",
+    "newAppointment": "+ Neuer Termin",
+    "allAppointments": "Alle Termine",
+    "selectedDaySummary": "Termine für den gewählten Tag",
+    "toList": "Zur Liste →",
+    "detailsCta": "Details →",
+    "todayPlan": "📅 Heutiger Plan",
+    "noAppointmentsToday": "Keine Termine heute",
+    "legend": {
+      "title": "📊 Kalender-Legende",
+      "capacity": "Auslastung",
+      "capacityLow": "1-4 Termine",
+      "capacityMedium": "5-7 Termine",
+      "capacityHigh": "8+ Termine",
+      "indicators": "Kennzeichnungen",
+      "homeVisit": "Hausbesuch",
+      "withTravel": "Mit Anfahrt",
+      "blocked": "Gesperrt"
+    },
+    "route": {
+      "title": "🗺️ Tagesroute",
+      "noVisits": "Keine Hausbesuche heute",
+      "practice": "Praxis",
+      "return": "Zurück",
+      "statsVisits": "Hausbesuche"
+    },
+    "releaseNotes": {
+      "title": "🎯 Verbesserte Kalenderansicht - 17. September 2025",
+      "item1": "✅ Professioneller Kalender mit besseren Farben und größeren Zellen",
+      "item2": "✅ Terminliste (links) ↔ Kalenderansicht (rechts)",
+      "item3": "✅ Verfügbarkeitsblocker: Doppelklick blockiert 9-17 Uhr",
+      "item4": "✅ Routenübersicht mit geschätzten Fahrzeiten",
+      "item5": "✅ Saubere Navigation: Eigene Kalenderseite mit direkter Route",
+      "next": "🔄 Nächstes Ziel: Mobile Responsiveness & Testing"
+    },
+    "dayDetailTitle": "Tag-Detail-Ansicht",
+    "dayDetailHint": "(15-Minuten-Blöcke für Terminplanung)",
+    "blockedTimePrefix": "Zeit gesperrt"
+  },
+  "calendarComponent": {
+    "weekdays": {
+      "mon": "Mo",
+      "tue": "Di",
+      "wed": "Mi",
+      "thu": "Do",
+      "fri": "Fr",
+      "sat": "Sa",
+      "sun": "So"
+    },
+    "withTravelSuffix": " (mit Anfahrt)",
+    "syncTitle": "Externen Kalender synchronisieren",
+    "syncButton": "📅 Sync",
+    "available": "Verfügbar",
+    "blockedSlots": "gesperrte Zeiten",
+    "instructions": "💡 Klick = Tag filtern | Doppelklick = Detail-Ansicht"
+  },
+  "travelRouteMap": {
+    "title": "🗺️ Tagesroute",
+    "titleWithDate": "🗺️ Tagesroute",
+    "noVisits": "Keine Hausbesuche heute",
+    "allInPractice": "Alle Termine in der Praxis",
+    "practiceStart": "🏠 Praxis Linz",
+    "departure": "Abfahrt",
+    "practiceReturn": "🏠 Zurück zur Praxis",
+    "endOfVisits": "Ende der Hausbesuche",
+    "arrival": "Ankunft",
+    "totalDistance": "Gesamtstrecke",
+    "travelTime": "Fahrzeit",
+    "homeVisits": "Hausbesuche",
+    "openInMaps": "📱 In Google Maps öffnen",
+    "exportRoute": "📋 Route exportieren"
+  },
+  "visualRouteMap": {
+    "loading": "Karte wird geladen...",
+    "noTravelAppointments": "Keine Hausbesuche heute",
+    "allInPractice": "Alle Termine in der Praxis",
+    "serviceLabel": "Leistung",
+    "nextLocation": "Nächster Ort",
+    "timelineHeading": "🕐 Tagesablauf",
+    "legend": {
+      "officeAppointments": "Praxistermine",
+      "homeVisits": "Hausbesuche",
+      "travelTime": "Fahrzeit"
+    },
+    "stats": {
+      "stops": "Stopps"
+    },
+    "travelLabel": "Anfahrt",
+    "title": "🗺️ Tagesroute",
+    "titleWithDate": "🗺️ Tagesroute",
+    "summary": {
+      "start": "🏠 Start: Praxis Linz",
+      "homeVisits": "Hausbesuche"
+    },
+    "openInMaps": "📱 In Google Maps öffnen"
+  },
+  "csvExport": {
+    "formats": {
+      "bmd": "BMD NTCS Buchhaltungsformat mit österreichischer Formatierung",
+      "rzl": "RZL Buchhaltungsformat mit Semikolon-Trennung",
+      "datev": "DATEV-Format für österreichische/deutsche Steuersoftware"
+    },
+    "successPrefix": "Erfolgreich exportiert",
+    "successSuffix": "Format",
+    "error": {
+      "generic": "Export fehlgeschlagen"
+    },
+    "title": "CSV-Export für Buchhaltungssoftware",
+    "description": "Exportieren Sie Ihre Rechnungsdaten in Formate für gängige österreichische Buchhaltungsprogramme.",
+    "fromDate": "Von-Datum",
+    "toDate": "Bis-Datum",
+    "includeHeaders": "Spaltenüberschriften im Export enthalten",
+    "selectFormat": "Exportformat wählen",
+    "exporting": "Export läuft...",
+    "exportButton": "Exportieren",
+    "errorTitle": "Exportfehler",
+    "successTitle": "Export erfolgreich",
+    "instructions": {
+      "title": "Anleitung",
+      "bmd": "Import über \"Datenimport\" -> \"CSV-Import\" mit Semikolon-Trennzeichen",
+      "rzl": "Über \"Datenaustausch\" -> \"Import\" das CSV-Format wählen",
+      "datev": "Über \"Datenaustausch\" -> \"Belege\" mit ISO-Codierung importieren",
+      "finalized": "Nur finalisierte Rechnungen (VERSENDET, BEZAHLT) werden exportiert",
+      "vat": "USt-Berechnung berücksichtigt automatisch den Kleinunternehmerstatus"
+    }
+  },
+  "serviceRates": {
+    "title": "Leistungstarif-Vorlagen",
+    "subtitle": "Verwalten Sie Standardpreise für verschiedene Leistungen",
+    "addNew": "Neue Vorlage hinzufügen",
+    "createFirst": "Erstellen Sie Ihre erste Vorlage",
+    "empty": "Keine Leistungstarif-Vorlagen gefunden",
+    "defaultBadge": "Standard",
+    "labels": {
+      "category": "Kategorie:",
+      "price": "Preis:",
+      "duration": "Dauer:",
+      "minutes": "Minuten",
+      "description": "Beschreibung:"
+    },
+    "form": {
+      "editTitle": "Vorlage bearbeiten",
+      "addTitle": "Neue Vorlage erstellen",
+      "serviceName": "Leistungsname *",
+      "servicePlaceholder": "z. B. Klassische Massage 60min",
+      "category": "Kategorie *",
+      "price": "Preis (EUR) *",
+      "pricePlaceholder": "80.00",
+      "duration": "Dauer (Minuten) *",
+      "vatRate": "USt-Satz *",
+      "setDefault": "Als Standard für diese Kategorie setzen",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Optionale Beschreibung der Leistung",
+      "updateTemplate": "Vorlage aktualisieren",
+      "createTemplate": "Vorlage erstellen"
+    },
+    "category": {
+      "massage": "Massage",
+      "yoga": "Yoga",
+      "consulting": "Beratung",
+      "other": "Andere"
+    },
+    "vat": {
+      "kleinunternehmer": "0% (Kleinunternehmer)",
+      "ust10": "10% (ermäßigt)",
+      "ust13": "13% (ermäßigt)",
+      "ust20": "20% (Normalsteuersatz)"
+    },
+    "error": {
+      "fetch": "Vorlagen konnten nicht geladen werden",
+      "load": "Leistungstarif-Vorlagen konnten nicht geladen werden",
+      "save": "Vorlage konnte nicht gespeichert werden",
+      "delete": "Vorlage konnte nicht gelöscht werden"
+    },
+    "confirmDelete": "Sind Sie sicher, dass Sie löschen möchten"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihr Praxisprofil und Ihre Präferenzen.",
+    "placeholder": {
+      "title": "Einstellungsübersicht",
+      "description": "Die Einstellungen werden aktuell im Nutzer-Einstellungen-Branch entwickelt.",
+      "note": "Dieser Branch konzentriert sich auf die Kalender-Implementation und Terminvisualisierung."
+    }
   }
 }

@@ -17,7 +17,7 @@ import {
 import { de } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from './Button'
-import { isAustrianHoliday } from '@myoflow/lib'
+import { isAustrianHoliday, useTranslation } from '@myoflow/lib'
 
 export interface CalendarEvent {
   id: string
@@ -129,6 +129,17 @@ export function Calendar({
   externalCalendarSyncEnabled = false
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = React.useState(selectedDate || new Date())
+  const { t } = useTranslation()
+  const weekdayLabels = [
+    t('calendarComponent.weekdays.mon', 'Mo'),
+    t('calendarComponent.weekdays.tue', 'Di'),
+    t('calendarComponent.weekdays.wed', 'Mi'),
+    t('calendarComponent.weekdays.thu', 'Do'),
+    t('calendarComponent.weekdays.fri', 'Fr'),
+    t('calendarComponent.weekdays.sat', 'Sa'),
+    t('calendarComponent.weekdays.sun', 'So')
+  ]
+  const travelSuffix = t('calendarComponent.withTravelSuffix', ' (mit Anfahrt)')
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -279,9 +290,9 @@ export function Calendar({
               variant="outline"
               size="sm"
               className="h-8"
-              title="Externen Kalender synchronisieren"
+              title={t('calendarComponent.syncTitle', 'Externen Kalender synchronisieren')}
             >
-              📅 Sync
+              {t('calendarComponent.syncButton', '📅 Sync')}
             </Button>
           )}
           <Button
@@ -290,7 +301,7 @@ export function Calendar({
             onClick={handleToday}
             className="h-8"
           >
-            Heute
+            {t('calendarPage.today', 'Heute')}
           </Button>
           <CalendarIcon className="h-5 w-5 text-gray-400" />
         </div>
@@ -300,7 +311,7 @@ export function Calendar({
       <div className="p-4">
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
+          {weekdayLabels.map((day) => (
             <div
               key={day}
               className="p-2 text-center text-sm font-medium text-gray-500"
@@ -367,7 +378,7 @@ export function Calendar({
                     if (densityInfo.count === 0) {
                       return (
                         <div className="text-xs text-gray-400">
-                          Verfügbar
+                          {t('calendarComponent.available', 'Verfügbar')}
                         </div>
                       )
                     }
@@ -401,7 +412,7 @@ export function Calendar({
                                 style={{
                                   backgroundColor: getLocationColor(locationName)
                                 }}
-                                title={`${event.title}${isTravel ? ' (mit Anfahrt)' : ''}`}
+                                title={`${event.title}${isTravel ? travelSuffix : ''}`}
                               />
                             )
                           })}
@@ -423,7 +434,10 @@ export function Calendar({
 
                         {/* Blocked Slots Indicator */}
                         {dayBlockedSlots.length > 0 && (
-                          <div className="w-4 h-1 bg-gray-600 rounded-full" title={`${dayBlockedSlots.length} gesperrte Zeiten`} />
+                          <div
+                            className="w-4 h-1 bg-gray-600 rounded-full"
+                            title={`${dayBlockedSlots.length} ${t('calendarComponent.blockedSlots', 'gesperrte Zeiten')}`}
+                          />
                         )}
                       </>
                     )
@@ -438,7 +452,7 @@ export function Calendar({
       {/* Compact Instructions */}
       <div className="border-t border-gray-200 px-4 py-2">
         <p className="text-xs text-gray-500">
-          💡 Klick = Tag filtern | Doppelklick = Detail-Ansicht
+          {t('calendarComponent.instructions', '💡 Klick = Tag filtern | Doppelklick = Detail-Ansicht')}
         </p>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import React from 'react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { useTranslation } from '@myoflow/lib'
 
 interface TravelAppointment {
   id: string
@@ -28,6 +29,7 @@ interface TravelRouteMapProps {
 }
 
 export function TravelRouteMap({ appointments, selectedDate, className = '' }: TravelRouteMapProps) {
+  const { t } = useTranslation()
   // Filter appointments for the selected date or today
   const targetDate = selectedDate || new Date()
   const dayAppointments = appointments.filter(apt => {
@@ -57,10 +59,10 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
   if (travelAppointments.length === 0) {
     return (
       <div className={`bg-white rounded-lg shadow p-4 ${className}`}>
-        <h3 className="font-medium text-gray-900 mb-2">🗺️ Tagesroute</h3>
+        <h3 className="font-medium text-gray-900 mb-2">{t('travelRouteMap.title', '🗺️ Tagesroute')}</h3>
         <div className="text-center py-4">
-          <p className="text-gray-500 text-sm">Keine Hausbesuche heute</p>
-          <p className="text-xs text-gray-400 mt-1">Alle Termine in der Praxis</p>
+          <p className="text-gray-500 text-sm">{t('travelRouteMap.noVisits', 'Keine Hausbesuche heute')}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('travelRouteMap.allInPractice', 'Alle Termine in der Praxis')}</p>
         </div>
       </div>
     )
@@ -69,7 +71,7 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
   return (
     <div className={`bg-white rounded-lg shadow p-4 ${className}`}>
       <h3 className="font-medium text-gray-900 mb-3">
-        🗺️ Tagesroute - {format(targetDate, 'dd.MM.yyyy', { locale: de })}
+        {t('travelRouteMap.titleWithDate', '🗺️ Tagesroute')} - {format(targetDate, 'dd.MM.yyyy', { locale: de })}
       </h3>
 
       {/* Route Overview */}
@@ -80,11 +82,11 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
             <span className="text-white text-xs font-bold">S</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">🏠 Praxis Linz</p>
+            <p className="text-sm font-medium text-gray-900">{t('travelRouteMap.practiceStart', '🏠 Praxis Linz')}</p>
             <p className="text-xs text-gray-500">Hauptplatz 1, 4020 Linz</p>
           </div>
           <div className="text-xs text-gray-500">
-            {formatTime(travelAppointments[0]?.start)} Abfahrt
+            {formatTime(travelAppointments[0]?.start)} {t('travelRouteMap.departure', 'Abfahrt')}
           </div>
         </div>
 
@@ -122,11 +124,11 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
             <span className="text-white text-xs font-bold">E</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">🏠 Zurück zur Praxis</p>
-            <p className="text-xs text-gray-500">Ende der Hausbesuche</p>
+            <p className="text-sm font-medium text-gray-900">{t('travelRouteMap.practiceReturn', '🏠 Zurück zur Praxis')}</p>
+            <p className="text-xs text-gray-500">{t('travelRouteMap.endOfVisits', 'Ende der Hausbesuche')}</p>
           </div>
           <div className="text-xs text-gray-500">
-            {travelAppointments.length > 0 && formatTime(travelAppointments[travelAppointments.length - 1]?.end)} Ankunft
+            {travelAppointments.length > 0 && `${formatTime(travelAppointments[travelAppointments.length - 1]?.end)} ${t('travelRouteMap.arrival', 'Ankunft')}`}
           </div>
         </div>
       </div>
@@ -135,15 +137,15 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
       <div className="mt-4 pt-3 border-t border-gray-200">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
-            <p className="text-xs text-gray-500">Gesamtstrecke</p>
+            <p className="text-xs text-gray-500">{t('travelRouteMap.totalDistance', 'Gesamtstrecke')}</p>
             <p className="text-sm font-bold text-gray-900">{getTotalDistance().toFixed(1)}km</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Fahrzeit</p>
+            <p className="text-xs text-gray-500">{t('travelRouteMap.travelTime', 'Fahrzeit')}</p>
             <p className="text-sm font-bold text-gray-900">{getTotalTravelTime()}min</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Hausbesuche</p>
+            <p className="text-xs text-gray-500">{t('travelRouteMap.homeVisits', 'Hausbesuche')}</p>
             <p className="text-sm font-bold text-gray-900">{travelAppointments.length}</p>
           </div>
         </div>
@@ -153,10 +155,10 @@ export function TravelRouteMap({ appointments, selectedDate, className = '' }: T
       <div className="mt-3 pt-3 border-t border-gray-200">
         <div className="flex justify-between items-center">
           <button className="text-xs text-blue-600 hover:text-blue-800">
-            📱 In Google Maps öffnen
+            {t('travelRouteMap.openInMaps', '📱 In Google Maps öffnen')}
           </button>
           <button className="text-xs text-gray-500 hover:text-gray-700">
-            📋 Route exportieren
+            {t('travelRouteMap.exportRoute', '📋 Route exportieren')}
           </button>
         </div>
       </div>
