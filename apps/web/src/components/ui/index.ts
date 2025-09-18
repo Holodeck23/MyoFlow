@@ -26,6 +26,8 @@ export type { InputProps } from './Input'
 
 export { Label } from './Label'
 
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs'
+
 export { Calendar } from './Calendar'
 export type { CalendarEvent, BlockedTimeSlot, CalendarAvailability } from './Calendar'
 
