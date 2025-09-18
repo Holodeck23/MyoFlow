@@ -39,58 +39,36 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        {/* Professional Austrian Medical Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              {/* Austrian Medical Cross Logo */}
-              <div className="w-10 h-10 bg-medical-blue rounded-lg flex items-center justify-center shadow-sm">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-4v-4H6v-2h4V7h4v4h4v2h-4v4z" fill="currentColor"/>
-                </svg>
+        {/* Compact Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm">
+          <div className="flex justify-end items-center space-x-3">
+            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-medical-blue rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {session.user?.email?.charAt(0).toUpperCase()}
+                </span>
               </div>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {t('dashboardLayout.header.title', 'MyoFlow Praxis')}
-                </h1>
-                <p className="text-sm text-gray-600">
-                  {t('dashboardLayout.header.subtitle', 'Österreichische Therapie-Verwaltung')}
-                </p>
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900">
+                  {session.user?.name || t('dashboardLayout.user.fallbackName', 'Therapeut')}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {session.user?.email}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* User Profile */}
-              <div className="flex items-center space-x-3 px-3 py-2 bg-gray-50 rounded-lg">
-                <div className="w-8 h-8 bg-medical-blue rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
-                    {session.user?.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-900">
-                    {session.user?.name || t('dashboardLayout.user.fallbackName', 'Therapeut')}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {session.user?.email}
-                  </div>
-                </div>
-              </div>
+            <LanguageToggle />
 
-              {/* Language Toggle */}
-              <LanguageToggle />
-
-              {/* Logout Button */}
-              <Button
-                onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
-                variant="outline"
-                size="sm"
-                title={t('auth.signOut', 'Abmelden')}
-              >
-                <LogOut size={16} />
-                <span className="text-sm font-medium">{t('auth.signOut', 'Abmelden')}</span>
-              </Button>
-            </div>
+            <Button
+              onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
+              variant="outline"
+              size="sm"
+              title={t('auth.signOut', 'Abmelden')}
+            >
+              <LogOut size={16} />
+              <span className="text-sm font-medium">{t('auth.signOut', 'Abmelden')}</span>
+            </Button>
           </div>
         </header>
 
@@ -120,7 +98,7 @@ function LanguageToggle() {
       onClick={toggleLanguage}
       variant="ghost"
       size="sm"
-      className="bg-white/10 hover:bg-white/20 text-white/80 hover:text-white"
+      className="bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-900"
       disabled={isLoading}
       title={t('dashboardLayout.languageToggle', 'Sprache wechseln / Switch language')}
     >
