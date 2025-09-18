@@ -107,8 +107,8 @@ export function Sidebar() {
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">MyoFlow Therapy</h1>
-                <p className="text-sm text-gray-500">Physiotherapie Praxis</p>
+                <h1 className="text-lg font-semibold text-gray-900">{t('sidebar.brand.title', 'MyoFlow Therapy')}</h1>
+                <p className="text-sm text-gray-500">{t('sidebar.brand.subtitle', 'Physiotherapie Praxis')}</p>
               </div>
             )}
           </div>
@@ -179,7 +179,7 @@ export function Sidebar() {
           `}
         >
           <Settings size={20} className="mr-3 flex-shrink-0" />
-          <span className="flex-1">Settings</span>
+          <span className="flex-1">{t('sidebar.settings', 'Settings')}</span>
         </Link>
       </div>
     </div>

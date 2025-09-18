@@ -1,8 +1,64 @@
 # 📋 CLAUDE DEVELOPMENT NOTES
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Session Date:** September 17, 2025
-**Status:** Google Maps Integration & Upper Austria Grant Focus - COMPLETED ✅
+**Session Date:** September 18, 2025
+**Status:** Calendar Implementation RESCUED & MERGED - EPIC SESSION ✅
+
+---
+
+## 🚀 **CALENDAR IMPLEMENTATION RESCUE SESSION - September 18, 2025** ✅
+
+**PRIMARY GOAL:** Rescue calendar implementation from parallel Claude session chaos
+**Session Date:** September 18, 2025
+**Branch:** `feat/calendar-view-implementation` (✅ MERGED TO MAIN)
+**Completed:** Complete schema disaster recovery + systematic CI fixes
+**Status:** Production-ready calendar with Austrian compliance + travel visualization
+
+### **The Problem:**
+- **Parallel Claude sessions** created schema/migration conflicts across branches
+- **Database out of sync** with migration files (missing columns, renamed fields)
+- **CI failing** with cascading errors (isActive, certificates, webpack issues)
+- **PR conflicts** between competing calendar implementations
+- **Repository chaos** from uncoordinated development
+
+### **The Systematic Rescue:**
+1. **Schema Synchronization** - Used `prisma db pull` to align schema with actual database state
+2. **Migration Consolidation** - Clean reset + comprehensive missing columns migration
+3. **TypeScript Cleanup** - Replaced all Google Maps `any` types with proper interfaces
+4. **Webpack Fixes** - Removed `@myoflow/db` from transpilePackages to fix bundling
+5. **API Test Updates** - Codex updated tests to match new appointment schema
+6. **Conflict Resolution** - Merged main, resolved appointments page conflicts
+7. **CI Pipeline Fixes** - All systematic issues resolved, green build achieved
+
+### **Key Achievements:**
+- ✅ **Database schema synchronized** - All missing columns properly migrated
+- ✅ **CI pipeline fixed** - Comprehensive TypeScript, build, and test fixes
+- ✅ **Calendar feature complete** - Working calendar view with Austrian compliance
+- ✅ **Travel visualization** - Professional route mapping and timeline display
+- ✅ **Coordination success** - Claude + Codex working in same environment
+- ✅ **Production deployment** - Feature successfully merged to main
+
+### **Technical Fixes Applied:**
+- **Database Migration**: Added 9 missing columns across Therapist + ServiceRateTemplate
+- **TypeScript Interfaces**: Complete Google Maps API type definitions
+- **Webpack Configuration**: Removed Prisma from client bundle
+- **Schema Validation**: Fixed isActive vs active field naming conflicts
+- **Seed Script**: Explicit field initialization for CI compatibility
+- **Test Compatibility**: Updated API tests for new travel-related fields
+
+### **Lessons Learned:**
+- **Single environment coordination** >> Multiple parallel Claude sessions
+- **Schema-first development** - Always migrate before switching contexts
+- **Systematic debugging** - Address root causes, not just symptoms
+- **Git worktrees** recommended for future parallel feature development
+- **Database introspection** (`prisma db pull`) can resolve complex schema mismatches
+- **Shared visibility** - Update `AGENT_ACTIVITY_LOG.md` at the end of each session so the other agent can see what changed and what’s next
+
+### **Business Impact:**
+- **Calendar MVP delivered** - Core scheduling functionality complete
+- **Austrian compliance maintained** - Travel calculations with proper formatting
+- **Professional UI** - Clean interface with Google Maps integration
+- **Development velocity restored** - Clean foundation for next features
 
 ---
 
@@ -570,26 +626,40 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 
 ---
 
+## 🎯 **NEXT PHASE PRIORITIES - September 18, 2025**
+
+### **Immediate Foundation Stabilization (Sprint 1):**
+1. **Next.js Upgrade Completion** - Align all dependencies to 14.2.x, clear .next cache
+2. **CI Pipeline Hardening** - Enable full test suite, add Postgres bootstrap, remove Redis
+3. **TypeScript Configuration** - Standardize tsconfig across monorepo packages
+4. **Documentation Cleanup** - Rationalize specs, update Agent OS coordination
+
+### **Strategic Technical Debt:**
+- **Modularize Calendar Page** - Break 500+ line page into components/hooks
+- **Remove Dead Code** - CSVExportManager, ServiceRateManager, DashboardNav (unused)
+- **Implement Data Layer** - Replace manual fetch with thin API abstraction
+- **Add Test Infrastructure** - Docker Postgres, environment validation
+
+### **Three-Branch Cleanup Strategy:**
+1. **Next.js Upgrade & Config Cleanup** - Kill webpack runtime errors
+2. **CI + Test Reliability** - Postgres-ready test bootstrap, Vitest integration
+3. **Frontend Hygiene** - Component breakdown, unused code removal
+
 ## 📝 **Session Notes**
 
-### **Key Insights:**
-- Project has evolved from personal tool to legitimate business opportunity
-- Technical foundation is enterprise-grade and well-architected  
-- Agent OS integration provides structured workflow and spec-driven development
-- Austrian regulatory compliance is significant competitive advantage
-- Perfect coordination with Codex on parallel infrastructure tasks
+### **Epic Rescue Session Insights:**
+- **Coordination wins** when all agents work in same environment vs. parallel chaos
+- **Systematic debugging** can rescue any schema disaster with proper tools
+- **Database introspection** (`prisma db pull`) is powerful for complex migration conflicts
+- **Schema-first development** prevents cross-branch contamination
+- **Git worktrees** should be used for future parallel feature development
 
-### **Development Approach:**
-- Agent OS handles structured workflow (specs → tasks → execution)
-- Claude focuses on implementation details and real-time problem solving
-- Codex handles infrastructure (subdomain routing, address data, CI)
-- Clear division of labor prevents conflicts and maximizes productivity
-
-### **Business Validation Plan:**
-- Start with wife as primary user and feedback source
-- Measure daily usage and feature adoption
-- Use affiliate system for organic growth
-- Austrian therapist market research needed
+### **Development Approach Refined:**
+- **Single environment** for all Claude/Codex coordination (proven successful)
+- **Spec-driven development** maintains focus and prevents scope creep
+- **Three-branch maximum** for infrastructure changes (learned the hard way)
+- **CI-first mentality** - if it doesn't pass CI, it's not done
+- **Migration hygiene** - always test database changes before switching contexts
 
 ---
 
