@@ -35,16 +35,16 @@ const LINZ_COORDS = { lat: 48.3059, lng: 14.2862 }
 
 function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [map, setMap] = useState<any>(null)
 
   useEffect(() => {
     if (!mapRef.current) return
 
     // Initialize the map
-    const googleMap = new google.maps.Map(mapRef.current, {
+    const googleMap = new (window as any).google.maps.Map(mapRef.current, {
       center: LINZ_COORDS,
       zoom: 12,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeId: (window as any).google.maps.MapTypeId.ROADMAP,
       styles: [
         {
           featureType: 'poi',
@@ -56,7 +56,7 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
     setMap(googleMap)
 
     // Add practice marker
-    new google.maps.Marker({
+    new (window as any).google.maps.Marker({
       position: LINZ_COORDS,
       map: googleMap,
       title: 'Praxis Linz',
@@ -76,8 +76,8 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
     if (travelAppointments.length === 0) return
 
     // Create waypoints for route calculation
-    const waypoints: google.maps.DirectionsWaypoint[] = []
-    const bounds = new google.maps.LatLngBounds()
+    const waypoints: any[] = []
+    const bounds = new (window as any).google.maps.LatLngBounds()
 
     // Add practice to bounds
     bounds.extend(LINZ_COORDS)
@@ -87,10 +87,10 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
       const location = appointment.Location
 
       // Use coordinates if available, otherwise estimate based on Austrian postal codes
-      let position: google.maps.LatLng
+      let position: any
 
       if (location.latitude && location.longitude) {
-        position = new google.maps.LatLng(location.latitude, location.longitude)
+        position = new (window as any).google.maps.LatLng(location.latitude, location.longitude)
       } else {
         // Rough estimate for Austrian cities based on postal code
         const postalCode = location.postalCode
@@ -101,7 +101,7 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
         else if (postalCode?.startsWith('4600')) coords = { lat: 48.1598, lng: 14.0290 } // Wels
         else if (postalCode?.startsWith('4400')) coords = { lat: 48.0379, lng: 14.4207 } // Steyr
 
-        position = new google.maps.LatLng(coords.lat, coords.lng)
+        position = new (window as any).google.maps.LatLng(coords.lat, coords.lng)
       }
 
       // Add to bounds
@@ -114,7 +114,7 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
       })
 
       // Add marker for appointment
-      new google.maps.Marker({
+      new (window as any).google.maps.Marker({
         position: position,
         map: googleMap,
         title: `${appointment.Client.name} - ${location.name}`,
@@ -134,8 +134,8 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
     googleMap.fitBounds(bounds)
 
     // Calculate and display route
-    const directionsService = new google.maps.DirectionsService()
-    const directionsRenderer = new google.maps.DirectionsRenderer({
+    const directionsService = new (window as any).google.maps.DirectionsService()
+    const directionsRenderer = new (window as any).google.maps.DirectionsRenderer({
       draggable: false,
       polylineOptions: {
         strokeColor: '#3B82F6',
@@ -153,9 +153,9 @@ function MapComponent({ appointments }: { appointments: TravelAppointment[] }) {
       destination: LINZ_COORDS, // Return to practice
       waypoints: waypoints,
       optimizeWaypoints: true,
-      travelMode: google.maps.TravelMode.DRIVING,
+      travelMode: (window as any).google.maps.TravelMode.DRIVING,
       region: 'AT' // Austria
-    }, (result, status) => {
+    }, (result: any, status: any) => {
       if (status === 'OK' && result) {
         directionsRenderer.setDirections(result)
       }
@@ -211,7 +211,7 @@ function ErrorComponent({ appointments }: { appointments: TravelAppointment[] })
         type: 'appointment',
         duration: appointmentDuration,
         client: apt.Client.name,
-        service: apt.Service?.name || 'Service',
+        service: 'Service',
         start: new Date(apt.start).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' }),
         location: apt.Location.name,
         isTravel: apt.requiresTravelBuffer

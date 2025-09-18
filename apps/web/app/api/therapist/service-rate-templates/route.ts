@@ -18,7 +18,7 @@ const UpdateTemplateSchema = CreateTemplateSchema.partial()
 
 const QuerySchema = z.object({
   category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']).optional(),
-  active: z.string().transform(val => val === 'true').default('true'),
+  isActive: z.string().transform(val => val === 'true').default('true'),
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     const whereClause: any = {
       therapistId,
-      active: query.active,
+      isActive: query.isActive,
     }
 
     if (query.category) {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         vatRate: true,
         description: true,
         isDefault: true,
-        active: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true,
       }
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         vatRate: true,
         description: true,
         isDefault: true,
-        active: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true,
       }
