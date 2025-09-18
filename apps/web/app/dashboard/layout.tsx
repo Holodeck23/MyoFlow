@@ -2,10 +2,11 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Sidebar } from '@/app/components/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { Languages, Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
+import { useLocale } from '@myoflow/lib'
 
 export default function DashboardLayout({
   children,
@@ -103,36 +104,11 @@ export default function DashboardLayout({
 }
 
 function LanguageToggle() {
-  const [language, setLanguage] = useState('de')
-  const [isClient, setIsClient] = useState(false)
-
-  // Ensure we're on the client side
-  useEffect(() => {
-    setIsClient(true)
-    const saved = localStorage.getItem('myoflow-language')
-    if (saved && (saved === 'de' || saved === 'en')) {
-      setLanguage(saved)
-    }
-  }, [])
+  const { locale, setLocale, isLoading } = useLocale()
 
   const toggleLanguage = () => {
-    if (!isClient) return
-
-    const newLang = language === 'de' ? 'en' : 'de'
-    setLanguage(newLang)
-    localStorage.setItem('myoflow-language', newLang)
-
-    // Force a page reload to apply language changes
-    window.location.reload()
-  }
-
-  if (!isClient) {
-    return (
-      <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/10 text-white/80">
-        <Languages size={16} />
-        <span className="text-sm font-medium">DE</span>
-      </div>
-    )
+    const nextLocale = locale === 'de' ? 'en' : 'de'
+    setLocale(nextLocale)
   }
 
   return (
@@ -141,10 +117,11 @@ function LanguageToggle() {
       variant="ghost"
       size="sm"
       className="bg-white/10 hover:bg-white/20 text-white/80 hover:text-white"
+      disabled={isLoading}
       title="Sprache wechseln / Switch language"
     >
       <Languages size={16} />
-      <span className="text-sm font-medium">{language.toUpperCase()}</span>
+      <span className="text-sm font-medium">{locale.toUpperCase()}</span>
     </Button>
   )
 }

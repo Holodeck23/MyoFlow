@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,231 +7,117 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { 
-  OWNER 
-  STAFF 
-  ACCOUNTANT 
-  AFFILIATE 
-}
-
-enum TherapistDesignation { 
-  HEILMASSEUR 
-  MEDIZINISCHER_MASSEUR 
-  GEWERBLICHER_MASSEUR 
-}
-
-enum VatStatus { 
-  KLEINUNTERNEHMER 
-  UST_10 
-  UST_13 
-  UST_20 
-}
-
-enum LocationType { 
-  HOME 
-  CLINIC 
-  MOBILE 
-  CLUB 
-}
-
-enum AppointmentStatus { 
-  BOOKED 
-  COMPLETED 
-  CANCELLED 
-  NO_SHOW 
-}
-
-enum RecurrenceType {
-  NONE
-  WEEKLY
-  BIWEEKLY
-  MONTHLY
-}
-
-enum BlockType {
-  HOLIDAY
-  VACATION  
-  BREAK
-  MAINTENANCE
-}
-
-enum AustrianHolidayType {
-  NATIONAL          // e.g., New Year, Christmas
-  REGIONAL          // e.g., St. Joseph's Day (some states)
-  RELIGIOUS         // e.g., Easter, Whit Monday
-  COMMEMORATION     // e.g., National Day
-}
-
-enum ReminderType {
-  EMAIL
-  SMS
-}
-
-enum ReminderStatus {
-  PENDING
-  SENT
-  FAILED
-}
-
-enum ProductType { 
-  PHYSICAL 
-  DIGITAL 
-}
-
-enum Provider { 
-  STRIPE 
-  MANUAL 
-}
-
-enum PaymentStatus { 
-  PENDING 
-  SETTLED 
-  FAILED 
-}
-
-enum InvoiceStatus { 
-  DRAFT 
-  SENT 
-  PAID 
-  VOID 
-}
-
-enum OrderStatus { 
-  PENDING 
-  PAID 
-  REFUNDED 
-}
-
-enum ServiceCategory { 
-  MASSAGE 
-  YOGA 
-  CONSULTING 
-  OTHER 
-}
-
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String     @id @default(cuid())
+  email     String     @unique
   name      String?
-  role      Role     @default(OWNER)
-  createdAt DateTime @default(now())
+  role      Role       @default(OWNER)
+  createdAt DateTime   @default(now())
   Therapist Therapist?
 }
 
 model Therapist {
-  id                   String               @id @default(cuid())
-  userId               String               @unique
-  slug                 String               @unique
-  designation          TherapistDesignation
-  vatStatus            VatStatus
-  kleinunternehmer     Boolean              @default(true)
-  annualGrossCents     Int                  @default(0)
-  annualGrossCachedAt  DateTime?
-  iban                 String?
-  brandColor           String?
-  logoUrl              String?
-
-  // Business Information Fields
-  businessName         String?
-  businessAddress      String?
-  businessPhone        String?
-  businessEmail        String?
-  businessWebsite      String?
-
-  // Austrian Compliance Fields
-  uidNumber            String?
-  chamberRegistration  String?
-  invoiceFooter        String?
-
-  // Practice Preferences
-  defaultReminderDays  Int                  @default(1)
-  enableEmailReminders Boolean              @default(true)
-  enableSmsReminders   Boolean              @default(false)
-
-  // Travel Preferences
-  travelServiceRadius  Int?                 // Maximum travel distance in km
-  travelRatePerKm      Int?                 // Rate per km in cents
-  defaultTravelBuffer  Int                  @default(30) // Default travel buffer in minutes
-  enableTravelService  Boolean              @default(false)
-  maxDailyTravelKm     Int?                 // Daily travel limit in km
-
-  // Profile Management
-  profileCompletedAt   DateTime?
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt @default(now())
-  
-  User                 User                 @relation(fields: [userId], references: [id])
-  Locations            Location[]
-  Clients              Client[]
-  Services             Service[]
-  Appointments         Appointment[]
-  BusinessHours        BusinessHours[]
-  BlockedTimes         BlockedTime[]
-  Invoices             Invoice[]
-  Vouchers             Voucher[]
-  Products             Product[]
-  Orders               Order[]
-  Consents             Consent[]
-  Notes                Note[]
-  Affiliates           Affiliate[]
-  AuditLogs            AuditLog[]
-  ServiceRateTemplates ServiceRateTemplate[]
+  id                    String                  @id @default(cuid())
+  userId                String                  @unique
+  slug                  String                  @unique
+  designation           TherapistDesignation
+  vatStatus             VatStatus
+  kleinunternehmer      Boolean                 @default(true)
+  annualGrossCents      Int                     @default(0)
+  annualGrossCachedAt   DateTime?
+  iban                  String?
+  brandColor            String?
+  logoUrl               String?
+  createdAt             DateTime                @default(now())
+  businessAddress       String?
+  businessEmail         String?
+  businessName          String?
+  businessPhone         String?
+  businessWebsite       String?
+  chamberRegistration   String?
+  defaultReminderDays   Int                     @default(1)
+  enableEmailReminders  Boolean                 @default(true)
+  enableSmsReminders    Boolean                 @default(false)
+  invoiceFooter         String?
+  profileCompletedAt    DateTime?
+  uidNumber             String?
+  updatedAt             DateTime                @default(now()) @updatedAt
+  travelServiceRadius   Int?
+  travelRatePerKm       Int?
+  defaultTravelBuffer   Int                     @default(30)
+  enableTravelService   Boolean                 @default(false)
+  maxDailyTravelKm      Int?
+  businessHours         Json?
+  certificates          String[]                @default([])
+  complianceSettings    Json?
+  languagePreference    String                  @default("de")
+  notificationSettings  Json?
+  travelSettings        Json?
+  Affiliates            Affiliate[]
+  Appointments          Appointment[]
+  AuditLogs             AuditLog[]
+  BlockedTimes          BlockedTime[]
+  BusinessConfiguration BusinessConfiguration[]
+  BusinessHours         BusinessHours[]
+  Clients               Client[]
+  Consents              Consent[]
+  Invoices              Invoice[]
+  Locations             Location[]
+  Notes                 Note[]
+  Orders                Order[]
+  Products              Product[]
+  Services              Service[]
+  ServiceRateTemplates  ServiceRateTemplate[]
+  User                  User                    @relation(fields: [userId], references: [id])
+  Vouchers              Voucher[]
 }
 
 model ServiceRateTemplate {
-  id           String          @id @default(cuid())
-  therapistId  String
-  name         String
-  category     ServiceCategory
-  durationMin  Int
-  priceCents   Int
-  vatRate      VatStatus
-  description  String?
-  isDefault    Boolean         @default(false)
-  isActive     Boolean         @default(true)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-
-  Therapist    Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  id                 String          @id @default(cuid())
+  therapistId        String
+  name               String
+  category           ServiceCategory
+  durationMin        Int
+  priceCents         Int
+  vatRate            VatStatus
+  description        String?
+  isDefault          Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  isActive           Boolean         @default(true)
+  isKleinunternehmer Boolean         @default(false)
+  metadata           Json?
+  travelRateCents    Int?
+  Therapist          Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId, category, isActive])
   @@index([therapistId, isDefault])
 }
 
 model Location {
-  id              String        @id @default(cuid())
+  id              String          @id @default(cuid())
   therapistId     String
   name            String
   type            LocationType
-
-  // Address Components (Austrian format)
+  address         String?
+  travelBufferMin Int             @default(0)
   street          String?
   streetNumber    String?
-  postalCode      String?       // Austrian postal codes (1010-9991)
+  postalCode      String?
   city            String?
-  state           String?       // Austrian state (Bundesland)
-  country         String?       @default("Austria")
-
-  // Legacy address field for backward compatibility
-  address         String?
-
-  // Geocoding and Travel
+  state           String?
+  country         String?         @default("Austria")
   latitude        Float?
   longitude       Float?
   geocodedAt      DateTime?
-  travelBufferMin Int           @default(0)
-  isValidated     Boolean       @default(false)
-
-  // Austrian-specific fields
-  districtCode    String?       // Vienna district codes, etc.
-
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt @default(now())
-
-  Therapist       Therapist     @relation(fields: [therapistId], references: [id])
+  isValidated     Boolean         @default(false)
+  districtCode    String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now()) @updatedAt
   Appointments    Appointment[]
-  BusinessHours   BusinessHours[]
   BlockedTimes    BlockedTime[]
+  BusinessHours   BusinessHours[]
+  Therapist       Therapist       @relation(fields: [therapistId], references: [id])
 
   @@index([therapistId, type])
   @@index([postalCode, city])
@@ -246,20 +129,20 @@ model Client {
   name           String
   email          String?
   phone          String?
-  street         String?
-  postalCode     String?
-  city           String?
-  country        String?
   tags           String[]      @default([])
   healthFlagsEnc String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  Therapist      Therapist     @relation(fields: [therapistId], references: [id])
-  Notes          Note[]
-  Consents       Consent[]
+  street         String?
+  postalCode     String?
+  city           String?
+  country        String?
   Appointments   Appointment[]
+  Therapist      Therapist     @relation(fields: [therapistId], references: [id])
+  Consents       Consent[]
   Invoices       Invoice[]
-  
+  Notes          Note[]
+
   @@index([therapistId, name])
 }
 
@@ -272,40 +155,37 @@ model Service {
   priceCents   Int
   vatRate      VatStatus
   active       Boolean         @default(true)
-  Therapist    Therapist       @relation(fields: [therapistId], references: [id])
   Appointments Appointment[]
-  
+  Therapist    Therapist       @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, category, active])
 }
 
 model Appointment {
-  id              String            @id @default(cuid())
-  therapistId     String
-  clientId        String
-  serviceId       String
-  locationId      String
-  start           DateTime
-  end             DateTime
-  status          AppointmentStatus @default(BOOKED)
-  notes           String?
-  recurrenceType  RecurrenceType    @default(NONE)
-  recurrenceId    String?
-  recurrenceEnd   DateTime?
-
-  // Travel-related fields
-  estimatedTravelTimeMin Int?        // Calculated travel time to location
-  travelDistanceKm      Float?       // Distance from previous appointment
-  travelCostCents       Int?         // Travel cost for this appointment
-  requiresTravelBuffer  Boolean      @default(false)
-
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  Therapist       Therapist         @relation(fields: [therapistId], references: [id])
-  Client          Client            @relation(fields: [clientId], references: [id])
-  Service         Service           @relation(fields: [serviceId], references: [id])
-  Location        Location          @relation(fields: [locationId], references: [id])
-  Invoice         Invoice?
-  Reminders       AppointmentReminder[]
+  id                     String                @id @default(cuid())
+  therapistId            String
+  clientId               String
+  serviceId              String
+  locationId             String
+  start                  DateTime
+  end                    DateTime
+  status                 AppointmentStatus     @default(BOOKED)
+  notes                  String?
+  createdAt              DateTime              @default(now())
+  recurrenceEnd          DateTime?
+  recurrenceId           String?
+  recurrenceType         RecurrenceType        @default(NONE)
+  updatedAt              DateTime              @updatedAt
+  estimatedTravelTimeMin Int?
+  travelDistanceKm       Float?
+  travelCostCents        Int?
+  requiresTravelBuffer   Boolean               @default(false)
+  Client                 Client                @relation(fields: [clientId], references: [id])
+  Location               Location              @relation(fields: [locationId], references: [id])
+  Service                Service               @relation(fields: [serviceId], references: [id])
+  Therapist              Therapist             @relation(fields: [therapistId], references: [id])
+  Reminders              AppointmentReminder[]
+  Invoice                Invoice?
 
   @@index([therapistId, start])
   @@index([therapistId, recurrenceId])
@@ -316,13 +196,13 @@ model BusinessHours {
   id          String    @id @default(cuid())
   therapistId String
   locationId  String?
-  dayOfWeek   Int       // 0 = Sunday, 1 = Monday, etc.
-  startTime   String    // Format: "09:00"
-  endTime     String    // Format: "17:00"
+  dayOfWeek   Int
+  startTime   String
+  endTime     String
   active      Boolean   @default(true)
-  Therapist   Therapist @relation(fields: [therapistId], references: [id])
   Location    Location? @relation(fields: [locationId], references: [id])
-  
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+
   @@unique([therapistId, locationId, dayOfWeek])
   @@index([therapistId, active])
 }
@@ -337,9 +217,9 @@ model BlockedTime {
   title       String
   description String?
   active      Boolean   @default(true)
-  Therapist   Therapist @relation(fields: [therapistId], references: [id])
   Location    Location? @relation(fields: [locationId], references: [id])
-  
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, start, end])
 }
 
@@ -352,43 +232,43 @@ model AppointmentReminder {
   sentAt        DateTime?
   errorMessage  String?
   Appointment   Appointment    @relation(fields: [appointmentId], references: [id])
-  
+
   @@index([status, scheduledFor])
 }
 
 model AustrianHoliday {
-  id          String             @id @default(cuid())
+  id          String              @id @default(cuid())
   name        String
-  date        DateTime           // Specific date for the year
+  date        DateTime
   type        AustrianHolidayType
   year        Int
-  stateCode   String?            // e.g., "W" for Vienna, "T" for Tyrol, null for national
+  stateCode   String?
   description String?
-  active      Boolean            @default(true)
-  
+  active      Boolean             @default(true)
+
   @@unique([date, stateCode])
   @@index([year, active])
   @@index([stateCode, year])
 }
 
 model Invoice {
-  id                String        @id @default(cuid())
-  therapistId       String
-  clientId          String?
-  appointmentId     String?       @unique
-  number            String        @unique
-  status            InvoiceStatus @default(DRAFT)
-  lines             Json
-  totalGrossCents   Int
-  vatBreakdown      Json
-  kleinunternehmer  Boolean
-  pdfUrl            String?
-  createdAt         DateTime      @default(now())
-  Therapist         Therapist     @relation(fields: [therapistId], references: [id])
-  Client            Client?       @relation(fields: [clientId], references: [id])
-  Appointment       Appointment?  @relation(fields: [appointmentId], references: [id])
-  Payments          Payment[]
-  
+  id               String        @id @default(cuid())
+  therapistId      String
+  clientId         String?
+  appointmentId    String?       @unique
+  number           String        @unique
+  status           InvoiceStatus @default(DRAFT)
+  lines            Json
+  totalGrossCents  Int
+  vatBreakdown     Json
+  kleinunternehmer Boolean
+  pdfUrl           String?
+  createdAt        DateTime      @default(now())
+  Appointment      Appointment?  @relation(fields: [appointmentId], references: [id])
+  Client           Client?       @relation(fields: [clientId], references: [id])
+  Therapist        Therapist     @relation(fields: [therapistId], references: [id])
+  Payments         Payment[]
+
   @@index([therapistId, createdAt])
 }
 
@@ -400,7 +280,7 @@ model Payment {
   status      PaymentStatus @default(PENDING)
   meta        Json?
   Invoice     Invoice       @relation(fields: [invoiceId], references: [id])
-  
+
   @@index([invoiceId, status])
 }
 
@@ -413,7 +293,7 @@ model Voucher {
   purchaserEmail     String?
   redeemedByClientId String?
   Therapist          Therapist @relation(fields: [therapistId], references: [id])
-  
+
   @@index([therapistId])
 }
 
@@ -427,25 +307,25 @@ model Product {
   stock       Int?
   fileUrl     String?
   active      Boolean     @default(true)
-  Therapist   Therapist   @relation(fields: [therapistId], references: [id])
   Orders      Order[]
-  
+  Therapist   Therapist   @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, active])
 }
 
 model Order {
-  id                  String      @id @default(cuid())
-  therapistId         String
-  productId           String
-  clientEmail         String
-  amountCents         Int
-  status              OrderStatus @default(PENDING)
-  downloadToken       String?
-  attributionRefCode  String?
-  createdAt           DateTime    @default(now())
-  Therapist           Therapist   @relation(fields: [therapistId], references: [id])
-  Product             Product     @relation(fields: [productId], references: [id])
-  
+  id                 String      @id @default(cuid())
+  therapistId        String
+  productId          String
+  clientEmail        String
+  amountCents        Int
+  status             OrderStatus @default(PENDING)
+  downloadToken      String?
+  attributionRefCode String?
+  createdAt          DateTime    @default(now())
+  Product            Product     @relation(fields: [productId], references: [id])
+  Therapist          Therapist   @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, status, createdAt])
 }
 
@@ -457,9 +337,9 @@ model Consent {
   acceptedAt  DateTime
   ip          String?
   payloadEnc  String
-  Therapist   Therapist @relation(fields: [therapistId], references: [id])
   Client      Client    @relation(fields: [clientId], references: [id])
-  
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, clientId, acceptedAt])
 }
 
@@ -469,9 +349,9 @@ model Note {
   clientId    String
   bodyEnc     String
   createdAt   DateTime  @default(now())
-  Therapist   Therapist @relation(fields: [therapistId], references: [id])
   Client      Client    @relation(fields: [clientId], references: [id])
-  
+  Therapist   Therapist @relation(fields: [therapistId], references: [id])
+
   @@index([therapistId, clientId, createdAt])
 }
 
@@ -495,6 +375,122 @@ model AuditLog {
   ip          String?
   meta        Json?
   Therapist   Therapist @relation(fields: [therapistId], references: [id])
-  
+
   @@index([therapistId, entity, entityId, at])
+}
+
+model BusinessConfiguration {
+  id          String    @id
+  therapistId String
+  configType  String
+  configData  Json
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  Therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@unique([therapistId, configType])
+  @@index([therapistId, configType])
+}
+
+enum Role {
+  OWNER
+  STAFF
+  ACCOUNTANT
+  AFFILIATE
+}
+
+enum TherapistDesignation {
+  HEILMASSEUR
+  MEDIZINISCHER_MASSEUR
+  GEWERBLICHER_MASSEUR
+}
+
+enum VatStatus {
+  KLEINUNTERNEHMER
+  UST_10
+  UST_13
+  UST_20
+}
+
+enum LocationType {
+  HOME
+  CLINIC
+  MOBILE
+  CLUB
+}
+
+enum AppointmentStatus {
+  BOOKED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum RecurrenceType {
+  NONE
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum BlockType {
+  HOLIDAY
+  VACATION
+  BREAK
+  MAINTENANCE
+}
+
+enum AustrianHolidayType {
+  NATIONAL
+  REGIONAL
+  RELIGIOUS
+  COMMEMORATION
+}
+
+enum ReminderType {
+  EMAIL
+  SMS
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+}
+
+enum Provider {
+  STRIPE
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SETTLED
+  FAILED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  VOID
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum ServiceCategory {
+  MASSAGE
+  YOGA
+  CONSULTING
+  OTHER
 }
