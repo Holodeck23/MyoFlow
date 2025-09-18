@@ -210,6 +210,13 @@ export async function PUT(
       const startDate = data.start ? new Date(data.start) : existingAppointment.start
       const endDate = data.end ? new Date(data.end) : existingAppointment.end
 
+      if (endDate <= startDate) {
+        return NextResponse.json(
+          { error: 'Appointment end time must be after start time' },
+          { status: 400 }
+        )
+      }
+
       const conflictingAppointment = await prisma.appointment.findFirst({
         where: {
           therapistId,
