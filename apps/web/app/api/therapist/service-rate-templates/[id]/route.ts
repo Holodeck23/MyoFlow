@@ -107,7 +107,7 @@ export async function PUT(
         vatRate: true,
         description: true,
         isDefault: true,
-        active: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true,
       }
@@ -162,7 +162,7 @@ export async function DELETE(
     // Soft delete - set active to false to preserve historical data
     await prisma.serviceRateTemplate.update({
       where: { id: templateId },
-      data: { active: false },
+      data: { isActive: false },
     })
 
     return NextResponse.json({

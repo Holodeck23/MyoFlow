@@ -9,6 +9,7 @@ import {
   Calendar,
   Users2,
   ClipboardList,
+  FileText,
   DollarSign,
   Package2,
   BarChart3,
@@ -33,8 +34,8 @@ export function Sidebar() {
       available: true
     },
     {
-      name: t('sidebar.calendar', 'Calendar'),
-      href: '/dashboard/appointments',
+      name: t('sidebar.calendar', 'Calendar & Appointments'),
+      href: '/dashboard/calendar',
       icon: Calendar,
       available: true
     },
@@ -47,7 +48,7 @@ export function Sidebar() {
     {
       name: t('sidebar.sessions', 'Sessions & Notes'),
       href: '/dashboard/sessions',
-      icon: ClipboardList,
+      icon: FileText,
       available: false,
       comingSoon: 'v1.7'
     },

@@ -58,8 +58,30 @@ describe('Appointment API time validation', () => {
     mockPrisma.service.findFirst.mockResolvedValue({ id: 'service-1' })
     mockPrisma.location.findFirst.mockResolvedValue({ id: 'location-1' })
     mockPrisma.appointment.findFirst.mockResolvedValue(null)
-    mockPrisma.appointment.create.mockResolvedValue({ id: 'appointment-1' })
-    mockPrisma.appointment.update.mockResolvedValue({ id: 'appointment-1' })
+    const baseAppointment = {
+      id: 'appointment-1',
+      therapistId: 'therapist-1',
+      clientId: 'client-1',
+      serviceId: 'service-1',
+      locationId: 'location-1',
+      start: new Date('2025-01-01T09:00:00.000Z'),
+      end: new Date('2025-01-01T10:00:00.000Z'),
+      status: 'BOOKED',
+      notes: null,
+      recurrenceEnd: null,
+      recurrenceId: null,
+      recurrenceType: 'NONE',
+      estimatedTravelTimeMin: null,
+      travelDistanceKm: null,
+      travelCostCents: null,
+      requiresTravelBuffer: false,
+    }
+    mockPrisma.appointment.create.mockResolvedValue(baseAppointment)
+    mockPrisma.appointment.update.mockResolvedValue({
+      ...baseAppointment,
+      start: new Date('2025-01-01T10:30:00.000Z'),
+      end: new Date('2025-01-01T11:30:00.000Z'),
+    })
   })
 
   it('rejects appointment creation when end is not after start', async () => {
@@ -93,6 +115,14 @@ describe('Appointment API time validation', () => {
       start: new Date('2025-01-01T09:00:00.000Z'),
       end: new Date('2025-01-01T10:00:00.000Z'),
       status: 'BOOKED',
+      notes: null,
+      recurrenceEnd: null,
+      recurrenceId: null,
+      recurrenceType: 'NONE',
+      estimatedTravelTimeMin: null,
+      travelDistanceKm: null,
+      travelCostCents: null,
+      requiresTravelBuffer: false,
     }
 
     mockPrisma.appointment.findFirst

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -362,4 +362,8 @@ describe('Travel-Aware Scheduling Models', () => {
       expect(viennaLocations.length).toBeGreaterThanOrEqual(2)
     })
   })
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
 })
