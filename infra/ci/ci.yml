@@ -24,15 +24,6 @@ jobs:
         ports:
           - 5432:5432
       
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
       - name: Checkout
@@ -81,6 +72,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
+      - name: Seed database
+        run: pnpm --filter db seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
+
       - name: Lint
         run: pnpm lint
 
@@ -91,8 +87,9 @@ jobs:
         run: pnpm build
 
       - name: Run unit tests
-        run: pnpm test
-        if: false # TODO-CLAUDE: Enable once tests are written
+        run: pnpm test:run
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
       - name: Run E2E tests
         run: pnpm test:e2e
