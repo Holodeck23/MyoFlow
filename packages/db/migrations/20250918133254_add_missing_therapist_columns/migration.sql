@@ -31,4 +31,20 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Therapist' AND column_name='travelSettings') THEN
         ALTER TABLE "Therapist" ADD COLUMN "travelSettings" JSONB;
     END IF;
+
+    -- Add missing ServiceRateTemplate columns
+    -- Add isKleinunternehmer column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ServiceRateTemplate' AND column_name='isKleinunternehmer') THEN
+        ALTER TABLE "ServiceRateTemplate" ADD COLUMN "isKleinunternehmer" BOOLEAN NOT NULL DEFAULT false;
+    END IF;
+
+    -- Add metadata column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ServiceRateTemplate' AND column_name='metadata') THEN
+        ALTER TABLE "ServiceRateTemplate" ADD COLUMN "metadata" JSONB;
+    END IF;
+
+    -- Add travelRateCents column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ServiceRateTemplate' AND column_name='travelRateCents') THEN
+        ALTER TABLE "ServiceRateTemplate" ADD COLUMN "travelRateCents" INTEGER;
+    END IF;
 END $$;
