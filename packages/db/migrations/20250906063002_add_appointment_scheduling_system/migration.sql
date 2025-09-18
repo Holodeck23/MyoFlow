@@ -24,7 +24,11 @@ ALTER TABLE "Appointment" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAU
 ADD COLUMN     "recurrenceEnd" TIMESTAMP(3),
 ADD COLUMN     "recurrenceId" TEXT,
 ADD COLUMN     "recurrenceType" "RecurrenceType" NOT NULL DEFAULT 'NONE',
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+UPDATE "Appointment" SET "updatedAt" = NOW() WHERE "updatedAt" IS NULL;
+
+ALTER TABLE "Appointment" ALTER COLUMN "updatedAt" DROP DEFAULT;
 
 -- CreateTable
 CREATE TABLE "BusinessHours" (

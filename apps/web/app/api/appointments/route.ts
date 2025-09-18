@@ -184,6 +184,15 @@ export async function POST(request: NextRequest) {
     }
 
     const data = validation.data
+    const startDate = new Date(data.start)
+    const endDate = new Date(data.end)
+
+    if (endDate <= startDate) {
+      return NextResponse.json(
+        { error: 'Appointment end time must be after start time' },
+        { status: 400 }
+      )
+    }
 
     // Verify client belongs to therapist
     const client = await prisma.client.findFirst({
@@ -232,9 +241,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for appointment conflicts
-    const startDate = new Date(data.start)
-    const endDate = new Date(data.end)
-
     const conflictingAppointment = await prisma.appointment.findFirst({
       where: {
         therapistId,
