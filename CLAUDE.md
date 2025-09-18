@@ -660,11 +660,13 @@ Core features align with "Must-Have MVP" requirements: ✅ Secure client managem
 - **Three-branch maximum** for infrastructure changes (learned the hard way)
 - **CI-first mentality** - if it doesn't pass CI, it's not done
 - **Migration hygiene** - always test database changes before switching contexts
+- **Git branch hygiene** - commit to correct branch, use cherry-pick to fix mistakes
 
 ---
 
 ## 🔄 **Update Log**
 
+**2025-09-18 18:56:** Test Invoice Creation Complete - added 3 test invoices to database seed (2025-001 SENT €65, 2025-002 PAID €80, 2025-003 DRAFT €75) with Austrian compliance, sequential numbering, and proper VAT handling; fixed git branch management issue by cherry-picking commit to correct branch
 **2025-09-17 08:55:** Google Maps Integration & Upper Austria Focus Complete - real travel calculations working (Linz ↔ Leonding = 8.5km, 15min, €6.80), all test data converted to 4xxx postal codes, grant application ready
 **2025-09-16 12:20:** Sprint 1.7 Button Transitions & Clean Sign-in Complete - smooth 300ms blue-to-red hover transitions, clean white sign-in page design, identified 10 files with hardcoded CSS for next cleanup phase
 **2025-09-15 19:30:** Complete design system overhaul - replaced broken CSS variables with clean white theme, professional Lucide React icons, fixed Kleinunternehmer math display
@@ -790,6 +792,7 @@ Following the documented single-branch approach for safe implementation.
 - ✅ **Professional appearance** - clean UI with Austrian branding
 - ✅ **Technical sophistication** - Google Maps, encryption, compliance
 - ✅ **Business value** - solves real travel time calculation needs
+- ✅ **Test data populated** - 3 realistic invoices demonstrate Austrian compliance
 
 ### **🚀 NEXT DEVELOPMENT SESSION:**
 **Recommended Priority:** Calendar view implementation
@@ -799,3 +802,13 @@ Following the documented single-branch approach for safe implementation.
 - **Dependencies:** None - builds on existing appointment data
 
 **Alternative:** Travel settings page for user configuration
+
+### **📊 TEST DATA STATUS:**
+**Invoices:** 3 test invoices with mixed statuses (SENT, PAID, DRAFT)
+- 2025-001 (SENT) - Johann Weber - Entspannungsmassage 45min - €65
+- 2025-002 (PAID) - Maria Schmidt - Klassische Massage 60min - €80
+- 2025-003 (DRAFT) - Anna Huber - Triggerpunkt-Massage 45min - €75
+
+**Clients:** 3 test clients with Austrian data (Maria Schmidt, Johann Weber, Anna Huber)
+**Appointments:** 2 upcoming appointments linked to invoices
+**Services:** 3 massage services with Austrian pricing
