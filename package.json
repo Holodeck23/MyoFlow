@@ -16,14 +16,15 @@
     "prisma:generate": "pnpm --filter db prisma generate",
     "prisma:studio": "pnpm --filter db prisma studio",
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
-    "docker:down": "docker compose -f infra/docker/docker-compose.yml down"
+    "docker:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "db:test": "docker compose -f infra/docker/docker-compose.yml up -d && sleep 5 && export DATABASE_URL=postgresql://postgres:password@localhost:5432/myoflow && pnpm prisma:migrate:dev && pnpm --filter db seed"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.56.0",
-    "eslint-config-next": "14.0.4",
+    "eslint-config-next": "14.2.13",
     "prettier": "^3.0.0",
     "turbo": "^1.10.0",
     "typescript": "^5.0.0"
