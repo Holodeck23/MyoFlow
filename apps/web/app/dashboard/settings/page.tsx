@@ -45,12 +45,12 @@ export default function SettingsPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="text-center py-8">
           <div className="text-4xl mb-4">⚙️</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Settings Dashboard</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('settings.placeholder.title', 'Settings overview')}</h3>
           <p className="text-gray-500">
-            Settings functionality is being developed in the user settings branch.
+            {t('settings.placeholder.description', 'Settings functionality is being developed in the user settings branch.')}
           </p>
           <p className="text-sm text-gray-400 mt-2">
-            This is the calendar implementation branch focused on appointment visualization.
+            {t('settings.placeholder.note', 'This branch focuses on calendar implementation and appointment visualization.')}
           </p>
         </div>
       </div>
