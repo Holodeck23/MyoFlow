@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslation } from '@myoflow/lib'
 
@@ -55,18 +55,7 @@ export default function AppointmentsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-
-    if (status === 'authenticated') {
-      fetchAppointments()
-    }
-  }, [status, router])
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       const response = await fetch('/api/appointments')
       if (!response.ok) {
@@ -79,7 +68,18 @@ export default function AppointmentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchAppointments()
+    }
+  }, [status, router, fetchAppointments])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
