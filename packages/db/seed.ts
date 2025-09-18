@@ -223,6 +223,89 @@ async function main() {
 
   console.log('✅ Created appointments:', appointments.length)
 
+  // Create test invoices
+  const invoices = await Promise.all([
+    prisma.invoice.create({
+      data: {
+        therapistId: testTherapist.id,
+        clientId: clients[1].id, // Johann Weber
+        appointmentId: appointments[1].id, // Entspannungsmassage appointment
+        number: '2025-001',
+        status: 'SENT',
+        lines: [{
+          description: 'Entspannungsmassage 45min',
+          quantity: 1,
+          unitPriceCents: 6500,
+          vatRate: 'KLEINUNTERNEHMER',
+          totalCents: 6500
+        }],
+        totalGrossCents: 6500,
+        vatBreakdown: {
+          kleinunternehmer: 6500,
+          vat10: 0,
+          vat13: 0,
+          vat20: 0,
+          totalVat: 0,
+          totalNet: 6500
+        },
+        kleinunternehmer: true
+      }
+    }),
+    prisma.invoice.create({
+      data: {
+        therapistId: testTherapist.id,
+        clientId: clients[0].id, // Maria Schmidt
+        appointmentId: appointments[0].id, // Klassische Massage appointment
+        number: '2025-002',
+        status: 'PAID',
+        lines: [{
+          description: 'Klassische Massage 60min',
+          quantity: 1,
+          unitPriceCents: 8000,
+          vatRate: 'KLEINUNTERNEHMER',
+          totalCents: 8000
+        }],
+        totalGrossCents: 8000,
+        vatBreakdown: {
+          kleinunternehmer: 8000,
+          vat10: 0,
+          vat13: 0,
+          vat20: 0,
+          totalVat: 0,
+          totalNet: 8000
+        },
+        kleinunternehmer: true
+      }
+    }),
+    prisma.invoice.create({
+      data: {
+        therapistId: testTherapist.id,
+        clientId: clients[2].id, // Anna Huber
+        number: '2025-003',
+        status: 'DRAFT',
+        lines: [{
+          description: 'Triggerpunkt-Massage 45min',
+          quantity: 1,
+          unitPriceCents: 7500,
+          vatRate: 'KLEINUNTERNEHMER',
+          totalCents: 7500
+        }],
+        totalGrossCents: 7500,
+        vatBreakdown: {
+          kleinunternehmer: 7500,
+          vat10: 0,
+          vat13: 0,
+          vat20: 0,
+          totalVat: 0,
+          totalNet: 7500
+        },
+        kleinunternehmer: true
+      }
+    })
+  ])
+
+  console.log('✅ Created test invoices:', invoices.map(inv => `${inv.number} (${inv.status}): €${inv.totalGrossCents / 100}`))
+
   console.log('🎉 Database seed completed successfully!')
   console.log(`
 Test login credentials:
@@ -230,8 +313,9 @@ Test login credentials:
 - This will work with both Google OAuth and email authentication
 - Therapist slug: dr-sarah-mueller
 - Created ${clients.length} test clients
-- Created ${services.length} services  
+- Created ${services.length} services
 - Created ${appointments.length} upcoming appointments
+- Created ${invoices.length} test invoices
 `)
 }
 
