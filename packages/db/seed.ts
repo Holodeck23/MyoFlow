@@ -30,6 +30,7 @@ async function main() {
       kleinunternehmer: true,
       annualGrossCents: 0,
       brandColor: '#3B82F6',
+      certificates: [], // Explicitly set certificates array
     }
   })
 
