@@ -17,6 +17,11 @@ export default function SignIn() {
   const [message, setMessage] = useState('')
   const [providers, setProviders] = useState<any>(null)
 
+  // Reset loading state on component mount to fix stuck states
+  useEffect(() => {
+    setIsLoading(false)
+  }, [])
+
   useEffect(() => {
     getProviders().then(setProviders)
   }, [])
@@ -161,6 +166,12 @@ export default function SignIn() {
               disabled={isLoading || !email || !password}
               className="w-full"
               size="lg"
+              onClick={() => {
+                // Reset any stuck loading state
+                if (isLoading) {
+                  setIsLoading(false)
+                }
+              }}
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
