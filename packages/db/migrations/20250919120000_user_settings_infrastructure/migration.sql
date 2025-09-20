@@ -1,6 +1,3 @@
--- Enable PostGIS for geographic calculations (idempotent)
-CREATE EXTENSION IF NOT EXISTS postgis;
-
 -- New enum types
 DO $$ BEGIN
   CREATE TYPE "PricingMode" AS ENUM ('NET', 'GROSS');

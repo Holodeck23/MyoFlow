@@ -10,6 +10,7 @@ _Last updated: 2025-09-18_
 - Documentation remains spec-first via Agent OS; redundant summaries are being consolidated into this file and `DECISION_LOG.md`.
 
 ## Product Track
+- Detailed clinic/AI roadmap now lives in [docs/clinic-ai-roadmap.md](docs/clinic-ai-roadmap.md) for phased planning.
 - Sprint 1.1–1.4 delivered auth, client management, scheduling, and Austrian invoice PDFs.
 - **Calendar Experience (In Flight):** modularize dashboard calendar, add travel timeline, unblock API integration.
 - **Travel-Aware Scheduling:** enhance routing, block conflicts across locations, surface surcharges.
