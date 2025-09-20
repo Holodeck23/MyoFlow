@@ -5,6 +5,7 @@ import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
 import { encryptString, decryptString, requireRole } from '@myoflow/lib'
 import { logAudit } from '@myoflow/db'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const CreateClientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -18,49 +19,10 @@ const CreateClientSchema = z.object({
   healthFlags: z.string().optional(),
 })
 
-async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.email) {
-    throw new Error('Unauthorized')
-  }
-
-  // Find or create user using email as unique identifier
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: user.id }
-  })
-
-  if (!therapist) {
-
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
-  }
-
-  return therapist.id
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    const therapistId = await getTherapistId(session)
+    const { therapist, session } = await requireTherapist(request)
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''
@@ -68,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const clients = await prisma.client.findMany({
       where: {
-        therapistId,
+        therapistId: therapist.id,
         AND: [
           search
             ? {
@@ -101,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     await logAudit({
       actorUserId: session.user.id,
-      therapistId,
+      therapistId: therapist.id,
       entity: 'client',
       entityId: 'list',
       action: 'read',
@@ -121,10 +83,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const therapistId = await getTherapistId(session)
+
+    // POST endpoints can create missing accounts
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
 
     const body = await request.json()
     const validatedData = CreateClientSchema.parse(body)
@@ -134,7 +98,7 @@ export async function POST(request: NextRequest) {
     const client = await prisma.client.create({
       data: {
         ...rest,
-        therapistId,
+        therapistId: therapist.id,
         email: rest.email || null,
         tags: rest.tags || [],
         street: rest.street || null,
@@ -147,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     await logAudit({
       actorUserId: session.user.id,
-      therapistId,
+      therapistId: therapist.id,
       entity: 'client',
       entityId: client.id,
       action: 'create',
