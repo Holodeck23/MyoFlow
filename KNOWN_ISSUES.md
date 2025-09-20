@@ -1,6 +1,14 @@
 # Known Issues - User Settings Branch
 
-## 🐛 Critical Issues
+**Last Updated:** 2025-09-20
+**Critical Issues Resolved:** 3 of 7 issues ✅
+
+## ✅ Recently Fixed (2025-09-20)
+- **Public Invoice Security Vulnerability** - Implemented signed token authentication and removed PII exposure
+- **GET Handler Side Effects** - Made API endpoints idempotent and side-effect free
+- **Encryption Key Inconsistency** - Standardized on ENCRYPTION_KEY_B64 across all packages
+
+## 🐛 Outstanding Issues
 
 ### 1. Translation System Layout Glitches
 **Status:** Critical - Severe layout shifts during language switching
@@ -25,7 +33,36 @@
 - Implement proper CSS layout strategy for bilingual content
 - Consider fixed-width containers or text overflow handling
 
-### 4. Settings Page Performance & Bundling (2025-09-19)
+### 2. Public Invoice Endpoint Exposes Tenant Data ✅ FIXED
+**Status:** ~~Critical~~ → Resolved (2025-09-20)
+**Affected:** `GET /api/public/invoices/[id]`
+**Solution Applied:**
+- ✅ Implemented signed token authentication using existing intake token infrastructure
+- ✅ Added tenant scoping to prevent cross-tenant access
+- ✅ Removed PII exposure by limiting fields (only client name, no email/phone/address)
+- ✅ Added expiring tokens (7-day default) with cryptographic verification
+- ✅ Endpoint now requires `?token=<signed_token>` parameter for access
+
+### 3. Idempotent API Regressions in Settings GET handlers ✅ FIXED
+**Status:** ~~High~~ → Resolved (2025-09-20)
+**Affected:** `/api/settings/overview`, `/api/clients`
+**Solution Applied:**
+- ✅ Created shared `requireTherapist()` helper for read-only authentication
+- ✅ Removed upserts from GET handlers in settings/overview and clients endpoints
+- ✅ Added `ensureTherapistAccount()` helper for POST endpoints that can create accounts
+- ✅ Converted revenue calculation to cached approach with 24-hour cache window
+- ✅ GET requests are now side-effect free and fail cleanly for missing accounts
+
+### 4. Encryption Secrets Out of Sync ✅ FIXED
+**Status:** ~~High~~ → Resolved (2025-09-20)
+**Affected:** Client CRUD, consent submission, any encryption utility usage
+**Solution Applied:**
+- ✅ Standardized all encryption utilities to use `ENCRYPTION_KEY_B64` environment variable
+- ✅ Updated `packages/lib/security/crypto.ts` to use consistent variable name
+- ✅ Removed inconsistent `DATA_ENCRYPTION_KEY` usage from legacy code
+- ✅ `.env.example` already correctly documents `ENCRYPTION_KEY_B64`
+
+### 5. Settings Page Performance & Bundling (2025-09-19)
 **Status:** Medium - Rebuilds ~12s, initial load sluggish
 
 **Findings:**
@@ -39,7 +76,7 @@
 - Move default seeding out of GET handlers; cache or queue the revenue aggregate.
 - Track in a follow-up branch before shipping settings UI.
 
-### 2. Performance Issues
+### 6. Performance Issues
 **Status:** Medium - Development workflow impact
 **Symptoms:**
 - Settings page compilation: 12.7+ seconds
@@ -50,7 +87,7 @@
 - Development velocity significantly reduced
 - Testing translation changes becomes time-consuming
 
-### 3. Settings Backend / UI Gaps (2025-09-19)
+### 7. Settings Backend / UI Gaps (2025-09-19)
 **Status:** High - Blocks user settings delivery
 
 **Findings:**
