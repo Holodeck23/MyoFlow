@@ -96,7 +96,7 @@ function Footer() {
             <img src="/logo.png" alt="MyoFlow" className="h-6 w-6" />
             <span className="font-semibold text-gray-900">MyoFlow</span>
           </div>
-          <p className="text-sm text-gray-600">{t('dashboardLayout.footer.tagline')}</p>
+          <p className="text-sm text-gray-600 max-w-xs truncate">{t('dashboardLayout.footer.tagline')}</p>
 
           {/* Social Links */}
           <div className="flex items-center space-x-3">
@@ -118,40 +118,40 @@ function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm min-w-0">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.product.title')}</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm min-w-0 flex-shrink-0">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate">{t('dashboardLayout.footer.sections.product.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.features')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.pricing')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.faq')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.product.features')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.product.pricing')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.product.faq')}</a></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.support.title')}</h3>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate">{t('dashboardLayout.footer.sections.support.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.helpCenter')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.contact')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.status')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.support.helpCenter')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.support.contact')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.support.status')}</a></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.legal.title')}</h3>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate">{t('dashboardLayout.footer.sections.legal.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.privacy')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.terms')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.imprint')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.legal.privacy')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.legal.terms')}</a></li>
+              <li><a href="#" className="hover:text-blue-600 block truncate">{t('dashboardLayout.footer.sections.legal.imprint')}</a></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.compliance.title')}</h3>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate">{t('dashboardLayout.footer.sections.compliance.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.gdpr')}</span></li>
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.vat')}</span></li>
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.smallBusiness')}</span></li>
+              <li><span className="text-green-600 block truncate">✓ {t('dashboardLayout.footer.sections.compliance.gdpr')}</span></li>
+              <li><span className="text-green-600 block truncate">✓ {t('dashboardLayout.footer.sections.compliance.vat')}</span></li>
+              <li><span className="text-green-600 block truncate">✓ {t('dashboardLayout.footer.sections.compliance.smallBusiness')}</span></li>
             </ul>
           </div>
         </div>
