@@ -216,22 +216,22 @@ model Appointment {
 
 model TherapistCredential {
   id                 String            @id @default(cuid())
-  therapistId        String
-  credentialType     CredentialType
+  therapistId        String            @map("therapist_id")
+  credentialType     CredentialType    @map("credential_type")
   title              String
-  issuingAuthority   String
-  credentialNumber   String?
+  issuingAuthority   String            @map("issuing_authority")
+  credentialNumber   String?           @map("credential_number")
   specialization     String?
-  issueDate          DateTime?
-  expirationDate     DateTime?
-  renewalRequired    Boolean          @default(false)
+  issueDate          DateTime?         @map("issue_date")
+  expirationDate     DateTime?         @map("expiration_date")
+  renewalRequired    Boolean          @default(false) @map("renewal_required")
   status             CredentialStatus @default(ACTIVE)
-  verificationUrl    String?
-  verificationStatus CredentialVerificationStatus @default(UNVERIFIED)
-  documentStorageKey String?
+  verificationUrl    String?           @map("verification_url")
+  verificationStatus CredentialVerificationStatus @default(UNVERIFIED) @map("verification_status")
+  documentStorageKey String?           @map("document_storage_key")
   notes              String?
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
   Therapist          Therapist        @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId, credentialType])
@@ -326,17 +326,17 @@ model UserPreferences {
 
 model ExportConfiguration {
   id                String               @id @default(cuid())
-  therapistId       String
-  exportType        ExportType
-  targetSystem      ExportTargetSystem
-  configurationName String
+  therapistId       String               @map("therapist_id")
+  exportType        ExportType           @map("export_type")
+  targetSystem      ExportTargetSystem   @map("target_system")
+  configurationName String               @map("configuration_name")
   description       String?
-  isDefault         Boolean              @default(false)
-  scheduleCron      String?
-  fieldMappings     Json?
-  lastRunAt         DateTime?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  isDefault         Boolean              @default(false) @map("is_default")
+  scheduleCron      String?              @map("schedule_cron")
+  fieldMappings     Json?                @map("field_mappings")
+  lastRunAt         DateTime?            @map("last_run_at")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
   Therapist         Therapist            @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId, targetSystem])
