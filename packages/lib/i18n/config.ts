@@ -1,6 +1,6 @@
 export type Locale = 'de' | 'en'
 
-export const defaultLocale: Locale = 'de'
+export const defaultLocale: Locale = 'en'
 export const locales: Locale[] = ['en', 'de']
 
 export interface Dictionary {

@@ -90,6 +90,7 @@
     "title": "Appointments",
     "subtitle": "Manage your scheduled appointments",
     "loading": "Loading appointments...",
+    "redirectingToCalendar": "Redirecting to calendar...",
     "noAppointments": "No appointments found.",
     "createFirst": "Create your first appointment to get started.",
     "fetchError": "Failed to fetch appointments",
@@ -200,6 +201,7 @@
     "detailsCta": "Details →",
     "todayPlan": "📅 Today’s plan",
     "noAppointmentsToday": "No appointments today",
+    "loading": "Loading calendar...",
     "legend": {
       "title": "📊 Calendar legend",
       "capacity": "Capacity",
@@ -375,6 +377,53 @@
       "title": "Settings overview",
       "description": "Settings functionality is being developed in the user settings branch.",
       "note": "This branch focuses on calendar implementation and appointment visualization."
+    },
+    "profile": {
+      "title": "Profile Settings",
+      "description": "Manage your business information and professional qualifications.",
+      "current": {
+        "title": "Current Profile",
+        "businessName": "Practice Name",
+        "businessAddress": "Business Address",
+        "email": "Email",
+        "designation": "Professional Title",
+        "vatStatus": "VAT Status",
+        "qualifications": "Qualifications",
+        "notConfigured": "Not configured yet",
+        "kleinunternehmer": "Small Business",
+        "regular": "Regular",
+        "certificates": "certificate(s)"
+      },
+      "placeholder": {
+        "title": "Profile Management",
+        "description": "Profile management will be implemented in an upcoming version.",
+        "button": "Coming Soon"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "profile": "Edit Profile",
+      "profileDesc": "Update business information",
+      "pricing": "Adjust Prices",
+      "pricingDesc": "Manage treatment prices",
+      "export": "Export Data",
+      "exportDesc": "Create BMD/RZL export"
+    },
+    "completion": {
+      "title": "Profile Completeness",
+      "description": "Complete your profile for optimal usage",
+      "missingTitle": "Still to do:"
+    },
+    "status": {
+      "title": "System Status",
+      "database": "Database",
+      "encryption": "Encryption",
+      "compliance": "GDPR Compliance"
+    },
+    "help": {
+      "title": "Help & Support",
+      "documentation": "Documentation",
+      "support": "Contact Support"
     }
   }
 }

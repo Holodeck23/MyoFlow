@@ -145,7 +145,7 @@ export function Sidebar() {
                 title={isCollapsed ? item.name : undefined}
               >
                 <IconComponent size={20} className={`flex-shrink-0 ${!isCollapsed && 'mr-3'}`} />
-                {!isCollapsed && <span className="flex-1">{item.name}</span>}
+                {!isCollapsed && <span className="flex-1 min-w-0 truncate">{item.name}</span>}
 
                 {/* Notification Badge */}
                 {item.badge && !isCollapsed && (
@@ -179,7 +179,7 @@ export function Sidebar() {
           `}
         >
           <Settings size={20} className="mr-3 flex-shrink-0" />
-          <span className="flex-1">{t('sidebar.settings', 'Settings')}</span>
+          <span className="flex-1 min-w-0 truncate">{t('sidebar.settings', 'Settings')}</span>
         </Link>
       </div>
     </div>

@@ -53,6 +53,21 @@ model Therapist {
   languagePreference    String                  @default("de")
   notificationSettings  Json?
   travelSettings        Json?
+  profileCompletionScore Int                     @default(0) @map("profile_completion_score")
+  settingsLastUpdated   DateTime?               @map("settings_last_updated")
+  settingsVersion       Int                     @default(1) @map("settings_version")
+  publicProfileSlug     String?                 @unique @map("public_profile_slug")
+  publicProfileDescription String?             @map("public_profile_description")
+  businessType          String?               @map("business_type")
+  businessRegistrationNumber String?          @map("business_registration_number")
+  taxAdvisorName        String?               @map("tax_advisor_name")
+  taxAdvisorEmail       String?               @map("tax_advisor_email")
+  taxAdvisorPhone       String?               @map("tax_advisor_phone")
+  TaxComplianceSettings TaxComplianceSettings?
+  travelSettingsDetail   TravelSettings?
+  Preferences           UserPreferences?
+  ExportConfigurations  ExportConfiguration[]
+  Credentials           TherapistCredential[]
   Affiliates            Affiliate[]
   Appointments          Appointment[]
   AuditLogs             AuditLog[]
@@ -88,6 +103,12 @@ model ServiceRateTemplate {
   isKleinunternehmer Boolean         @default(false)
   metadata           Json?
   travelRateCents    Int?
+  pricingMode        PricingMode     @default(NET) @map("pricing_mode")
+  travelIncluded     Boolean         @default(false) @map("travel_included")
+  maxParticipants    Int?            @map("max_participants")
+  defaultLocationId  String?         @map("default_location_id")
+  bookingNotes       String?         @map("booking_notes")
+  DefaultLocation    Location?       @relation("ServiceTemplateDefaultLocation", fields: [defaultLocationId], references: [id])
   Therapist          Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId, category, isActive])
@@ -114,6 +135,7 @@ model Location {
   districtCode    String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @default(now()) @updatedAt
+  DefaultForRates ServiceRateTemplate[] @relation("ServiceTemplateDefaultLocation")
   Appointments    Appointment[]
   BlockedTimes    BlockedTime[]
   BusinessHours   BusinessHours[]
@@ -190,6 +212,136 @@ model Appointment {
   @@index([therapistId, start])
   @@index([therapistId, recurrenceId])
   @@index([therapistId, locationId, start])
+}
+
+model TherapistCredential {
+  id                 String            @id @default(cuid())
+  therapistId        String            @map("therapist_id")
+  credentialType     CredentialType    @map("credential_type")
+  title              String
+  issuingAuthority   String            @map("issuing_authority")
+  credentialNumber   String?           @map("credential_number")
+  specialization     String?
+  issueDate          DateTime?         @map("issue_date")
+  expirationDate     DateTime?         @map("expiration_date")
+  renewalRequired    Boolean          @default(false) @map("renewal_required")
+  status             CredentialStatus @default(ACTIVE)
+  verificationUrl    String?           @map("verification_url")
+  verificationStatus CredentialVerificationStatus @default(UNVERIFIED) @map("verification_status")
+  documentStorageKey String?           @map("document_storage_key")
+  notes              String?
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  Therapist          Therapist        @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId, credentialType])
+  @@index([therapistId, status])
+  @@index([therapistId, expirationDate])
+  @@unique([therapistId, title])
+}
+
+model TravelSettings {
+  id                       String          @id @default(cuid())
+  therapistId              String          @unique @map("therapist_id")
+  baseAddressLine1         String          @map("base_address_line1")
+  baseAddressLine2         String?         @map("base_address_line2")
+  baseCity                 String          @map("base_city")
+  basePostalCode           String          @map("base_postal_code")
+  baseState                String?         @map("base_state")
+  baseCountry              String          @default("Austria") @map("base_country")
+  latitude                 Float?
+  longitude                Float?
+  serviceRadiusKm          Int             @default(20) @map("service_radius_km")
+  maximumTravelDistanceKm  Int?            @map("maximum_travel_distance_km")
+  transportMethod          TransportMethod @default(CAR) @map("transport_method")
+  ratePerKmCents           Int             @default(42) @map("rate_per_km_cents")
+  minimumTravelChargeCents Int             @default(500) @map("minimum_travel_charge_cents")
+  travelBufferMinutes      Int             @default(15) @map("travel_buffer_minutes")
+  dailyTravelBudgetMinutes Int?            @map("daily_travel_budget_minutes")
+  preferredTransportNotes  String?         @map("preferred_transport_notes")
+  preferredRegions         String[]        @map("preferred_regions")
+  excludedRegions          String[]        @map("excluded_regions")
+  avoidHighways            Boolean         @default(false) @map("avoid_highways")
+  avoidTolls               Boolean         @default(false) @map("avoid_tolls")
+  realTimeTraffic          Boolean         @default(true) @map("real_time_traffic")
+  backupTransportMethod    String?         @map("backup_transport_method")
+  emergencyContactName     String?         @map("emergency_contact_name")
+  emergencyContactPhone    String?         @map("emergency_contact_phone")
+  createdAt                DateTime        @default(now()) @map("created_at")
+  updatedAt                DateTime        @updatedAt @map("updated_at")
+  Therapist                Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([basePostalCode, baseCity])
+}
+
+model TaxComplianceSettings {
+  id                             String    @id @default(cuid())
+  therapistId                    String    @unique @map("therapist_id")
+  vatNumber                      String?   @map("vat_number")
+  vatRegistered                  Boolean   @default(false) @map("vat_registered")
+  kleinunternehmerActive         Boolean   @default(true) @map("kleinunternehmer_active")
+  kleinunternehmerThresholdCents Int       @default(5500000) @map("kleinunternehmer_threshold_cents")
+  currentYearRevenueCents        Int       @default(0) @map("current_year_revenue_cents")
+  revenueYear                    Int?      @map("revenue_year")
+  kleinunternehmerStart          DateTime? @map("kleinunternehmer_start")
+  kleinunternehmerEnd            DateTime? @map("kleinunternehmer_end")
+  legalNoticeTemplate            String?   @map("legal_notice_template")
+  taxAdvisorName                 String?   @map("tax_advisor_name")
+  taxAdvisorEmail                String?   @map("tax_advisor_email")
+  taxAdvisorPhone                String?   @map("tax_advisor_phone")
+  vatRegistrationDate            DateTime? @map("vat_registration_date")
+  revenueLastCalculatedAt        DateTime? @map("revenue_last_calculated_at")
+  rksvEnabled                    Boolean   @default(false) @map("rksv_enabled")
+  cashRegisterId                 String?   @map("cash_register_id")
+  signatureDeviceId              String?   @map("signature_device_id")
+  rksvNotes                      String?   @map("rksv_notes")
+  lastRksvAuditAt                DateTime? @map("last_rksv_audit_at")
+  nextRksvAuditDue               DateTime? @map("next_rksv_audit_due")
+  createdAt                      DateTime  @default(now()) @map("created_at")
+  updatedAt                      DateTime  @updatedAt @map("updated_at")
+  Therapist                      Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([vatNumber])
+}
+
+model UserPreferences {
+  id                       String    @id @default(cuid())
+  therapistId              String    @unique @map("therapist_id")
+  language                 Locale    @default(DE)
+  timezone                 String    @default("Europe/Vienna")
+  currency                 Currency  @default(EUR)
+  dateFormat               String    @default("DD.MM.YYYY") @map("date_format")
+  numberFormat             String    @default("1.234,56") @map("number_format")
+  appointmentReminderDays  Int       @default(1) @map("appointment_reminder_days")
+  enableEmailNotifications Boolean   @default(true) @map("enable_email_notifications")
+  enableSmsNotifications   Boolean   @default(false) @map("enable_sms_notifications")
+  enableComplianceAlerts   Boolean   @default(true) @map("enable_compliance_alerts")
+  enableTravelAlerts       Boolean   @default(true) @map("enable_travel_alerts")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+  Therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+}
+
+model ExportConfiguration {
+  id                String               @id @default(cuid())
+  therapistId       String               @map("therapist_id")
+  exportType        ExportType           @map("export_type")
+  targetSystem      ExportTargetSystem   @map("target_system")
+  configurationName String               @map("configuration_name")
+  description       String?
+  isDefault         Boolean              @default(false) @map("is_default")
+  scheduleCron      String?              @map("schedule_cron")
+  fieldMappings     Json?                @map("field_mappings")
+  lastRunAt         DateTime?            @map("last_run_at")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  Therapist         Therapist            @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId, targetSystem])
+  @@index([therapistId, isDefault])
+  @@unique([therapistId, targetSystem, configurationName])
 }
 
 model BusinessHours {
@@ -411,6 +563,65 @@ enum VatStatus {
   UST_10
   UST_13
   UST_20
+}
+
+enum PricingMode {
+  NET
+  GROSS
+}
+
+enum CredentialType {
+  PROFESSIONAL_LICENSE
+  CERTIFICATION
+  QUALIFICATION
+  CONTINUING_EDUCATION
+  SPECIALIZATION
+  INSURANCE_APPROVAL
+}
+
+enum CredentialStatus {
+  ACTIVE
+  EXPIRING
+  EXPIRED
+  SUSPENDED
+  PENDING
+}
+
+enum CredentialVerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  PENDING
+}
+
+enum TransportMethod {
+  CAR
+  PUBLIC_TRANSPORT
+  BICYCLE
+  WALKING
+  MOTORCYCLE
+}
+
+enum Locale {
+  DE
+  EN
+}
+
+enum Currency {
+  EUR
+}
+
+enum ExportType {
+  ACCOUNTING_EXPORT
+  DATA_BACKUP
+  CUSTOM_REPORT
+}
+
+enum ExportTargetSystem {
+  BMD
+  RZL
+  DATEV
+  CSV_GENERIC
+  CUSTOM
 }
 
 enum LocationType {

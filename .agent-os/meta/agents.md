@@ -1,10 +1,99 @@
-# MyoFlow Agent Coordination Guide
+# 🤖 AGENT COORDINATION STATUS
+**Session:** Settings Performance Optimization
+**Updated:** September 20, 2025 07:30 CET
 
-_Last updated: 2025-09-18 (Codex)_
+## 🟩 CLAUDE STATUS: SETTINGS IMPLEMENTATION COMPLETE ✅
 
-## Core Roles
-- **Claude (Implementation)** – Owns UX, client features, copy, and rapid UI iteration. Works primarily on `feature/myoflow-professional-branding` and downstream feature branches.
-- **Codex (Infrastructure)** – Owns configuration, build+CI, data plumbing, and branch hygiene. Current focus: calendar view integration (`feat/calendar-view-implementation`), Next.js build stability, and database/Vitest reliability.
+**Branch:** `claude/settings-tabs-completion` (PUSHED & PR READY)
+**Assignment:** Complete settings system implementation
+**Status:** ✅ ALL OBJECTIVES ACCOMPLISHED
+
+### **CLAUDE ACHIEVEMENTS:**
+- ✅ **All Settings Tabs Functional:** Profile, Travel, Pricing, Tax Compliance working
+- ✅ **API Integration Complete:** Real backend data, no more mock data
+- ✅ **Schema Fixes:** TypeScript errors resolved, proper validation
+- ✅ **Form Functionality:** Auto-save, controlled inputs, error handling
+- ✅ **Performance Analysis:** Issues identified and documented
+
+**PR:** `https://github.com/Holodeck23/MyoFlow/pull/new/claude/settings-tabs-completion`
+
+## 🟦 CODEX STATUS: PERFORMANCE OPTIMIZATION ASSIGNED
+
+**Branch:** `perf/settings-optimization`
+**Working Directory:** `/Users/ZOD/Documents/GitHub/MyoFlow-perf`
+**Assignment:** Systematic Settings Performance Optimization
+**Priority:** HIGH - Address 12s+ rebuild times
+
+### **CODEX MISSION: PERFORMANCE OPTIMIZATION**
+- 🎯 **Monolithic Component:** Split 1,800+ line settings component
+- 🎯 **Rebuild Performance:** Target <3s from current 12s+
+- 🎯 **Bundle Optimization:** Implement code splitting/lazy loading
+- 🎯 **API Efficiency:** Fix multiple unnecessary calls on mount
+- 🎯 **Translation System:** Move to separate branch (causing layout glitches)
+
+**DETAILED WORK PLAN:** See `KNOWN_ISSUES.md` sections 2 & 4
+
+## 🚀 EXECUTION PROTOCOL
+
+### **PHASE 1: CODEX LANGUAGE CLEANUP**
+**Status:** 🟡 READY TO START
+
+**Codex Tasks:**
+1. Worktree setup (`codex/language-system-cleanup`)
+2. German string audit across dashboard
+3. Systematic replacement with translation keys
+4. Language toggle component
+5. English default configuration
+6. Integration testing
+7. **HANDOFF SIGNAL** to Claude
+
+### **PHASE 2: CLAUDE SETTINGS COMPLETION**
+**Status:** ⏸️ WAITING
+
+**Claude Tasks:**
+1. Branch setup (`claude/settings-tabs-completion`)
+2. Travel Settings tab implementation
+3. Pricing Settings tab implementation
+4. Compliance Settings tab implementation
+5. System Settings tab implementation
+6. Real API integration (replace mock data)
+7. Form validation and error handling
+8. Integration testing
+
+## 📋 COORDINATION CHECKPOINTS
+
+### **Progress Updates Every 30 Minutes**
+- Current task status
+- Files modified
+- Blockers or dependencies
+- Next steps
+
+### **Handoff Protocol**
+**Codex Completion Signal:**
+```markdown
+## CODEX LANGUAGE CLEANUP COMPLETE ✅
+- **Strings replaced:** [count] hardcoded → translation keys
+- **Language toggle:** Implemented and tested
+- **Default language:** Set to English
+- **Dictionary updates:** [count] new keys added
+- **Ready for Claude:** Settings work can begin
+```
+
+**Claude Confirmation:**
+```markdown
+## CLAUDE READY TO CONTINUE ✅
+- **Base rebased:** Latest changes integrated
+- **Settings work:** Beginning implementation
+- **Timeline:** [estimated completion]
+```
+
+---
+
+## 🎯 **EXECUTION APPROVED - GO GO GO!**
+
+**CODEX: You have the green light. Begin language cleanup in your worktree.**
+
+**Coordination active. Progress updates expected every 30 minutes.**
 
 ## Collaboration Workflow
 1. **Specifications first** – Major features start with `/create-spec` in `.agent-os/specs/`, followed by `/create-tasks` before coding.
@@ -18,6 +107,8 @@ _Last updated: 2025-09-18 (Codex)_
 - **Calendar view branch** (`feat/calendar-view-implementation`) merges the new dashboard calendar and should replace the appointments list route with a redirect once conflicts are resolved.
 - **Locale coordination** – `LocaleProvider` owns `myoflow-locale`; all UI toggles should use the shared context (`useLocale` / `useTranslation`).
 - **Database tests** – Vitest suites depend on `DATABASE_URL`; ensure CI runners set this env var and call `prisma.$disconnect()` on teardown.
+- **User settings backend** – Prisma schema + migration for travel/tax/preferences committed; API endpoints `/api/settings/overview` and `/api/settings/tax-compliance` ready for frontend integration.
+- **2025-09-18 – Codex:** `codex/language-system-cleanup` active; layout/sidebar cleaned, dashboard pages under audit for remaining hardcoded German strings.
 
 ## Quick Reference
 - **Primary packages**: `apps/web` (Next.js app), `packages/db` (Prisma schema + Vitest), `packages/lib` (shared Austrian compliance + i18n helpers).
