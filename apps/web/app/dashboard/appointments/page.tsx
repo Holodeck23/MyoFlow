@@ -26,7 +26,7 @@ export default function AppointmentsRedirect() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-lg">
-        {t('appointments.redirectingToCalendar', 'Weiterleitung zum Kalender...')}
+        {t('appointments.redirectingToCalendar')}
       </div>
     </div>
   )

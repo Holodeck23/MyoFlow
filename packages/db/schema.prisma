@@ -53,6 +53,21 @@ model Therapist {
   languagePreference    String                  @default("de")
   notificationSettings  Json?
   travelSettings        Json?
+  profileCompletionScore Int                     @default(0)
+  settingsLastUpdated   DateTime?
+  settingsVersion       Int                     @default(1)
+  publicProfileSlug     String?                 @unique
+  publicProfileDescription String?
+  businessType          String?
+  businessRegistrationNumber String?
+  taxAdvisorName        String?
+  taxAdvisorEmail       String?
+  taxAdvisorPhone       String?
+  TaxComplianceSettings TaxComplianceSettings?
+  travelSettingsDetail   TravelSettings?
+  Preferences           UserPreferences?
+  ExportConfigurations  ExportConfiguration[]
+  Credentials           TherapistCredential[]
   Affiliates            Affiliate[]
   Appointments          Appointment[]
   AuditLogs             AuditLog[]
@@ -88,6 +103,12 @@ model ServiceRateTemplate {
   isKleinunternehmer Boolean         @default(false)
   metadata           Json?
   travelRateCents    Int?
+  pricingMode        PricingMode     @default(NET)
+  travelIncluded     Boolean         @default(false)
+  maxParticipants    Int?
+  defaultLocationId  String?
+  bookingNotes       String?
+  DefaultLocation    Location?       @relation("ServiceTemplateDefaultLocation", fields: [defaultLocationId], references: [id])
   Therapist          Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@index([therapistId, category, isActive])
@@ -114,6 +135,7 @@ model Location {
   districtCode    String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @default(now()) @updatedAt
+  DefaultForRates ServiceRateTemplate[] @relation("ServiceTemplateDefaultLocation")
   Appointments    Appointment[]
   BlockedTimes    BlockedTime[]
   BusinessHours   BusinessHours[]
@@ -190,6 +212,136 @@ model Appointment {
   @@index([therapistId, start])
   @@index([therapistId, recurrenceId])
   @@index([therapistId, locationId, start])
+}
+
+model TherapistCredential {
+  id                 String            @id @default(cuid())
+  therapistId        String
+  credentialType     CredentialType
+  title              String
+  issuingAuthority   String
+  credentialNumber   String?
+  specialization     String?
+  issueDate          DateTime?
+  expirationDate     DateTime?
+  renewalRequired    Boolean          @default(false)
+  status             CredentialStatus @default(ACTIVE)
+  verificationUrl    String?
+  verificationStatus CredentialVerificationStatus @default(UNVERIFIED)
+  documentStorageKey String?
+  notes              String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  Therapist          Therapist        @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId, credentialType])
+  @@index([therapistId, status])
+  @@index([therapistId, expirationDate])
+  @@unique([therapistId, title])
+}
+
+model TravelSettings {
+  id                       String          @id @default(cuid())
+  therapistId              String          @unique
+  baseAddressLine1         String
+  baseAddressLine2         String?
+  baseCity                 String
+  basePostalCode           String
+  baseState                String?
+  baseCountry              String         @default("Austria")
+  latitude                 Float?
+  longitude                Float?
+  serviceRadiusKm          Int             @default(20)
+  maximumTravelDistanceKm  Int?
+  transportMethod          TransportMethod @default(CAR)
+  ratePerKmCents           Int             @default(42)
+  minimumTravelChargeCents Int             @default(500)
+  travelBufferMinutes      Int             @default(15)
+  dailyTravelBudgetMinutes Int?
+  preferredTransportNotes  String?
+  preferredRegions         String[]
+  excludedRegions          String[]
+  avoidHighways            Boolean         @default(false)
+  avoidTolls               Boolean         @default(false)
+  realTimeTraffic          Boolean         @default(true)
+  backupTransportMethod    String?
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
+  Therapist                Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([basePostalCode, baseCity])
+}
+
+model TaxComplianceSettings {
+  id                             String    @id @default(cuid())
+  therapistId                    String    @unique
+  vatNumber                      String?
+  vatRegistered                  Boolean   @default(false)
+  kleinunternehmerActive         Boolean   @default(true)
+  kleinunternehmerThresholdCents Int       @default(5500000)
+  currentYearRevenueCents        Int       @default(0)
+  revenueYear                    Int?
+  kleinunternehmerStart          DateTime?
+  kleinunternehmerEnd            DateTime?
+  legalNoticeTemplate            String?
+  taxAdvisorName                 String?
+  taxAdvisorEmail                String?
+  taxAdvisorPhone                String?
+  vatRegistrationDate            DateTime?
+  revenueLastCalculatedAt        DateTime?
+  rksvEnabled                    Boolean   @default(false)
+  cashRegisterId                 String?
+  signatureDeviceId              String?
+  rksvNotes                      String?
+  lastRksvAuditAt                DateTime?
+  nextRksvAuditDue               DateTime?
+  createdAt                      DateTime  @default(now())
+  updatedAt                      DateTime  @updatedAt
+  Therapist                      Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([vatNumber])
+}
+
+model UserPreferences {
+  id                       String    @id @default(cuid())
+  therapistId              String    @unique
+  language                 Locale    @default(DE)
+  timezone                 String    @default("Europe/Vienna")
+  currency                 Currency  @default(EUR)
+  dateFormat               String    @default("DD.MM.YYYY")
+  numberFormat             String    @default("1.234,56")
+  appointmentReminderDays  Int       @default(1)
+  enableEmailNotifications Boolean   @default(true)
+  enableSmsNotifications   Boolean   @default(false)
+  enableComplianceAlerts   Boolean   @default(true)
+  enableTravelAlerts       Boolean   @default(true)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  Therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+}
+
+model ExportConfiguration {
+  id                String               @id @default(cuid())
+  therapistId       String
+  exportType        ExportType
+  targetSystem      ExportTargetSystem
+  configurationName String
+  description       String?
+  isDefault         Boolean              @default(false)
+  scheduleCron      String?
+  fieldMappings     Json?
+  lastRunAt         DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  Therapist         Therapist            @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId, targetSystem])
+  @@index([therapistId, isDefault])
+  @@unique([therapistId, targetSystem, configurationName])
 }
 
 model BusinessHours {
@@ -411,6 +563,65 @@ enum VatStatus {
   UST_10
   UST_13
   UST_20
+}
+
+enum PricingMode {
+  NET
+  GROSS
+}
+
+enum CredentialType {
+  PROFESSIONAL_LICENSE
+  CERTIFICATION
+  QUALIFICATION
+  CONTINUING_EDUCATION
+  SPECIALIZATION
+  INSURANCE_APPROVAL
+}
+
+enum CredentialStatus {
+  ACTIVE
+  EXPIRING
+  EXPIRED
+  SUSPENDED
+  PENDING
+}
+
+enum CredentialVerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  PENDING
+}
+
+enum TransportMethod {
+  CAR
+  PUBLIC_TRANSPORT
+  BICYCLE
+  WALKING
+  MOTORCYCLE
+}
+
+enum Locale {
+  DE
+  EN
+}
+
+enum Currency {
+  EUR
+}
+
+enum ExportType {
+  ACCOUNTING_EXPORT
+  DATA_BACKUP
+  CUSTOM_REPORT
+}
+
+enum ExportTargetSystem {
+  BMD
+  RZL
+  DATEV
+  CSV_GENERIC
+  CUSTOM
 }
 
 enum LocationType {

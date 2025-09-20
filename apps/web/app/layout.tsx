@@ -27,7 +27,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased bg-background text-foreground`}>
         <SessionProvider>
-          <LocaleProvider>
+          <LocaleProvider initialLocale="en">
             <RootContent>
               {children}
             </RootContent>

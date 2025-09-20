@@ -56,19 +56,19 @@ export default function ClientsPage() {
       if (selectedTag) params.append('tag', selectedTag)
 
       const response = await fetch(`/api/clients?${params}`)
-      if (!response.ok) throw new Error(t('clients.fetchError', 'Failed to fetch clients'))
+      if (!response.ok) throw new Error(t('clients.fetchError'))
       
       const data = await response.json()
       setClients(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('clients.loadError', 'Failed to load clients'))
+      setError(err instanceof Error ? err.message : t('clients.loadError'))
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteClient = async (clientId: string, clientName: string) => {
-    if (!confirm(`${t('clients.deleteConfirm', 'Are you sure you want to delete')} ${clientName}? ${t('clients.deleteConfirmContinue', 'This action cannot be undone.')}`)) {
+    if (!confirm(`${t('clients.deleteConfirm')} ${clientName}${t('clients.deleteConfirmContinue')}`)) {
       return
     }
 
@@ -77,11 +77,11 @@ export default function ClientsPage() {
         method: 'DELETE'
       })
       
-      if (!response.ok) throw new Error(t('clients.deleteError', 'Failed to delete client'))
+      if (!response.ok) throw new Error(t('clients.deleteError'))
       
       setClients(clients.filter(client => client.id !== clientId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : t('clients.deleteError', 'Failed to delete client'))
+      alert(err instanceof Error ? err.message : t('clients.deleteError'))
     }
   }
 
@@ -103,9 +103,9 @@ export default function ClientsPage() {
       {/* Header Section */}
       <div className="flex justify-between items-start">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-foreground">{t('clients.title', 'Klienten verwalten')}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('clients.title')}</h1>
           <p className="text-muted-foreground flex items-center gap-2">
-            {t('clients.subtitle', 'Verwalten Sie Ihre Klientendaten sicher und GDPR-konform.')}
+            {t('clients.subtitle')}
             <EncryptionBadge className="ml-1" />
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function ClientsPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            {t('clients.addNew', 'Neuen Klienten hinzufügen')}
+            {t('clients.addNew')}
           </Link>
         </Button>
       </div>
@@ -130,7 +130,7 @@ export default function ClientsPage() {
                 </svg>
                 <Input
                   type="text"
-                  placeholder={t('clients.searchPlaceholder', 'Klienten suchen...')}
+                  placeholder={t('clients.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10 h-11 shadow-sm border-border/60 focus:border-primary/60 focus:ring-primary/20"
@@ -145,7 +145,7 @@ export default function ClientsPage() {
                   onChange={(e) => setSelectedTag(e.target.value)}
                   className="w-full h-11 px-3 py-2 border border-border/60 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-colors shadow-sm"
                 >
-                  <option value="">{t('clients.allTags', 'Alle Tags')}</option>
+                  <option value="">{t('clients.allTags')}</option>
                   {allTags.map(tag => (
                     <option key={tag} value={tag}>{tag}</option>
                   ))}
@@ -167,7 +167,7 @@ export default function ClientsPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium">{t('common.error', 'Fehler')}</p>
+                <p className="font-medium">{t('common.error')}</p>
                 <p className="text-sm text-muted-foreground mt-1">{error}</p>
               </div>
             </div>
@@ -183,19 +183,17 @@ export default function ClientsPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">
-                {search || selectedTag ? t('clients.noClientsFound', 'Keine Klienten gefunden') : t('clients.noClientsYet', 'Noch keine Klienten hinzugefügt')}
+                {search || selectedTag ? t('clients.noClientsFound') : t('clients.noClientsYet')}
               </h3>
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                {search || selectedTag
-                  ? t('clients.adjustSearch', 'Versuchen Sie, Ihre Suche oder Filter anzupassen.')
-                  : t('clients.addFirstClient', 'Fügen Sie Ihren ersten Klienten hinzu, um zu beginnen.')}
+                {search || selectedTag ? t('clients.adjustSearch') : t('clients.addFirstClient')}
               </p>
               <Button asChild size="lg" className="shadow-sm">
                 <Link href="/dashboard/clients/new" className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  {search || selectedTag ? t('clients.addNew', 'Neuen Klienten hinzufügen') : t('clients.addFirst', 'Ersten Klienten hinzufügen')}
+                  {search || selectedTag ? t('clients.addNew') : t('clients.addFirst')}
                 </Link>
               </Button>
             </div>
