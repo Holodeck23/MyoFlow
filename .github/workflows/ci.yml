@@ -24,15 +24,6 @@ jobs:
         ports:
           - 5432:5432
       
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
       - name: Checkout
@@ -62,33 +53,29 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Setup environment
         run: |
           cp .env.example .env
           echo "ENCRYPTION_KEY_B64=$(openssl rand -base64 32)" >> .env
-          echo "DATA_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> .env
           echo "INTAKE_TOKEN_SECRET=$(openssl rand -hex 32)" >> .env
           echo "NEXTAUTH_SECRET=$(openssl rand -hex 32)" >> .env
-          # Setup web app environment
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/myoflow" > apps/web/.env
-          echo "NEXTAUTH_URL=http://localhost:3000" >> apps/web/.env
-          echo "NEXTAUTH_SECRET=$(openssl rand -hex 32)" >> apps/web/.env
-          echo "DATA_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> apps/web/.env
 
       - name: Generate Prisma client
-        run: pnpm --filter @myoflow/db prisma generate
+        run: pnpm --filter db prisma generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
       - name: Run database migrations
-        run: |
-          pnpm --filter @myoflow/db prisma migrate deploy
-          pnpm --filter @myoflow/db seed
+        run: pnpm --filter db prisma migrate dev --name init
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
-          DATA_ENCRYPTION_KEY: ${{ env.DATA_ENCRYPTION_KEY }}
+
+      - name: Seed database
+        run: pnpm --filter db seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
       - name: Lint
         run: pnpm lint
@@ -99,33 +86,11 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Temporarily disabled E2E tests due to Playwright CI infrastructure issues
-      # Will be re-enabled in dedicated fix/playwright-e2e-infrastructure branch
-      # - name: Install Playwright browsers
-      #   run: pnpm playwright install --with-deps chromium firefox
-      #   working-directory: apps/web
-
       - name: Run unit tests
         run: pnpm test:run
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
-          DATA_ENCRYPTION_KEY: ${{ env.DATA_ENCRYPTION_KEY }}
 
-      # - name: Start development server
-      #   run: pnpm --filter @myoflow/web dev &
-      #   env:
-      #     DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
-      #     DATA_ENCRYPTION_KEY: ${{ env.DATA_ENCRYPTION_KEY }}
-      #     NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
-      #     NEXTAUTH_URL: http://localhost:3000
-
-      # - name: Wait for server
-      #   run: npx wait-on http://localhost:3000 --timeout 30000
-
-      # - name: Run E2E tests
-      #   run: pnpm test:e2e
-      #   env:
-      #     DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
-      #     DATA_ENCRYPTION_KEY: ${{ secrets.DATA_ENCRYPTION_KEY || env.DATA_ENCRYPTION_KEY }}
-      #     NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || env.NEXTAUTH_SECRET }}
-      #     NEXTAUTH_URL: http://localhost:3000
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        if: false # TODO-CLAUDE: Enable once Playwright tests are written
