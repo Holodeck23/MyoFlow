@@ -1,3 +1,24 @@
+-- User Settings Infrastructure Migration
+--
+-- IMPORTANT: PostGIS Extension Setup Required
+-- ===========================================
+-- This migration requires the PostGIS extension for geographic calculations.
+-- However, CREATE EXTENSION postgis; requires superuser privileges and is not
+-- supported in CI environments or managed PostgreSQL services.
+--
+-- FOR PRODUCTION DEPLOYMENT:
+-- 1. Manually enable PostGIS extension before running this migration:
+--    CREATE EXTENSION IF NOT EXISTS postgis;
+-- 2. Ensure the database user has appropriate permissions
+-- 3. Verify PostGIS is available: SELECT PostGIS_Version();
+--
+-- FOR DEVELOPMENT:
+-- Run this command as a superuser before migrations:
+-- CREATE EXTENSION IF NOT EXISTS postgis;
+--
+-- The following migration creates tables and enums without PostGIS dependency.
+-- Geographic calculations will use standard DOUBLE PRECISION for latitude/longitude.
+
 -- New enum types
 DO $$ BEGIN
   CREATE TYPE "PricingMode" AS ENUM ('NET', 'GROSS');
