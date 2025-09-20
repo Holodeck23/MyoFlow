@@ -6,17 +6,14 @@ import { z } from 'zod'
 
 const updateSchema = z.object({
   businessName: z.string().min(1).max(200).optional(),
-  businessAddressLine1: z.string().min(1).max(200).optional(),
-  businessAddressLine2: z.string().max(200).optional().nullable(),
-  businessCity: z.string().min(1).max(100).optional(),
-  businessPostalCode: z.string().min(1).max(20).optional(),
-  businessCountry: z.string().min(1).max(100).optional(),
+  businessAddress: z.string().min(1).max(500).optional(),
   businessEmail: z.string().email().optional(),
   businessPhone: z.string().max(50).optional().nullable(),
-  designation: z.enum(['PHYSIOTHERAPEUT', 'HEILMASSEUR', 'FITNESSTRAINER', 'OSTEOPATH', 'OTHER']).optional(),
-  licenseNumber: z.string().max(100).optional().nullable(),
-  qualifications: z.array(z.string()).optional(),
-  vatStatus: z.enum(['KLEINUNTERNEHMER', 'VAT_REGISTERED', 'VAT_EXEMPT']).optional(),
+  businessWebsite: z.string().max(200).optional().nullable(),
+  designation: z.enum(['HEILMASSEUR', 'MEDIZINISCHER_MASSEUR', 'GEWERBLICHER_MASSEUR']).optional(),
+  chamberRegistration: z.string().max(100).optional().nullable(),
+  certificates: z.array(z.string()).optional(),
+  vatStatus: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']).optional(),
 })
 
 async function authenticate(request: NextRequest) {
@@ -59,19 +56,16 @@ export async function GET(request: NextRequest) {
       where: { id: therapistId },
       select: {
         businessName: true,
-        businessAddressLine1: true,
-        businessAddressLine2: true,
-        businessCity: true,
-        businessPostalCode: true,
-        businessCountry: true,
+        businessAddress: true,
         businessEmail: true,
         businessPhone: true,
+        businessWebsite: true,
         designation: true,
-        licenseNumber: true,
-        qualifications: true,
+        chamberRegistration: true,
+        certificates: true,
         vatStatus: true,
         createdAt: true,
-        settingsLastUpdated: true,
+        updatedAt: true,
       },
     })
 
@@ -103,8 +97,7 @@ export async function PUT(request: NextRequest) {
       where: { id: therapistId },
       data: {
         ...parsed,
-        settingsLastUpdated: new Date(),
-        settingsVersion: { increment: 1 },
+        updatedAt: new Date(),
       },
     })
 
