@@ -68,7 +68,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
       - name: Run database migrations
-        run: pnpm --filter db prisma migrate dev --name init
+        run: pnpm --filter db prisma migrate deploy
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/myoflow
 
