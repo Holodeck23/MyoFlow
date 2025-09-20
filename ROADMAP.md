@@ -10,6 +10,7 @@ _Last updated: 2025-09-18_
 - Documentation remains spec-first via Agent OS; redundant summaries are being consolidated into this file and `DECISION_LOG.md`.
 
 ## Product Track
+- Detailed clinic/AI roadmap now lives in [docs/clinic-ai-roadmap.md](docs/clinic-ai-roadmap.md) for phased planning.
 - Sprint 1.1–1.4 delivered auth, client management, scheduling, and Austrian invoice PDFs.
 - **Calendar Experience (In Flight):** modularize dashboard calendar, add travel timeline, unblock API integration.
 - **Travel-Aware Scheduling:** enhance routing, block conflicts across locations, surface surcharges.
@@ -18,11 +19,17 @@ _Last updated: 2025-09-18_
 
 ## Technical Track
 - **Foundation (Complete):** Turborepo, pnpm workspaces, Prisma schema, libsodium security, seed data.
+- **Current Status:** Calendar implementation rescued, CI stabilized, Google Maps integration complete
 - **Next Priorities:**
-  - Finish Next.js upgrade (align lint configs, drop Prisma from transpilePackages, purge stale `.next`).
-  - Standardize TypeScript configs via `tsconfig.base.json` + package-specific includes.
-  - Stabilize CI by provisioning databases, running Vitest, and pruning unused services.
-- **Future Enhancements:** shared env schema validation, thin data-access layer for API calls, Playwright smoke suite with CI toggle.
+  - Frontend hygiene: Modularize 500+ line calendar page into components/hooks
+  - Remove dead code: CSVExportManager, ServiceRateManager, DashboardNav (unused)
+  - Implement thin data layer: Replace manual fetch with API abstraction
+  - Add test infrastructure: Docker Postgres, environment validation, Vitest integration
+- **Technical Debt:**
+  - 10 files with hardcoded button CSS need component conversion
+  - Minor ESLint warnings for useEffect dependencies (non-blocking)
+  - Next.js config warnings for transpilePackages (cosmetic)
+  - Client API response format needs harmonization (phone/email display issues)
 
 ## Execution Rhythm
 - Specs live in `.agent-os/specs/`; prune or refresh before implementation and capture decisions in `DECISION_LOG.md`.

@@ -51,12 +51,12 @@ export default function InvoicesPage() {
     try {
       const response = await fetch('/api/invoices')
       if (!response.ok) {
-        throw new Error(t('invoices.fetchError', 'Failed to fetch invoices'))
+        throw new Error(t('invoices.fetchError'))
       }
       const data = await response.json()
       setInvoices(data.invoices)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('common.error', 'Unknown error'))
+      setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setLoading(false)
     }
@@ -96,7 +96,7 @@ export default function InvoicesPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">{t('invoices.loading', 'Loading invoices...')}</div>
+        <div className="text-lg">{t('invoices.loading')}</div>
       </div>
     )
   }
@@ -110,14 +110,14 @@ export default function InvoicesPage() {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('invoices.title', 'Rechnungen verwalten')}</h1>
+          <h1 className="text-2xl font-semibold text-neutral-gray-900">{t('invoices.title')}</h1>
           <p className="mt-2 text-neutral-gray-600">
-            {t('invoices.subtitle', 'Verwalten Sie Rechnungen mit Kleinunternehmer- und USt-Compliance.')}
+            {t('invoices.subtitle')}
           </p>
         </div>
         <Button asChild>
           <Link href="/dashboard/invoices/new">
-            {t('invoices.createNew', 'Neue Rechnung erstellen')}
+            {t('invoices.createNew')}
           </Link>
         </Button>
       </div>
@@ -127,16 +127,16 @@ export default function InvoicesPage() {
 
           {error && (
             <div className="p-6 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">{t('common.error', 'Error')}: {error}</p>
+              <p className="text-red-800">{t('common.error')}: {error}</p>
             </div>
           )}
 
           <div className="overflow-hidden">
             {invoices.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-gray-500">{t('invoices.noInvoices', 'Keine Rechnungen gefunden.')}</p>
+                <p className="text-gray-500">{t('invoices.noInvoices')}</p>
                 <p className="text-sm text-gray-400 mt-2">
-                  {t('invoices.createFirst', 'Erstellen Sie Ihre erste österreichisch-konforme Rechnung, um zu beginnen.')}
+                  {t('invoices.createFirst')}
                 </p>
               </div>
             ) : (

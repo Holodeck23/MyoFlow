@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Sidebar } from '@/app/components/Sidebar'
 import { Button } from '@/components/ui/Button'
-import { Languages, Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
-import { useLocale, useTranslation } from '@myoflow/lib'
+import { LanguageToggle } from '@/components/ui/LanguageToggle'
+import { Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
+import { useTranslation } from '@myoflow/lib'
 
 export default function DashboardLayout({
   children,
@@ -26,7 +27,7 @@ export default function DashboardLayout({
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">{t('common.loading', 'Loading...')}</div>
+        <div className="text-lg">Loading...</div>
       </div>
     )
   }
@@ -50,7 +51,7 @@ export default function DashboardLayout({
               </div>
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900">
-                  {session.user?.name || t('dashboardLayout.user.fallbackName', 'Therapeut')}
+                  {session.user?.name || t('dashboardLayout.user.fallbackName')}
                 </div>
                 <div className="text-xs text-gray-500">
                   {session.user?.email}
@@ -64,10 +65,10 @@ export default function DashboardLayout({
               onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
               variant="outline"
               size="sm"
-              title={t('auth.signOut', 'Abmelden')}
+              title={t('auth.signOut')}
             >
               <LogOut size={16} />
-              <span className="text-sm font-medium">{t('auth.signOut', 'Abmelden')}</span>
+              <span className="text-sm font-medium">{t('auth.signOut')}</span>
             </Button>
           </div>
         </header>
@@ -84,30 +85,6 @@ export default function DashboardLayout({
   )
 }
 
-function LanguageToggle() {
-  const { locale, setLocale, isLoading } = useLocale()
-  const { t } = useTranslation()
-
-  const toggleLanguage = () => {
-    const nextLocale = locale === 'de' ? 'en' : 'de'
-    setLocale(nextLocale)
-  }
-
-  return (
-    <Button
-      onClick={toggleLanguage}
-      variant="ghost"
-      size="sm"
-      className="bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-900"
-      disabled={isLoading}
-      title={t('dashboardLayout.languageToggle', 'Sprache wechseln / Switch language')}
-    >
-      <Languages size={16} />
-      <span className="text-sm font-medium">{locale.toUpperCase()}</span>
-    </Button>
-  )
-}
-
 function Footer() {
   const { t } = useTranslation()
 
@@ -119,7 +96,7 @@ function Footer() {
             <img src="/logo.png" alt="MyoFlow" className="h-6 w-6" />
             <span className="font-semibold text-gray-900">MyoFlow</span>
           </div>
-          <p className="text-sm text-gray-600">{t('dashboardLayout.footer.tagline', 'Österreichische Therapiepraxis-Management-Software')}</p>
+          <p className="text-sm text-gray-600">{t('dashboardLayout.footer.tagline')}</p>
 
           {/* Social Links */}
           <div className="flex items-center space-x-3">
@@ -141,40 +118,40 @@ function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm min-w-0">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.product.title', 'Produkt')}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.product.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.features', 'Features')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.pricing', 'Preise')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.faq', 'FAQ')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.features')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.pricing')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.product.faq')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.support.title', 'Support')}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.support.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.helpCenter', 'Hilfe Center')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.contact', 'Kontakt')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.status', 'Status')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.helpCenter')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.contact')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.support.status')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.legal.title', 'Legal')}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.legal.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.privacy', 'Datenschutz')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.terms', 'AGB')}</a></li>
-              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.imprint', 'Impressum')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.privacy')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.terms')}</a></li>
+              <li><a href="#" className="hover:text-blue-600">{t('dashboardLayout.footer.sections.legal.imprint')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.compliance.title', 'Compliance')}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('dashboardLayout.footer.sections.compliance.title')}</h3>
             <ul className="space-y-1 text-gray-600">
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.gdpr', 'GDPR')}</span></li>
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.vat', 'Österreichische VAT')}</span></li>
-              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.smallBusiness', 'Kleinunternehmer')}</span></li>
+              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.gdpr')}</span></li>
+              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.vat')}</span></li>
+              <li><span className="text-green-600">✓ {t('dashboardLayout.footer.sections.compliance.smallBusiness')}</span></li>
             </ul>
           </div>
         </div>
@@ -182,10 +159,10 @@ function Footer() {
 
       <div className="border-t border-blue-200 mt-6 pt-4 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
         <p className="text-xs text-gray-500">
-          {t('dashboardLayout.footer.copyright', '© 2025 MyoFlow. Alle Rechte vorbehalten. Made in Austria 🇦🇹')}
+          {t('dashboardLayout.footer.copyright')}
         </p>
         <p className="text-xs text-gray-500">
-          {t('dashboardLayout.footer.version', 'Version 1.6.0 • Letzte Aktualisierung: September 2025')}
+          {t('dashboardLayout.footer.version')}
         </p>
       </div>
     </footer>

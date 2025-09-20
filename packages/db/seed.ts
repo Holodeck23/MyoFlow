@@ -1,4 +1,18 @@
-import { PrismaClient, TherapistDesignation, VatStatus, LocationType, ServiceCategory } from '@prisma/client'
+import {
+  PrismaClient,
+  TherapistDesignation,
+  VatStatus,
+  LocationType,
+  ServiceCategory,
+  CredentialStatus,
+  CredentialType,
+  CredentialVerificationStatus,
+  ExportTargetSystem,
+  ExportType,
+  TransportMethod,
+  Locale,
+  Currency
+} from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -35,6 +49,113 @@ async function main() {
   })
 
   console.log('✅ Created therapist:', testTherapist.slug)
+
+  // Ensure baseline settings records exist
+  const travelSettings = await prisma.travelSettings.upsert({
+    where: { therapistId: testTherapist.id },
+    update: {},
+    create: {
+      therapistId: testTherapist.id,
+      baseAddressLine1: 'Hauptplatz 1',
+      baseCity: 'Linz',
+      basePostalCode: '4020',
+      baseState: 'Oberösterreich',
+      latitude: 48.3069,
+      longitude: 14.2858,
+      serviceRadiusKm: 25,
+      transportMethod: TransportMethod.CAR,
+      ratePerKmCents: 45,
+      minimumTravelChargeCents: 700,
+      travelBufferMinutes: 20,
+      preferredRegions: ['40'],
+      excludedRegions: ['48'],
+    },
+  })
+
+  const taxSettings = await prisma.taxComplianceSettings.upsert({
+    where: { therapistId: testTherapist.id },
+    update: {},
+    create: {
+      therapistId: testTherapist.id,
+      vatNumber: null,
+      vatRegistered: false,
+      kleinunternehmerActive: true,
+      kleinunternehmerThresholdCents: 5500000,
+      currentYearRevenueCents: 0,
+      revenueYear: new Date().getFullYear(),
+      legalNoticeTemplate: 'Kein Ausweis der Umsatzsteuer gemäß § 6 Abs. 1 Z 27 UStG.',
+      rksvEnabled: false,
+    },
+  })
+
+  const preferences = await prisma.userPreferences.upsert({
+    where: { therapistId: testTherapist.id },
+    update: {},
+    create: {
+      therapistId: testTherapist.id,
+      language: Locale.DE,
+      timezone: 'Europe/Vienna',
+      currency: Currency.EUR,
+      dateFormat: 'DD.MM.YYYY',
+      numberFormat: '1.234,56',
+      appointmentReminderDays: 1,
+      enableEmailNotifications: true,
+      enableComplianceAlerts: true,
+    },
+  })
+
+  const credential = await prisma.therapistCredential.upsert({
+    where: {
+      therapistId_title: {
+        therapistId: testTherapist.id,
+        title: 'Medizinischer Masseur Ausbildung'
+      }
+    },
+    update: {},
+    create: {
+      therapistId: testTherapist.id,
+      credentialType: CredentialType.PROFESSIONAL_LICENSE,
+      title: 'Medizinischer Masseur Ausbildung',
+      issuingAuthority: 'Bundesministerium für Gesundheit',
+      credentialNumber: 'MM-2020-AT-001',
+      issueDate: new Date('2020-03-01'),
+      expirationDate: null,
+      status: CredentialStatus.ACTIVE,
+      verificationStatus: CredentialVerificationStatus.VERIFIED,
+    },
+  })
+
+  const exportConfig = await prisma.exportConfiguration.upsert({
+    where: {
+      therapistId_targetSystem_configurationName: {
+        therapistId: testTherapist.id,
+        targetSystem: ExportTargetSystem.BMD,
+        configurationName: 'BMD Standard Export'
+      }
+    },
+    update: {},
+    create: {
+      therapistId: testTherapist.id,
+      exportType: ExportType.ACCOUNTING_EXPORT,
+      targetSystem: ExportTargetSystem.BMD,
+      configurationName: 'BMD Standard Export',
+      description: 'Standard CSV export for Austrian accounting software BMD',
+      isDefault: true,
+      fieldMappings: {
+        invoiceNumber: 'belegnummer',
+        bookingDate: 'buchungsdatum',
+        grossAmount: 'betragBrutto',
+      }
+    },
+  })
+
+  console.log('✅ Settings seed complete:', {
+    travelSettings: travelSettings.transportMethod,
+    taxSettings: taxSettings.kleinunternehmerActive,
+    preferences: preferences.language,
+    credential: credential.title,
+    exportConfig: exportConfig.configurationName,
+  })
 
   // Create locations
   const homeLocation = await prisma.location.create({
