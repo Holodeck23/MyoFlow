@@ -1,80 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { differenceInDays, startOfYear } from 'date-fns'
-import { authOptions } from '@/lib/auth'
 import { prisma, CredentialStatus } from '@myoflow/db'
+import { requireTherapist } from '@/lib/shared-helpers'
 
 const KLEINUNTERNEHMER_LIMIT_CENTS = 5_500_000
 
-async function authenticateTherapist(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Therapist',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Therapist',
-      role: 'OWNER',
-    },
-  })
-
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: session.user.email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
-  })
-
-  return therapist
-}
-
-async function ensureDefaultSettings(therapistId: string) {
-  await Promise.all([
-    prisma.taxComplianceSettings.upsert({
-      where: { therapistId },
-      update: {},
-      create: {
-        therapistId,
-        kleinunternehmerActive: true,
-        kleinunternehmerThresholdCents: KLEINUNTERNEHMER_LIMIT_CENTS,
-      },
-    }),
-    prisma.travelSettings.upsert({
-      where: { therapistId },
-      update: {},
-      create: {
-        therapistId,
-        baseAddressLine1: 'Hauptplatz 1',
-        baseCity: 'Linz',
-        basePostalCode: '4020',
-        baseCountry: 'Austria',
-        transportMethod: 'CAR',
-        ratePerKmCents: 45,
-        minimumTravelChargeCents: 700,
-      },
-    }),
-    prisma.userPreferences.upsert({
-      where: { therapistId },
-      update: {},
-      create: {
-        therapistId,
-        language: 'DE',
-        timezone: 'Europe/Vienna',
-        currency: 'EUR',
-      },
-    }),
-  ])
-}
 
 function calculateProfileCompletion(therapist: any) {
   const requiredFields: Array<[string, string]> = [
@@ -167,8 +97,7 @@ function getNextCredentialExpiryDays(credentials: any[]) {
 
 export async function GET(request: NextRequest) {
   try {
-    const therapist = await authenticateTherapist(request)
-    await ensureDefaultSettings(therapist.id)
+    const { therapist } = await requireTherapist(request)
 
    const detailedTherapist = await prisma.therapist.findUnique({
       where: { id: therapist.id },
@@ -187,6 +116,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
     }
 
+    // Read current year revenue without performing writes
     const currentYearRevenue = await prisma.invoice.aggregate({
       _sum: { totalGrossCents: true },
       where: {
@@ -200,34 +130,28 @@ export async function GET(request: NextRequest) {
 
     const revenueCents = currentYearRevenue._sum.totalGrossCents ?? 0
 
-    if (detailedTherapist.TaxComplianceSettings) {
-      await prisma.taxComplianceSettings.update({
-        where: { therapistId: detailedTherapist.id },
-        data: {
-          currentYearRevenueCents: revenueCents,
-          revenueYear: new Date().getFullYear(),
-          revenueLastCalculatedAt: new Date(),
-        },
-      })
-    }
+    // Use cached revenue from tax settings if available and recent, otherwise use live calculation
+    const taxSettings = detailedTherapist.TaxComplianceSettings
+    const isCacheRecent = taxSettings?.revenueLastCalculatedAt &&
+      (Date.now() - taxSettings.revenueLastCalculatedAt.getTime()) < 24 * 60 * 60 * 1000 // 24 hours
 
-    const updatedTaxSettings = detailedTherapist.TaxComplianceSettings
-      ? { ...detailedTherapist.TaxComplianceSettings, currentYearRevenueCents: revenueCents }
-      : null
+    const displayRevenueCents = (isCacheRecent && taxSettings?.currentYearRevenueCents)
+      ? taxSettings.currentYearRevenueCents
+      : revenueCents
 
     const profileCompletion = calculateProfileCompletion(detailedTherapist)
     const complianceStatus = assessComplianceStatus(
-      updatedTaxSettings,
+      { ...taxSettings, currentYearRevenueCents: displayRevenueCents },
       detailedTherapist.Credentials || [],
     )
 
     const quickStats = {
       currentYearRevenue:
-        revenueCents / 100,
+        displayRevenueCents / 100,
       kleinunternehmerThreshold:
         (detailedTherapist.TaxComplianceSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS) / 100,
       thresholdPercentage:
-        (revenueCents /
+        (displayRevenueCents /
           (detailedTherapist.TaxComplianceSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS)) * 100,
       daysUntilCredentialExpiry: getNextCredentialExpiryDays(detailedTherapist.Credentials || []),
     }

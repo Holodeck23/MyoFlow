@@ -5,9 +5,9 @@ let key: Uint8Array | null = null
 async function getKey(): Promise<Uint8Array> {
   await sodium.ready
   if (!key) {
-    const keyB64 = process.env.DATA_ENCRYPTION_KEY
+    const keyB64 = process.env.ENCRYPTION_KEY_B64
     if (!keyB64) {
-      throw new Error('DATA_ENCRYPTION_KEY not set')
+      throw new Error('ENCRYPTION_KEY_B64 not set')
     }
     key = sodium.from_base64(keyB64, sodium.base64_variants.ORIGINAL)
   }
