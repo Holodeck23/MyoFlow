@@ -48,6 +48,7 @@ export * from './src/csv-export'
 
 // Austrian holidays
 export * from './src/austrian-holidays'
+export * from './src/austrian-validation'
 
 // Types
 export * from './src/types'

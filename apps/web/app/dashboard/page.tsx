@@ -90,19 +90,19 @@ export default function Dashboard() {
   const recentActivity = [
     {
       type: 'invoice',
-      description: t('dashboard.activity.invoiceCreated', 'Invoice #2025-001 created for Maria Huber'),
-      time: t('dashboard.activity.hoursAgo', '2 hours ago'),
+      description: t('dashboard.activity.invoiceCreated'),
+      time: t('dashboard.activity.hoursAgo'),
       amount: '€75.00'
     },
     {
       type: 'appointment',
-      description: t('dashboard.activity.newAppointment', 'New appointment booked by Franz Müller'),
-      time: t('dashboard.activity.hoursAgoFour', '4 hours ago')
+      description: t('dashboard.activity.newAppointment'),
+      time: t('dashboard.activity.hoursAgoFour')
     },
     {
       type: 'payment',
-      description: t('dashboard.activity.paymentReceived', 'Payment received from Anna Schmidt'),
-      time: t('dashboard.activity.oneDayAgo', '1 day ago'),
+      description: t('dashboard.activity.paymentReceived'),
+      time: t('dashboard.activity.oneDayAgo'),
       amount: '€120.00'
     },
   ]
@@ -113,8 +113,8 @@ export default function Dashboard() {
       <div className="bg-gradient-to-br from-medical-blue via-blue-600 to-medical-blue-800 rounded-lg p-6 text-white shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">{t('dashboard.kleinunternehmerStatus', 'Kleinunternehmer Status 2025')}</h2>
-            <p className="text-medical-blue-100">{t('dashboard.revenueMonitoring', 'Umsatzgrenze Überwachung')}</p>
+            <h2 className="text-lg font-semibold">{t('dashboard.kleinunternehmerStatus')}</h2>
+            <p className="text-medical-blue-100">{t('dashboard.revenueMonitoring')}</p>
           </div>
           <Euro className="h-8 w-8 text-medical-blue-200" />
         </div>
@@ -122,19 +122,19 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-2xl font-bold">{formatAustrianCurrency(currentYearRevenue)}</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.currentYearRevenue', 'Jahresumsatz (Jan-Sep)')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.currentYearRevenue')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold">{formatAustrianCurrency(remainingThreshold)}</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.remainingAllowance', 'Noch verfügbar')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.remainingAllowance')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold">{formatAustrianCurrency(Math.round(projectedYearEnd))}</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.projectedTotal', 'Hochgerechnetes Jahresende')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.projectedTotal')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold">{thresholdProgress.toFixed(1)}%</div>
-            <div className="text-sm text-medical-blue-100">{t('dashboard.thresholdUsed', 'Grenze ausgeschöpft')}</div>
+            <div className="text-sm text-medical-blue-100">{t('dashboard.thresholdUsed')}</div>
           </div>
         </div>
 
@@ -150,10 +150,10 @@ export default function Dashboard() {
           <span>€0</span>
           <span>
             {projectedYearEnd > kleinunternehmerThreshold
-              ? t('dashboard.warningProjectedExceed', '⚠️ Hochrechnung überschreitet Grenze!')
+              ? t('dashboard.warningProjectedExceed')
               : thresholdProgress > 80
-                ? t('dashboard.warningNearLimit', '⚠️ Achtung: Nähert sich der Grenze')
-                : t('dashboard.safeUnderLimit', '✅ Sicher unter der Grenze')
+                ? t('dashboard.warningNearLimit')
+                : t('dashboard.safeUnderLimit')
             }
           </span>
           <span>€55.000</span>
@@ -168,7 +168,7 @@ export default function Dashboard() {
               <Users className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{t('dashboard.totalClients', 'Klienten Gesamt')}</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.totalClients')}</p>
               <p className="text-2xl font-bold text-gray-900">247</p>
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function Dashboard() {
               <Calendar className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{t('dashboard.todayAppointments', 'Termine Heute')}</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.todayAppointments')}</p>
               <p className="text-2xl font-bold text-gray-900">{todayAppointments.length}</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function Dashboard() {
               <Euro className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{t('dashboard.monthlyAverage', 'Monatsdurchschnitt')}</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.monthlyAverage')}</p>
               <p className="text-2xl font-bold text-gray-900">{formatAustrianCurrency(Math.round(averageMonthlyRevenue))}</p>
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function Dashboard() {
               <AlertTriangle className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">{t('dashboard.actionRequired', 'Handlungsbedarf')}</p>
+              <p className="text-sm font-medium text-gray-600">{t('dashboard.actionRequired')}</p>
               <p className="text-2xl font-bold text-gray-900">3</p>
             </div>
           </div>
@@ -216,12 +216,12 @@ export default function Dashboard() {
         {/* Today's Appointments */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.todaysSchedule', 'Heutige Termine')}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.todaysSchedule')}</h3>
             <Calendar className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-3">
             {todayAppointments.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">{t('dashboard.noAppointmentsToday', 'Keine Termine heute')}</p>
+              <p className="text-gray-500 text-center py-4">{t('dashboard.noAppointmentsToday')}</p>
             ) : (
               todayAppointments.map((appointment) => (
                 <div key={appointment.id} className="p-3 bg-gray-50 rounded-lg">
@@ -269,7 +269,7 @@ export default function Dashboard() {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity', 'Letzte Aktivitäten')}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
           </div>
           <div className="space-y-3">
             {recentActivity.map((activity, index) => (

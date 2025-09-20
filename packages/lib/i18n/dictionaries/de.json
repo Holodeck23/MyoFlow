@@ -90,6 +90,7 @@
     "title": "Termine",
     "subtitle": "Verwalten Sie Ihre geplanten Termine",
     "loading": "Termine laden...",
+    "redirectingToCalendar": "Weiterleitung zum Kalender...",
     "noAppointments": "Keine Termine gefunden.",
     "createFirst": "Erstellen Sie Ihren ersten Termin, um zu beginnen.",
     "fetchError": "Fehler beim Laden der Termine",
@@ -200,6 +201,7 @@
     "detailsCta": "Details →",
     "todayPlan": "📅 Heutiger Plan",
     "noAppointmentsToday": "Keine Termine heute",
+    "loading": "Kalender wird geladen...",
     "legend": {
       "title": "📊 Kalender-Legende",
       "capacity": "Auslastung",
@@ -375,6 +377,23 @@
       "title": "Einstellungsübersicht",
       "description": "Die Einstellungen werden aktuell im Nutzer-Einstellungen-Branch entwickelt.",
       "note": "Dieser Branch konzentriert sich auf die Kalender-Implementation und Terminvisualisierung."
+    },
+    "profile": {
+      "title": "Profil-Einstellungen",
+      "description": "Verwalten Sie Ihre Geschäftsinformationen und beruflichen Qualifikationen.",
+      "current": {
+        "title": "Aktuelles Profil",
+        "businessName": "Praxisname",
+        "businessAddress": "Geschäftsadresse",
+        "email": "E-Mail",
+        "designation": "Berufsbezeichnung",
+        "vatStatus": "MwSt.-Status",
+        "qualifications": "Qualifikationen",
+        "notConfigured": "Noch nicht konfiguriert",
+        "kleinunternehmer": "Kleinunternehmer",
+        "regular": "Regulär",
+        "certificates": "Zertifikat(e)"
+      }
     }
   }
 }
