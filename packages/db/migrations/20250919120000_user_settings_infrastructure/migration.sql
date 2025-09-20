@@ -113,7 +113,7 @@ ALTER TABLE "ServiceRateTemplate"
 
 -- Professional credential management
 CREATE TABLE IF NOT EXISTS "TherapistCredential" (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   therapist_id TEXT NOT NULL REFERENCES "Therapist"(id) ON DELETE CASCADE,
   credential_type "CredentialType" NOT NULL,
   title TEXT NOT NULL,
@@ -140,7 +140,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "TherapistCredential_therapist_id_title_key" O
 
 -- Travel settings
 CREATE TABLE IF NOT EXISTS "TravelSettings" (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   therapist_id TEXT UNIQUE NOT NULL REFERENCES "Therapist"(id) ON DELETE CASCADE,
   base_address_line1 TEXT NOT NULL,
   base_address_line2 TEXT,
@@ -176,7 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_travel_settings_postal ON "TravelSettings"(base_p
 
 -- Tax compliance settings
 CREATE TABLE IF NOT EXISTS "TaxComplianceSettings" (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   therapist_id TEXT UNIQUE NOT NULL REFERENCES "Therapist"(id) ON DELETE CASCADE,
   vat_number TEXT,
   vat_registered BOOLEAN NOT NULL DEFAULT false,
@@ -208,7 +208,7 @@ CREATE INDEX IF NOT EXISTS idx_tax_settings_therapist ON "TaxComplianceSettings"
 
 -- User preferences
 CREATE TABLE IF NOT EXISTS "UserPreferences" (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   therapist_id TEXT UNIQUE NOT NULL REFERENCES "Therapist"(id) ON DELETE CASCADE,
   language "Locale" NOT NULL DEFAULT 'DE',
   timezone TEXT NOT NULL DEFAULT 'Europe/Vienna',
@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS "UserPreferences" (
 
 -- Export configurations
 CREATE TABLE IF NOT EXISTS "ExportConfiguration" (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   therapist_id TEXT NOT NULL REFERENCES "Therapist"(id) ON DELETE CASCADE,
   export_type "ExportType" NOT NULL,
   target_system "ExportTargetSystem" NOT NULL,
