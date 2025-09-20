@@ -32,8 +32,7 @@ export async function GET(
       include: {
         Client: {
           select: {
-            firstName: true,
-            lastName: true,
+            name: true,
             // Exclude PII like email, phone, address
           }
         },
@@ -42,8 +41,7 @@ export async function GET(
             Service: {
               select: {
                 name: true,
-                description: true,
-                duration: true,
+                durationMin: true,
                 // Exclude pricing data
               }
             },

@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // POST endpoints can create missing accounts
-    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
 
     const body = await request.json()
     const validatedData = CreateClientSchema.parse(body)
