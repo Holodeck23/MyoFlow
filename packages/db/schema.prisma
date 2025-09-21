@@ -17,74 +17,73 @@ model User {
 }
 
 model Therapist {
-  id                    String                  @id @default(cuid())
-  userId                String                  @unique
-  slug                  String                  @unique
-  designation           TherapistDesignation
-  vatStatus             VatStatus
-  kleinunternehmer      Boolean                 @default(true)
-  annualGrossCents      Int                     @default(0)
-  annualGrossCachedAt   DateTime?
-  iban                  String?
-  brandColor            String?
-  logoUrl               String?
-  createdAt             DateTime                @default(now())
-  businessAddress       String?
-  businessEmail         String?
-  businessName          String?
-  businessPhone         String?
-  businessWebsite       String?
-  chamberRegistration   String?
-  defaultReminderDays   Int                     @default(1)
-  enableEmailReminders  Boolean                 @default(true)
-  enableSmsReminders    Boolean                 @default(false)
-  invoiceFooter         String?
-  profileCompletedAt    DateTime?
-  uidNumber             String?
-  updatedAt             DateTime                @default(now()) @updatedAt
-  travelServiceRadius   Int?
-  travelRatePerKm       Int?
-  defaultTravelBuffer   Int                     @default(30)
-  enableTravelService   Boolean                 @default(false)
-  maxDailyTravelKm      Int?
-  businessHours         Json?
-  certificates          String[]                @default([])
-  complianceSettings    Json?
-  languagePreference    String                  @default("de")
-  notificationSettings  Json?
-  travelSettings        Json?
-  profileCompletionScore Int                     @default(0) @map("profile_completion_score")
-  settingsLastUpdated   DateTime?               @map("settings_last_updated")
-  settingsVersion       Int                     @default(1) @map("settings_version")
-  publicProfileSlug     String?                 @unique @map("public_profile_slug")
-  publicProfileDescription String?             @map("public_profile_description")
-  businessType          String?               @map("business_type")
-  businessRegistrationNumber String?          @map("business_registration_number")
-  taxAdvisorName        String?               @map("tax_advisor_name")
-  taxAdvisorEmail       String?               @map("tax_advisor_email")
-  taxAdvisorPhone       String?               @map("tax_advisor_phone")
-  TaxComplianceSettings TaxComplianceSettings?
-  travelSettingsDetail   TravelSettings?
-  Preferences           UserPreferences?
-  ExportConfigurations  ExportConfiguration[]
-  Credentials           TherapistCredential[]
-  Affiliates            Affiliate[]
-  Appointments          Appointment[]
-  AuditLogs             AuditLog[]
-  BlockedTimes          BlockedTime[]
-  BusinessConfiguration BusinessConfiguration[]
-  BusinessHours         BusinessHours[]
-  Clients               Client[]
-  Consents              Consent[]
-  Invoices              Invoice[]
-  Locations             Location[]
-  Notes                 Note[]
-  Orders                Order[]
-  Products              Product[]
-  Services              Service[]
-  ServiceRateTemplates  ServiceRateTemplate[]
-  User                  User                    @relation(fields: [userId], references: [id])
-  Vouchers              Voucher[]
+  id                         String                 @id @default(cuid())
+  userId                     String                 @unique
+  slug                       String                 @unique
+  designation                TherapistDesignation
+  vatStatus                  VatStatus
+  kleinunternehmer           Boolean                @default(true)
+  annualGrossCents           Int                    @default(0)
+  annualGrossCachedAt        DateTime?
+  iban                       String?
+  brandColor                 String?
+  logoUrl                    String?
+  createdAt                  DateTime               @default(now())
+  businessAddress            String?
+  businessEmail              String?
+  businessName               String?
+  businessPhone              String?
+  businessWebsite            String?
+  chamberRegistration        String?
+  defaultReminderDays        Int                    @default(1)
+  enableEmailReminders       Boolean                @default(true)
+  enableSmsReminders         Boolean                @default(false)
+  invoiceFooter              String?
+  profileCompletedAt         DateTime?
+  uidNumber                  String?
+  updatedAt                  DateTime               @default(now()) @updatedAt
+  travelServiceRadius        Int?
+  travelRatePerKm            Int?
+  defaultTravelBuffer        Int                    @default(30)
+  enableTravelService        Boolean                @default(false)
+  maxDailyTravelKm           Int?
+  businessHours              Json?
+  certificates               String[]               @default([])
+  complianceSettings         Json?
+  languagePreference         String                 @default("de")
+  notificationSettings       Json?
+  travelSettings             Json?
+  profileCompletionScore     Int                    @default(0) @map("profile_completion_score")
+  settingsLastUpdated        DateTime?              @map("settings_last_updated") @db.Timestamp(6)
+  settingsVersion            Int                    @default(1) @map("settings_version")
+  publicProfileSlug          String?                @map("public_profile_slug")
+  publicProfileDescription   String?                @map("public_profile_description")
+  businessType               String?                @map("business_type")
+  businessRegistrationNumber String?                @map("business_registration_number")
+  taxAdvisorName             String?                @map("tax_advisor_name")
+  taxAdvisorEmail            String?                @map("tax_advisor_email")
+  taxAdvisorPhone            String?                @map("tax_advisor_phone")
+  Affiliates                 Affiliate[]
+  Appointments               Appointment[]
+  AuditLogs                  AuditLog[]
+  BlockedTimes               BlockedTime[]
+  BusinessHours              BusinessHours[]
+  Clients                    Client[]
+  Consents                   Consent[]
+  ExportConfigurations       ExportConfiguration[]
+  Invoices                   Invoice[]
+  Locations                  Location[]
+  Notes                      Note[]
+  Orders                     Order[]
+  Products                   Product[]
+  Services                   Service[]
+  ServiceRateTemplates       ServiceRateTemplate[]
+  TaxComplianceSettings      TaxComplianceSettings?
+  User                       User                   @relation(fields: [userId], references: [id])
+  Credentials                TherapistCredential[]
+  travelSettingsDetail       TravelSettings?
+  Preferences                UserPreferences?
+  Vouchers                   Voucher[]
 }
 
 model ServiceRateTemplate {
@@ -97,9 +96,9 @@ model ServiceRateTemplate {
   vatRate            VatStatus
   description        String?
   isDefault          Boolean         @default(false)
+  isActive           Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
-  isActive           Boolean         @default(true)
   isKleinunternehmer Boolean         @default(false)
   metadata           Json?
   travelRateCents    Int?
@@ -108,38 +107,38 @@ model ServiceRateTemplate {
   maxParticipants    Int?            @map("max_participants")
   defaultLocationId  String?         @map("default_location_id")
   bookingNotes       String?         @map("booking_notes")
-  DefaultLocation    Location?       @relation("ServiceTemplateDefaultLocation", fields: [defaultLocationId], references: [id])
   Therapist          Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  DefaultLocation    Location?       @relation("ServiceTemplateDefaultLocation", fields: [defaultLocationId], references: [id], onUpdate: NoAction, map: "service_rate_template_default_location_fkey")
 
   @@index([therapistId, category, isActive])
   @@index([therapistId, isDefault])
 }
 
 model Location {
-  id              String          @id @default(cuid())
+  id              String                @id @default(cuid())
   therapistId     String
   name            String
   type            LocationType
   address         String?
-  travelBufferMin Int             @default(0)
+  travelBufferMin Int                   @default(0)
   street          String?
   streetNumber    String?
   postalCode      String?
   city            String?
   state           String?
-  country         String?         @default("Austria")
+  country         String?               @default("Austria")
   latitude        Float?
   longitude       Float?
   geocodedAt      DateTime?
-  isValidated     Boolean         @default(false)
+  isValidated     Boolean               @default(false)
   districtCode    String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @default(now()) @updatedAt
-  DefaultForRates ServiceRateTemplate[] @relation("ServiceTemplateDefaultLocation")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @default(now()) @updatedAt
   Appointments    Appointment[]
   BlockedTimes    BlockedTime[]
   BusinessHours   BusinessHours[]
-  Therapist       Therapist       @relation(fields: [therapistId], references: [id])
+  Therapist       Therapist             @relation(fields: [therapistId], references: [id])
+  DefaultForRates ServiceRateTemplate[] @relation("ServiceTemplateDefaultLocation")
 
   @@index([therapistId, type])
   @@index([postalCode, city])
@@ -215,29 +214,29 @@ model Appointment {
 }
 
 model TherapistCredential {
-  id                 String            @id @default(cuid())
-  therapistId        String            @map("therapist_id")
-  credentialType     CredentialType    @map("credential_type")
+  id                 String                       @id @default(cuid())
+  therapistId        String                       @map("therapist_id")
+  credentialType     CredentialType               @map("credential_type")
   title              String
-  issuingAuthority   String            @map("issuing_authority")
-  credentialNumber   String?           @map("credential_number")
+  issuingAuthority   String                       @map("issuing_authority")
+  credentialNumber   String?                      @map("credential_number")
   specialization     String?
-  issueDate          DateTime?         @map("issue_date")
-  expirationDate     DateTime?         @map("expiration_date")
-  renewalRequired    Boolean          @default(false) @map("renewal_required")
-  status             CredentialStatus @default(ACTIVE)
-  verificationUrl    String?           @map("verification_url")
+  issueDate          DateTime?                    @map("issue_date") @db.Date
+  expirationDate     DateTime?                    @map("expiration_date") @db.Date
+  renewalRequired    Boolean                      @default(false) @map("renewal_required")
+  status             CredentialStatus             @default(ACTIVE)
+  verificationUrl    String?                      @map("verification_url")
   verificationStatus CredentialVerificationStatus @default(UNVERIFIED) @map("verification_status")
-  documentStorageKey String?           @map("document_storage_key")
+  documentStorageKey String?                      @map("document_storage_key")
   notes              String?
-  createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
-  Therapist          Therapist        @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  createdAt          DateTime                     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt          DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Therapist          Therapist                    @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([therapistId, credentialType])
-  @@index([therapistId, status])
-  @@index([therapistId, expirationDate])
   @@unique([therapistId, title])
+  @@index([expirationDate], map: "idx_credentials_expiration")
+  @@index([status], map: "idx_credentials_status")
+  @@index([therapistId], map: "idx_credentials_therapist_id")
 }
 
 model TravelSettings {
@@ -267,12 +266,11 @@ model TravelSettings {
   backupTransportMethod    String?         @map("backup_transport_method")
   emergencyContactName     String?         @map("emergency_contact_name")
   emergencyContactPhone    String?         @map("emergency_contact_phone")
-  createdAt                DateTime        @default(now()) @map("created_at")
-  updatedAt                DateTime        @updatedAt @map("updated_at")
-  Therapist                Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  createdAt                DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Therapist                Therapist       @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([therapistId])
-  @@index([basePostalCode, baseCity])
+  @@index([basePostalCode, baseCity], map: "idx_travel_settings_postal")
 }
 
 model TaxComplianceSettings {
@@ -284,26 +282,26 @@ model TaxComplianceSettings {
   kleinunternehmerThresholdCents Int       @default(5500000) @map("kleinunternehmer_threshold_cents")
   currentYearRevenueCents        Int       @default(0) @map("current_year_revenue_cents")
   revenueYear                    Int?      @map("revenue_year")
-  kleinunternehmerStart          DateTime? @map("kleinunternehmer_start")
-  kleinunternehmerEnd            DateTime? @map("kleinunternehmer_end")
+  kleinunternehmerStart          DateTime? @map("kleinunternehmer_start") @db.Timestamp(6)
+  kleinunternehmerEnd            DateTime? @map("kleinunternehmer_end") @db.Timestamp(6)
   legalNoticeTemplate            String?   @map("legal_notice_template")
   taxAdvisorName                 String?   @map("tax_advisor_name")
   taxAdvisorEmail                String?   @map("tax_advisor_email")
   taxAdvisorPhone                String?   @map("tax_advisor_phone")
-  vatRegistrationDate            DateTime? @map("vat_registration_date")
-  revenueLastCalculatedAt        DateTime? @map("revenue_last_calculated_at")
+  vatRegistrationDate            DateTime? @map("vat_registration_date") @db.Timestamp(6)
+  revenueLastCalculatedAt        DateTime? @map("revenue_last_calculated_at") @db.Timestamp(6)
   rksvEnabled                    Boolean   @default(false) @map("rksv_enabled")
   cashRegisterId                 String?   @map("cash_register_id")
   signatureDeviceId              String?   @map("signature_device_id")
   rksvNotes                      String?   @map("rksv_notes")
-  lastRksvAuditAt                DateTime? @map("last_rksv_audit_at")
-  nextRksvAuditDue               DateTime? @map("next_rksv_audit_due")
-  createdAt                      DateTime  @default(now()) @map("created_at")
-  updatedAt                      DateTime  @updatedAt @map("updated_at")
-  Therapist                      Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  lastRksvAuditAt                DateTime? @map("last_rksv_audit_at") @db.Timestamp(6)
+  nextRksvAuditDue               DateTime? @map("next_rksv_audit_due") @db.Timestamp(6)
+  createdAt                      DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Therapist                      Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([therapistId])
-  @@index([vatNumber])
+  @@index([therapistId], map: "idx_tax_settings_therapist")
+  @@index([vatNumber], map: "idx_tax_settings_vat")
 }
 
 model UserPreferences {
@@ -319,29 +317,29 @@ model UserPreferences {
   enableSmsNotifications   Boolean   @default(false) @map("enable_sms_notifications")
   enableComplianceAlerts   Boolean   @default(true) @map("enable_compliance_alerts")
   enableTravelAlerts       Boolean   @default(true) @map("enable_travel_alerts")
-  createdAt                DateTime  @default(now()) @map("created_at")
-  updatedAt                DateTime  @updatedAt @map("updated_at")
-  Therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model ExportConfiguration {
-  id                String               @id @default(cuid())
-  therapistId       String               @map("therapist_id")
-  exportType        ExportType           @map("export_type")
-  targetSystem      ExportTargetSystem   @map("target_system")
-  configurationName String               @map("configuration_name")
+  id                String             @id @default(cuid())
+  therapistId       String             @map("therapist_id")
+  exportType        ExportType         @map("export_type")
+  targetSystem      ExportTargetSystem @map("target_system")
+  configurationName String             @map("configuration_name")
   description       String?
-  isDefault         Boolean              @default(false) @map("is_default")
-  scheduleCron      String?              @map("schedule_cron")
-  fieldMappings     Json?                @map("field_mappings")
-  lastRunAt         DateTime?            @map("last_run_at")
-  createdAt         DateTime             @default(now()) @map("created_at")
-  updatedAt         DateTime             @updatedAt @map("updated_at")
-  Therapist         Therapist            @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  isDefault         Boolean            @default(false) @map("is_default")
+  scheduleCron      String?            @map("schedule_cron")
+  fieldMappings     Json?              @map("field_mappings")
+  lastRunAt         DateTime?          @map("last_run_at") @db.Timestamp(6)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  Therapist         Therapist          @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([therapistId, targetSystem])
-  @@index([therapistId, isDefault])
-  @@unique([therapistId, targetSystem, configurationName])
+  @@unique([therapistId, targetSystem, configurationName], map: "ExportConfiguration_unique_name")
+  @@index([therapistId, isDefault], map: "idx_export_configuration_default")
+  @@index([therapistId, targetSystem], map: "idx_export_configuration_target")
 }
 
 model BusinessHours {
@@ -529,20 +527,6 @@ model AuditLog {
   Therapist   Therapist @relation(fields: [therapistId], references: [id])
 
   @@index([therapistId, entity, entityId, at])
-}
-
-model BusinessConfiguration {
-  id          String    @id
-  therapistId String
-  configType  String
-  configData  Json
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime
-  Therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
-
-  @@unique([therapistId, configType])
-  @@index([therapistId, configType])
 }
 
 enum Role {

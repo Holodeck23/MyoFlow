@@ -119,4 +119,54 @@
   .bg-muted {
     background-color: rgb(249 250 251) !important;
   }
+
+  /* Translation-stable text rendering */
+  .translation-stable {
+    /* Prevent layout shifts during language changes */
+    contain: layout style;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .translation-stable-multiline {
+    /* For multi-line text that needs to be stable */
+    contain: layout style;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* Container that maintains width during translation changes */
+  .translation-container {
+    /* Maintain consistent container width */
+    contain: layout;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  /* Smooth transitions for language switching */
+  .language-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Fix for flexbox text overflow in complex layouts */
+  .flex-text-safe {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .flex-text-safe > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Ensure consistent baseline alignment across languages */
+  .text-baseline-stable {
+    vertical-align: baseline;
+    line-height: 1.5;
+    font-feature-settings: "kern" 1;
+  }
 }
