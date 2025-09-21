@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
+
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
 
 const updateSchema = z.object({
   language: z.enum(['EN', 'DE']).optional(),
@@ -16,66 +18,35 @@ const updateSchema = z.object({
   enableTravelAlerts: z.boolean().optional(),
 })
 
-async function authenticate(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Therapist',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Therapist',
-      role: 'OWNER',
-    },
-  })
-
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: session.user.email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
-  })
-
-  return therapist.id
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await requireTherapist(request)
 
     const preferences = await prisma.userPreferences.findUnique({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
     })
 
+    // GET handler should not create missing data - return default structure instead
     if (!preferences) {
-      // Create default preferences
-      const defaults = await prisma.userPreferences.create({
-        data: {
-          therapistId,
-          language: 'DE',
-          timezone: 'Europe/Vienna',
-          currency: 'EUR',
-          dateFormat: 'DD.MM.YYYY',
-          appointmentReminderDays: 1,
-          enableEmailNotifications: true,
-          enableSmsNotifications: false,
-          enableComplianceAlerts: true,
-          enableTravelAlerts: true,
-        },
+      return NextResponse.json({
+        id: null,
+        therapistId: therapist.id,
+        language: 'DE',
+        timezone: 'Europe/Vienna',
+        currency: 'EUR',
+        dateFormat: 'DD.MM.YYYY',
+        appointmentReminderDays: 1,
+        enableEmailNotifications: true,
+        enableSmsNotifications: false,
+        enableComplianceAlerts: true,
+        enableTravelAlerts: true,
+        // Indicate this is default data, not persisted
+        isDefault: true,
       })
-      return NextResponse.json(defaults)
     }
 
-    return NextResponse.json(preferences)
+    return NextResponse.json({ ...preferences, isDefault: false })
   } catch (error) {
     if (error instanceof Response) {
       throw error
@@ -88,16 +59,16 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await ensureTherapistAccount(request)
     const payload = await request.json()
     const parsed = updateSchema.parse(payload)
 
     // Ensure preferences exist
     await prisma.userPreferences.upsert({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
       update: {},
       create: {
-        therapistId,
+        therapistId: therapist.id,
         language: 'DE',
         timezone: 'Europe/Vienna',
         currency: 'EUR',
@@ -124,7 +95,7 @@ export async function PUT(request: NextRequest) {
     if (parsed.enableTravelAlerts !== undefined) updateData.enableTravelAlerts = parsed.enableTravelAlerts
 
     const updated = await prisma.userPreferences.update({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
       data: {
         ...updateData,
         updatedAt: new Date(),
@@ -133,7 +104,7 @@ export async function PUT(request: NextRequest) {
 
     // Update therapist settings timestamp
     await prisma.therapist.update({
-      where: { id: therapistId },
+      where: { id: therapist.id },
       data: {
         settingsLastUpdated: new Date(),
         settingsVersion: { increment: 1 },

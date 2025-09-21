@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 import { assertValidVatNumber, normalizeVatNumber } from '@myoflow/lib'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
+
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
 
 const updateSchema = z.object({
   vatRegistered: z.boolean().optional(),
@@ -34,58 +36,31 @@ const updateSchema = z.object({
     .optional(),
 })
 
-async function authenticate(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Therapist',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Therapist',
-      role: 'OWNER',
-    },
-  })
-
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: session.user.email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
-  })
-
-  return therapist.id
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await requireTherapist(request)
 
     const settings = await prisma.taxComplianceSettings.findUnique({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
     })
 
+    // GET handler should not create missing data - return null structure instead
     if (!settings) {
-      const defaults = await prisma.taxComplianceSettings.create({
-        data: {
-          therapistId,
-          kleinunternehmerActive: true,
-          kleinunternehmerThresholdCents: 5_500_000,
-        },
+      return NextResponse.json({
+        id: null,
+        therapistId: therapist.id,
+        vatRegistered: false,
+        kleinunternehmerActive: true,
+        kleinunternehmerThresholdCents: 5_500_000,
+        currentYearRevenueCents: 0,
+        rksvEnabled: false,
+        // Indicate this is default data, not persisted
+        isDefault: true,
       })
-      return NextResponse.json(defaults)
     }
 
-    return NextResponse.json(settings)
+    return NextResponse.json({ ...settings, isDefault: false })
   } catch (error) {
     if (error instanceof Response) {
       throw error
@@ -98,7 +73,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await ensureTherapistAccount(request)
     const payload = await request.json()
     const parsed = updateSchema.parse(payload)
     if (parsed.vatNumber) {
@@ -106,10 +81,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const current = await prisma.taxComplianceSettings.upsert({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
       update: {},
       create: {
-        therapistId,
+        therapistId: therapist.id,
         kleinunternehmerActive: true,
         kleinunternehmerThresholdCents: 5_500_000,
       },
@@ -163,7 +138,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updated = await prisma.taxComplianceSettings.update({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
       data: {
         ...updateData,
         updatedAt: new Date(),
@@ -171,7 +146,7 @@ export async function PUT(request: NextRequest) {
     })
 
     await prisma.therapist.update({
-      where: { id: therapistId },
+      where: { id: therapist.id },
       data: {
         settingsLastUpdated: new Date(),
         settingsVersion: { increment: 1 },
