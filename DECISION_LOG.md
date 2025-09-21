@@ -1,5 +1,18 @@
 # MyoFlow Development Decision Log
 
+## 2025-09-19: Stabilisation & MVP Sprint Plan Recorded
+
+### Context
+- Ongoing coordination between Claude and Codex required a clear roadmap to close outstanding issues and avoid feature creep while finishing the remaining MVP scope.
+
+### Decision
+- Document a seven-sprint sequence (four stabilisation sprints + three MVP completion sprints) in `CLAUDE.md` under "📆 Stabilisation & MVP Plan (Sept 2025)".
+- Treat the plan as the canonical guide for branch planning and handoffs; all sprint outcomes must update `AGENT_ACTIVITY_LOG.md`.
+
+### Impact
+- Establishes a shared reference so both agents prioritise security/performance fixes before resuming feature work.
+- Enables stakeholders to track progress against a finite series of sprints without expanding scope.
+
 ## 2025-09-15: Strategic Pivot to Figma-Based UI
 
 ### Context
