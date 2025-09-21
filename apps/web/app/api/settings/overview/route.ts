@@ -102,7 +102,6 @@ export async function GET(request: NextRequest) {
    const detailedTherapist = await prisma.therapist.findUnique({
       where: { id: therapist.id },
       include: {
-        TaxComplianceSettings: true,
         travelSettingsDetail: true,
         Preferences: true,
         Credentials: {
@@ -111,6 +110,16 @@ export async function GET(request: NextRequest) {
         },
       },
     })
+
+    // Fetch TaxComplianceSettings separately with error handling
+    let taxSettings = null
+    try {
+      taxSettings = await prisma.taxComplianceSettings.findUnique({
+        where: { therapistId: therapist.id },
+      })
+    } catch (error) {
+      console.warn('TaxComplianceSettings query failed, continuing without:', error)
+    }
 
     if (!detailedTherapist) {
       return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
@@ -131,7 +140,6 @@ export async function GET(request: NextRequest) {
     const revenueCents = currentYearRevenue._sum.totalGrossCents ?? 0
 
     // Use cached revenue from tax settings if available and recent, otherwise use live calculation
-    const taxSettings = detailedTherapist.TaxComplianceSettings
     const isCacheRecent = taxSettings?.revenueLastCalculatedAt &&
       (Date.now() - taxSettings.revenueLastCalculatedAt.getTime()) < 24 * 60 * 60 * 1000 // 24 hours
 
@@ -149,10 +157,10 @@ export async function GET(request: NextRequest) {
       currentYearRevenue:
         displayRevenueCents / 100,
       kleinunternehmerThreshold:
-        (detailedTherapist.TaxComplianceSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS) / 100,
+        (taxSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS) / 100,
       thresholdPercentage:
         (displayRevenueCents /
-          (detailedTherapist.TaxComplianceSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS)) * 100,
+          (taxSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS)) * 100,
       daysUntilCredentialExpiry: getNextCredentialExpiryDays(detailedTherapist.Credentials || []),
     }
 
