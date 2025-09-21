@@ -10,19 +10,9 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui'
-// Optimized icon imports - only what we need for the main page
-import {
-  User,
-  Shield,
-  MapPin,
-  DollarSign,
-  Settings as SettingsIcon,
-  Download,
-  Clock,
-  ChevronRight,
-  Home,
-  Bell
-} from 'lucide-react'
+// Optimized icon imports - centralized icon management
+import { ChevronRight, Home, Loader2, Download } from 'lucide-react'
+import { SETTINGS_TABS } from './lib/icons'
 
 // Lazy load all tab components for code splitting
 const OverviewTab = lazy(() => import('./components/OverviewTab').then(m => ({ default: m.OverviewTab })))
@@ -32,14 +22,10 @@ const PricingTab = lazy(() => import('./components/PricingTab').then(m => ({ def
 const ComplianceTab = lazy(() => import('./components/ComplianceTab').then(m => ({ default: m.ComplianceTab })))
 const SystemTab = lazy(() => import('./components/SystemTab').then(m => ({ default: m.SystemTab })))
 
-interface SettingsTab {
-  id: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  description: string
-  available: boolean
-  comingSoon?: string
-}
+// Error boundary for settings tabs
+import ErrorBoundary, { SettingsErrorFallback } from './components/ErrorBoundary'
+
+// Tab interface moved to centralized icons file
 
 interface ProfileCompletionItem {
   id: string
@@ -169,64 +155,14 @@ export default function SettingsPage() {
     setProfileCompletion(completionItems)
   }
 
-  const settingsTabs: SettingsTab[] = [
-    {
-      id: 'overview',
-      label: 'Overview',
-      icon: SettingsIcon,
-      description: 'Profile status and quick actions',
-      available: true
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
-      icon: User,
-      description: 'Business information and qualifications',
-      available: true
-    },
-    {
-      id: 'compliance',
-      label: 'Compliance',
-      icon: Shield,
-      description: 'Austrian tax and legal compliance',
-      available: true
-    },
-    {
-      id: 'travel',
-      label: 'Location & Travel',
-      icon: MapPin,
-      description: 'Base location and travel configuration',
-      available: true
-    },
-    {
-      id: 'pricing',
-      label: 'Pricing',
-      icon: DollarSign,
-      description: 'Service rates and package deals',
-      available: true
-    },
-    {
-      id: 'system',
-      label: 'System',
-      icon: Bell,
-      description: 'Language, notifications and formats',
-      available: true
-    },
-    {
-      id: 'export',
-      label: 'Export',
-      icon: Download,
-      description: 'Data export and accounting integration',
-      available: false,
-      comingSoon: 'v1.8'
-    }
-  ]
+  // Use centralized tab configuration
+  const settingsTabs = SETTINGS_TABS
 
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="flex items-center space-x-2">
-          <Clock className="w-5 h-5 animate-spin text-[#1565C0]" />
+          <Loader2 className="w-5 h-5 animate-spin text-[#1565C0]" />
           <div className="text-lg">Loading...</div>
         </div>
       </div>
@@ -316,33 +252,43 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="profile" className="space-y-6">
-          <Suspense fallback={<TabLoadingFallback />}>
-            <ProfileTab profileData={profileData} />
-          </Suspense>
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ProfileTab profileData={profileData} isActive={activeTab === 'profile'} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="travel" className="space-y-6">
-          <Suspense fallback={<TabLoadingFallback />}>
-            <TravelTab profileData={profileData} />
-          </Suspense>
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <TravelTab profileData={profileData} isActive={activeTab === 'travel'} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-6">
-          <Suspense fallback={<TabLoadingFallback />}>
-            <PricingTab profileData={profileData} />
-          </Suspense>
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <PricingTab profileData={profileData} isActive={activeTab === 'pricing'} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-6">
-          <Suspense fallback={<TabLoadingFallback />}>
-            <ComplianceTab profileData={profileData} overviewData={overviewData} />
-          </Suspense>
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ComplianceTab profileData={profileData} overviewData={overviewData} isActive={activeTab === 'compliance'} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">
-          <Suspense fallback={<TabLoadingFallback />}>
-            <SystemTab profileData={profileData} />
-          </Suspense>
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <SystemTab profileData={profileData} isActive={activeTab === 'system'} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">
