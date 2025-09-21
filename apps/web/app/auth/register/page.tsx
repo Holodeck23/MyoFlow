@@ -25,11 +25,43 @@ export default function Register() {
     setIsLoading(true)
     setMessage('')
 
-    // Placeholder - would connect to actual registration API
-    setTimeout(() => {
-      setMessage('Registration feature coming soon! Contact support@myoflow.at for early access.')
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setMessage('Passwords do not match')
       setIsLoading(false)
-    }, 1000)
+      return
+    }
+
+    if (formData.password.length < 8) {
+      setMessage('Password must be at least 8 characters long')
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage('Account created successfully! Redirecting to sign in...')
+        setTimeout(() => {
+          window.location.href = '/auth/sign-in?message=Account created successfully'
+        }, 2000)
+      } else {
+        setMessage(data.error || 'Registration failed. Please try again.')
+      }
+    } catch (error) {
+      setMessage('Network error. Please check your connection and try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

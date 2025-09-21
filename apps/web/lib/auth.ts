@@ -1,6 +1,10 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { compare } from 'bcryptjs'
+import { PrismaClient } from '@myoflow/db'
+
+const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -20,26 +24,60 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Demo authentication with password validation
-        if (credentials?.email && credentials?.password && credentials.email.includes('@')) {
-          // Test user with specific password
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        try {
+          // Check for database user first
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            include: { Therapist: true }
+          })
+
+          if (user && user.password) {
+            // Verify password for database users
+            const isValidPassword = await compare(credentials.password, user.password)
+            if (isValidPassword) {
+              return {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                therapistId: user.Therapist?.id,
+                subscriptionStatus: user.subscriptionStatus,
+                trialEndsAt: user.trialEndsAt,
+              }
+            }
+          }
+
+          // Fallback to demo authentication for testing
           if (credentials.email === 'test@myoflow.at' && credentials.password === 'demo123') {
             return {
               id: 'test-user-id',
               email: credentials.email,
               name: 'Dr. Sarah Müller',
+              role: 'OWNER',
             }
           }
+
           // For demo, accept any email with password "demo"
           if (credentials.password === 'demo') {
             return {
               id: credentials.email,
               email: credentials.email,
               name: credentials.email.split('@')[0],
+              role: 'OWNER',
             }
           }
+
+          return null
+        } catch (error) {
+          console.error('Auth error:', error)
+          return null
+        } finally {
+          await prisma.$disconnect()
         }
-        return null
       }
     }),
   ],

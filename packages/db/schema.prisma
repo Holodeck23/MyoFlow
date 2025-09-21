@@ -8,12 +8,27 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  name      String?
-  role      Role       @default(OWNER)
-  createdAt DateTime   @default(now())
-  Therapist Therapist?
+  id                      String      @id @default(cuid())
+  email                   String      @unique
+  name                    String?
+  password                String?
+  role                    Role        @default(OWNER)
+  createdAt               DateTime    @default(now())
+  emailVerified           DateTime?   @map("emailVerified")
+  emailVerificationToken  String?     @map("emailVerificationToken")
+  passwordResetToken      String?     @map("passwordResetToken")
+  passwordResetExpires    DateTime?   @map("passwordResetExpires")
+  trialStarted            DateTime?   @default(now()) @map("trialStarted")
+  trialEndsAt             DateTime?   @map("trialEndsAt")
+  subscriptionStatus      SubscriptionStatus @default(TRIAL) @map("subscriptionStatus")
+  stripeCustomerId        String?     @map("stripeCustomerId")
+  stripeSubscriptionId    String?     @map("stripeSubscriptionId")
+  Therapist               Therapist?
+
+  @@index([emailVerificationToken], map: "idx_user_email_verification")
+  @@index([passwordResetToken], map: "idx_user_password_reset")
+  @@index([subscriptionStatus], map: "idx_user_subscription_status")
+  @@index([trialEndsAt], map: "idx_user_trial_ends")
 }
 
 model Therapist {
@@ -534,6 +549,18 @@ enum Role {
   STAFF
   ACCOUNTANT
   AFFILIATE
+  ADMIN // Tenant-level admin (future use)
+  SUPPORT // Platform-level support role
+  FINANCE // Platform-level finance/billing role
+  SUPER_ADMIN // Platform-level super administrator
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
 }
 
 enum TherapistDesignation {
