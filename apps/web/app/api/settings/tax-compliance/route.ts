@@ -4,6 +4,9 @@ import { z } from 'zod'
 import { assertValidVatNumber, normalizeVatNumber } from '@myoflow/lib'
 import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
+
 const updateSchema = z.object({
   vatRegistered: z.boolean().optional(),
   vatNumber: z.string().trim().nullable().optional(),

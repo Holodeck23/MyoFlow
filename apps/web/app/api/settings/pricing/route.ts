@@ -3,6 +3,9 @@ import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
+
 const serviceRateSchema = z.object({
   name: z.string().min(1).max(200),
   category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']),
