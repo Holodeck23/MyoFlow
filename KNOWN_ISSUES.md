@@ -1,7 +1,7 @@
 # Known Issues - User Settings Branch
 
 **Last Updated:** 2025-09-21
-**Critical Issues Resolved:** 5 of 8 issues ✅
+**Critical Issues Resolved:** 6 of 8 issues ✅
 
 ## ✅ Recently Fixed (2025-09-21)
 - **Public Invoice Security Vulnerability** - Implemented signed token authentication and removed PII exposure
@@ -9,34 +9,11 @@
 - **Encryption Key Inconsistency** - Standardized on ENCRYPTION_KEY_B64 across all packages
 - **Translation System Layout Glitches** - Applied CSS containment and flex layout improvements for stable internationalization
 - **RKSV Compliance Implementation** - Complete Austrian Registrierkassenpflicht monitoring with dedicated API endpoint
+- **Database Schema Synchronization Issue** - Resolved Prisma client cache inconsistency through fresh rebuild and client regeneration
 
 ## 🐛 Outstanding Issues
 
-### 1. Database Schema Synchronization Issue ⚠️ NEW
-**Status:** Medium - Prisma client cache inconsistency
-**Affected:** Settings page API, TaxComplianceSettings queries
-**Symptoms:**
-- Prisma client claims `TaxComplianceSettings.kleinunternehmer_start` column doesn't exist
-- Database actually contains the column (verified via psql)
-- Error persists despite schema pull, cache clearing, and client regeneration
-
-**Technical Details:**
-- Database table created correctly via migration `20250919120000_user_settings_infrastructure`
-- Column exists: `kleinunternehmer_start timestamp without time zone`
-- Prisma schema shows correct mapping: `@map("kleinunternehmer_start")`
-- Multiple regeneration attempts failed to resolve cache issue
-
-**Workaround Applied:**
-- TaxComplianceSettings relation temporarily disabled in API
-- Settings overview endpoint modified to handle missing relation
-- Allows continued development while investigating root cause
-
-**Next Steps:**
-- Investigate Prisma client connection string discrepancies
-- Consider fresh database rebuild if issue persists
-- Document as potential deployment consideration
-
-### 2. Public Invoice Endpoint Exposes Tenant Data ✅ FIXED
+### 1. Public Invoice Endpoint Exposes Tenant Data ✅ FIXED
 **Status:** ~~Critical~~ → Resolved (2025-09-20)
 **Affected:** `GET /api/public/invoices/[id]`
 **Solution Applied:**
@@ -46,7 +23,7 @@
 - ✅ Added expiring tokens (7-day default) with cryptographic verification
 - ✅ Endpoint now requires `?token=<signed_token>` parameter for access
 
-### 3. Idempotent API Regressions in Settings GET handlers ✅ FIXED
+### 2. Idempotent API Regressions in Settings GET handlers ✅ FIXED
 **Status:** ~~High~~ → Resolved (2025-09-20)
 **Affected:** `/api/settings/overview`, `/api/clients`
 **Solution Applied:**
@@ -56,7 +33,7 @@
 - ✅ Converted revenue calculation to cached approach with 24-hour cache window
 - ✅ GET requests are now side-effect free and fail cleanly for missing accounts
 
-### 4. Encryption Secrets Out of Sync ✅ FIXED
+### 3. Encryption Secrets Out of Sync ✅ FIXED
 **Status:** ~~High~~ → Resolved (2025-09-20)
 **Affected:** Client CRUD, consent submission, any encryption utility usage
 **Solution Applied:**
@@ -65,7 +42,7 @@
 - ✅ Removed inconsistent `DATA_ENCRYPTION_KEY` usage from legacy code
 - ✅ `.env.example` already correctly documents `ENCRYPTION_KEY_B64`
 
-### 3. Settings Page Performance & Bundling (2025-09-19)
+### 4. Settings Page Performance & Bundling (2025-09-19)
 **Status:** Medium - Rebuilds ~12s, initial load sluggish
 
 **Findings:**
@@ -79,7 +56,7 @@
 - Move default seeding out of GET handlers; cache or queue the revenue aggregate.
 - Track in a follow-up branch before shipping settings UI.
 
-### 4. Performance Issues
+### 5. Performance Issues
 **Status:** Medium - Development workflow impact
 **Symptoms:**
 - Settings page compilation: 12.7+ seconds
@@ -90,7 +67,7 @@
 - Development velocity significantly reduced
 - Testing translation changes becomes time-consuming
 
-### 5. Settings Backend / UI Gaps (2025-09-19)
+### 6. Settings Backend / UI Gaps (2025-09-19)
 **Status:** High - Blocks user settings delivery
 
 **Findings:**
