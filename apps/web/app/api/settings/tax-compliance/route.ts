@@ -135,7 +135,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updated = await prisma.taxComplianceSettings.update({
-      where: { therapistId },
+      where: { therapistId: therapist.id },
       data: {
         ...updateData,
         updatedAt: new Date(),
@@ -143,7 +143,7 @@ export async function PUT(request: NextRequest) {
     })
 
     await prisma.therapist.update({
-      where: { id: therapistId },
+      where: { id: therapist.id },
       data: {
         settingsLastUpdated: new Date(),
         settingsVersion: { increment: 1 },

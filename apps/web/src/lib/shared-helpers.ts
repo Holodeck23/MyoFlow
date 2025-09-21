@@ -36,15 +36,31 @@ export async function requireTherapist(request: NextRequest) {
  * Setup helper that creates missing user/therapist accounts.
  * Use this only in POST endpoints or explicit setup flows.
  */
-export async function ensureTherapistAccount(email: string, name?: string) {
+export async function ensureTherapistAccount(emailOrRequest: string | NextRequest, name?: string) {
+  let email: string
+  let userName: string | undefined
+
+  if (typeof emailOrRequest === 'string') {
+    email = emailOrRequest
+    userName = name
+  } else {
+    // Handle NextRequest - extract from session
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      throw new Response('Unauthorized', { status: 401 })
+    }
+    email = session.user.email
+    userName = session.user.name || session.user.email || 'Therapist'
+  }
+
   const user = await prisma.user.upsert({
     where: { email },
     update: {
-      name: name || email || 'Therapist',
+      name: userName || email || 'Therapist',
     },
     create: {
       email,
-      name: name || email || 'Therapist',
+      name: userName || email || 'Therapist',
       role: 'OWNER',
     },
   })
