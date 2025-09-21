@@ -95,6 +95,20 @@ Working on **comprehensive user settings design** implementation following Agent
 - **Security:** libsodium encryption, field-level protection
 - **Test Data:** 3 Austrian invoices, realistic Linz-based client scenarios
 
+## 📆 Stabilisation & MVP Plan (Sept 2025)
+
+**Goal:** Eliminate open issues, tighten architecture, then deliver the remaining ~30% toward MVP without feature creep.
+
+1. **Hardening Sprint (5d)** – Secure public invoice access, standardise encryption secrets, and refactor GET handlers to be side-effect free with shared therapist lookup helpers.
+2. **Runtime Performance Sprint (6d)** – Decompose the settings surface (lazy/server components), relocate default seeding to explicit setup flows, benchmark rebuild/hydration times, and tidy repo artefacts (coverage/dist, Prisma versions).
+3. **UX + i18n Cleanup Sprint (5d)** – Resolve translation layout glitches, finish string extraction, and move the root layout back to SSR-friendly patterns with scoped locale persistence.
+4. **Settings Completion Sprint (7d)** – Ship remaining settings APIs + UI wiring, migrate legacy JSON blobs, and document PostGIS rollout requirements.
+5. **Compliance & Reporting Sprint (6d)** – Finish RKSV flows, tighten audit logging, and replace dashboard mock metrics with live revenue/threshold data.
+6. **E2E Reliability Sprint (5d)** – Expand Playwright suites (settings, calendar, security smoke tests) and enable E2E in CI.
+7. **Polish & Launch Prep Sprint (4d)** – Documentation sweep, localisation/responsiveness QA, release-candidate tag, and launch checklist.
+
+Each sprint should run on focused branches (one per sprint task), finish with the standard lint/typecheck/build/test gate, and record progress in `AGENT_ACTIVITY_LOG.md`.
+
 ---
 
 ## 📋 Development Rules

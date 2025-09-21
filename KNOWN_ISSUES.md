@@ -1,37 +1,39 @@
 # Known Issues - User Settings Branch
 
-**Last Updated:** 2025-09-20
-**Critical Issues Resolved:** 3 of 7 issues ✅
+**Last Updated:** 2025-09-21
+**Critical Issues Resolved:** 4 of 8 issues ✅
 
-## ✅ Recently Fixed (2025-09-20)
+## ✅ Recently Fixed (2025-09-21)
 - **Public Invoice Security Vulnerability** - Implemented signed token authentication and removed PII exposure
 - **GET Handler Side Effects** - Made API endpoints idempotent and side-effect free
 - **Encryption Key Inconsistency** - Standardized on ENCRYPTION_KEY_B64 across all packages
+- **Translation System Layout Glitches** - Applied CSS containment and flex layout improvements for stable internationalization
 
 ## 🐛 Outstanding Issues
 
-### 1. Translation System Layout Glitches
-**Status:** Critical - Severe layout shifts during language switching
-**Affected:** Sidebar navigation, footer, settings page
+### 1. Database Schema Synchronization Issue ⚠️ NEW
+**Status:** Medium - Prisma client cache inconsistency
+**Affected:** Settings page API, TaxComplianceSettings queries
 **Symptoms:**
-- Multiple UI elements shifting positions when toggling EN/DE
-- Layout becomes unstable and unprofessional
-- Several areas affected simultaneously
+- Prisma client claims `TaxComplianceSettings.kleinunternehmer_start` column doesn't exist
+- Database actually contains the column (verified via psql)
+- Error persists despite schema pull, cache clearing, and client regeneration
 
-**Root Cause:**
-- German text significantly longer than English equivalents
-- CSS layout not accounting for dynamic text length changes
-- Translation system causing reflow throughout UI
+**Technical Details:**
+- Database table created correctly via migration `20250919120000_user_settings_infrastructure`
+- Column exists: `kleinunternehmer_start timestamp without time zone`
+- Prisma schema shows correct mapping: `@map("kleinunternehmer_start")`
+- Multiple regeneration attempts failed to resolve cache issue
 
-**Temporary Fix Applied:**
-- Added `min-w-0 truncate` CSS classes to sidebar
-- Hardcoded dummy data in Current Profile section
-- Still experiencing severe glitches
+**Workaround Applied:**
+- TaxComplianceSettings relation temporarily disabled in API
+- Settings overview endpoint modified to handle missing relation
+- Allows continued development while investigating root cause
 
-**Recommended Action:**
-- Move translation work to separate feature branch
-- Implement proper CSS layout strategy for bilingual content
-- Consider fixed-width containers or text overflow handling
+**Next Steps:**
+- Investigate Prisma client connection string discrepancies
+- Consider fresh database rebuild if issue persists
+- Document as potential deployment consideration
 
 ### 2. Public Invoice Endpoint Exposes Tenant Data ✅ FIXED
 **Status:** ~~Critical~~ → Resolved (2025-09-20)
@@ -62,7 +64,7 @@
 - ✅ Removed inconsistent `DATA_ENCRYPTION_KEY` usage from legacy code
 - ✅ `.env.example` already correctly documents `ENCRYPTION_KEY_B64`
 
-### 5. Settings Page Performance & Bundling (2025-09-19)
+### 3. Settings Page Performance & Bundling (2025-09-19)
 **Status:** Medium - Rebuilds ~12s, initial load sluggish
 
 **Findings:**
@@ -76,7 +78,7 @@
 - Move default seeding out of GET handlers; cache or queue the revenue aggregate.
 - Track in a follow-up branch before shipping settings UI.
 
-### 6. Performance Issues
+### 4. Performance Issues
 **Status:** Medium - Development workflow impact
 **Symptoms:**
 - Settings page compilation: 12.7+ seconds
@@ -87,7 +89,7 @@
 - Development velocity significantly reduced
 - Testing translation changes becomes time-consuming
 
-### 7. Settings Backend / UI Gaps (2025-09-19)
+### 5. Settings Backend / UI Gaps (2025-09-19)
 **Status:** High - Blocks user settings delivery
 
 **Findings:**
