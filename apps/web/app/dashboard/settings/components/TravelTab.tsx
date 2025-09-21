@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from '@myoflow/lib'
 import {
   Card,
@@ -13,39 +13,19 @@ import {
   Input
 } from '@/components/ui'
 import { MapPin, AlertCircle, Plane } from 'lucide-react'
+import { useSettingsEndpoint } from '../lib/api-config'
 
 interface TravelTabProps {
   profileData: any
+  isActive?: boolean
 }
 
-export function TravelTab({ profileData }: TravelTabProps) {
+export function TravelTab({ profileData, isActive = false }: TravelTabProps) {
   const { t } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [travelSettings, setTravelSettings] = useState<any>(null)
 
-  useEffect(() => {
-    fetchTravelSettings()
-  }, [])
-
-  const fetchTravelSettings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await fetch('/api/settings/travel')
-      if (response.ok) {
-        const data = await response.json()
-        setTravelSettings(data.travelSettings)
-      } else {
-        setError('Failed to load travel settings')
-      }
-    } catch (err) {
-      setError('Network error loading travel settings')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Only fetch when tab is active
+  const { data: travelSettings, loading: isLoading, error } = useSettingsEndpoint('travel', isActive)
 
   if (isLoading) {
     return (

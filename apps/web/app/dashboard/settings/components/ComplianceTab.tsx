@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from '@myoflow/lib'
 import {
   Card,
@@ -11,39 +11,19 @@ import {
   Button
 } from '@/components/ui'
 import { Shield, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react'
+import { useSettingsEndpoint } from '../lib/api-config'
 
 interface ComplianceTabProps {
   profileData: any
   overviewData: any
+  isActive?: boolean
 }
 
-export function ComplianceTab({ profileData, overviewData }: ComplianceTabProps) {
+export function ComplianceTab({ profileData, overviewData, isActive = false }: ComplianceTabProps) {
   const { t } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [complianceData, setComplianceData] = useState<any>(null)
 
-  useEffect(() => {
-    fetchComplianceSettings()
-  }, [])
-
-  const fetchComplianceSettings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await fetch('/api/settings/tax-compliance')
-      if (response.ok) {
-        const data = await response.json()
-        setComplianceData(data)
-      } else {
-        setError('Failed to load compliance settings')
-      }
-    } catch (err) {
-      setError('Network error loading compliance settings')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Only fetch when tab is active
+  const { data: complianceData, loading: isLoading, error } = useSettingsEndpoint('tax-compliance', isActive)
 
   if (isLoading) {
     return (

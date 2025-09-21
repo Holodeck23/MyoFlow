@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from '@myoflow/lib'
 import {
   Card,
@@ -11,38 +11,18 @@ import {
   Button
 } from '@/components/ui'
 import { DollarSign, AlertCircle, Euro } from 'lucide-react'
+import { useSettingsEndpoint } from '../lib/api-config'
 
 interface PricingTabProps {
   profileData: any
+  isActive?: boolean
 }
 
-export function PricingTab({ profileData }: PricingTabProps) {
+export function PricingTab({ profileData, isActive = false }: PricingTabProps) {
   const { t } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [pricingSettings, setPricingSettings] = useState<any>(null)
 
-  useEffect(() => {
-    fetchPricingSettings()
-  }, [])
-
-  const fetchPricingSettings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await fetch('/api/settings/pricing')
-      if (response.ok) {
-        const data = await response.json()
-        setPricingSettings(data.pricingSettings)
-      } else {
-        setError('Failed to load pricing settings')
-      }
-    } catch (err) {
-      setError('Network error loading pricing settings')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Only fetch when tab is active
+  const { data: serviceRates, loading: isLoading, error } = useSettingsEndpoint('pricing', isActive)
 
   if (isLoading) {
     return (
