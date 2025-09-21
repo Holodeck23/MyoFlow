@@ -3,6 +3,9 @@ import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
+
 const updateSchema = z.object({
   language: z.enum(['EN', 'DE']).optional(),
   timezone: z.string().max(50).optional(),

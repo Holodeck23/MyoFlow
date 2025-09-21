@@ -3,6 +3,9 @@ import { differenceInDays, startOfYear } from 'date-fns'
 import { prisma, CredentialStatus } from '@myoflow/db'
 import { requireTherapist } from '@/lib/shared-helpers'
 
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
+
 const KLEINUNTERNEHMER_LIMIT_CENTS = 5_500_000
 
 
