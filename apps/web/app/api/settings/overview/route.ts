@@ -7,6 +7,7 @@ import { requireTherapist } from '@/lib/shared-helpers'
 export const dynamic = 'force-dynamic'
 
 const KLEINUNTERNEHMER_LIMIT_CENTS = 5_500_000
+const RKSV_THRESHOLD_CENTS = 1_500_000 // €15,000 annual revenue threshold for RKSV requirement
 
 
 function calculateProfileCompletion(therapist: any) {
@@ -68,6 +69,23 @@ function assessComplianceStatus(taxSettings: any, credentials: any[]) {
     kleinunternehmerStatus = 'threshold_warning'
   }
 
+  // RKSV (Registrierkassenpflicht) compliance assessment
+  const currentRevenueCents = taxSettings?.currentYearRevenueCents || 0
+  const rksvRequired = currentRevenueCents >= RKSV_THRESHOLD_CENTS
+  const rksvImplemented = taxSettings?.rksvEnabled || false
+
+  let rksvStatus: 'not_required' | 'required' | 'compliant' | 'overdue' = 'not_required'
+  if (rksvRequired) {
+    if (rksvImplemented) {
+      // Check if signature device audit is due
+      const nextAuditDue = taxSettings?.nextRksvAuditDue ? new Date(taxSettings.nextRksvAuditDue) : null
+      const isAuditOverdue = nextAuditDue && nextAuditDue < new Date()
+      rksvStatus = isAuditOverdue ? 'overdue' : 'compliant'
+    } else {
+      rksvStatus = 'required'
+    }
+  }
+
   const hasExpiringCredential = credentials.some((credential) => credential.status === CredentialStatus.EXPIRING)
   const credentialsStatus: 'valid' | 'expiring' | 'expired' = credentials.some(
     (credential) => credential.status === CredentialStatus.EXPIRED
@@ -81,6 +99,7 @@ function assessComplianceStatus(taxSettings: any, credentials: any[]) {
     vatCompliance,
     kleinunternehmerStatus,
     credentialsStatus,
+    rksvStatus,
   }
 }
 
@@ -156,6 +175,12 @@ export async function GET(request: NextRequest) {
       detailedTherapist.Credentials || [],
     )
 
+    // Calculate days until next RKSV audit
+    const nextRksvAuditDue = taxSettings?.nextRksvAuditDue ? new Date(taxSettings.nextRksvAuditDue) : null
+    const daysUntilRksvAudit = nextRksvAuditDue
+      ? Math.ceil((nextRksvAuditDue.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null
+
     const quickStats = {
       currentYearRevenue:
         displayRevenueCents / 100,
@@ -165,6 +190,9 @@ export async function GET(request: NextRequest) {
         (displayRevenueCents /
           (taxSettings?.kleinunternehmerThresholdCents || KLEINUNTERNEHMER_LIMIT_CENTS)) * 100,
       daysUntilCredentialExpiry: getNextCredentialExpiryDays(detailedTherapist.Credentials || []),
+      rksvThreshold: RKSV_THRESHOLD_CENTS / 100, // €15,000
+      rksvThresholdPercentage: (displayRevenueCents / RKSV_THRESHOLD_CENTS) * 100,
+      daysUntilRksvAudit,
     }
 
     return NextResponse.json({
