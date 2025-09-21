@@ -13,17 +13,17 @@ import {
   Input
 } from '@/components/ui'
 import { AlertCircle } from 'lucide-react'
+import { useSettingsEndpoint } from '../lib/api-config'
 
 interface ProfileTabProps {
   profileData: any
+  isActive?: boolean
 }
 
-export function ProfileTab({ profileData }: ProfileTabProps) {
+export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
   const { t } = useTranslation()
-  const [profile, setProfile] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     businessName: '',
     businessAddressLine1: '',
@@ -38,62 +38,57 @@ export function ProfileTab({ profileData }: ProfileTabProps) {
     vatStatus: 'KLEINUNTERNEHMER'
   })
 
-  // Fetch profile data
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  // Only fetch when tab is active
+  const { data: profile, loading: isLoading, error, refetch } = useSettingsEndpoint('profile', isActive)
 
-  const fetchProfile = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await fetch('/api/settings/profile')
-      if (response.ok) {
-        const data = await response.json()
-        setProfile(data.profile)
-        setFormData({
-          businessName: data.profile.businessName || '',
-          businessAddressLine1: data.profile.businessAddressLine1 || '',
-          businessAddressLine2: data.profile.businessAddressLine2 || '',
-          businessCity: data.profile.businessCity || '',
-          businessPostalCode: data.profile.businessPostalCode || '',
-          businessCountry: data.profile.businessCountry || 'Austria',
-          businessEmail: data.profile.businessEmail || '',
-          businessPhone: data.profile.businessPhone || '',
-          designation: data.profile.designation || 'HEILMASSEUR',
-          licenseNumber: data.profile.licenseNumber || '',
-          vatStatus: data.profile.vatStatus || 'KLEINUNTERNEHMER'
-        })
-      } else {
-        setError('Failed to load profile data')
-      }
-    } catch (err) {
-      setError('Network error loading profile')
-    } finally {
-      setIsLoading(false)
+  // Update form data when profile loads
+  useEffect(() => {
+    if (profile?.profile) {
+      const profileData = profile.profile
+      setFormData({
+        businessName: profileData.businessName || '',
+        businessAddressLine1: profileData.businessAddress || '', // API uses businessAddress not businessAddressLine1
+        businessAddressLine2: '',
+        businessCity: '',
+        businessPostalCode: '',
+        businessCountry: 'Austria',
+        businessEmail: profileData.businessEmail || '',
+        businessPhone: profileData.businessPhone || '',
+        designation: profileData.designation || 'HEILMASSEUR',
+        licenseNumber: profileData.chamberRegistration || '', // API uses chamberRegistration
+        vatStatus: profileData.vatStatus || 'KLEINUNTERNEHMER'
+      })
     }
-  }
+  }, [profile])
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      setError(null)
+      setSaveError(null)
       const response = await fetch('/api/settings/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          businessName: formData.businessName,
+          businessAddress: formData.businessAddressLine1, // Map to API field
+          businessEmail: formData.businessEmail,
+          businessPhone: formData.businessPhone,
+          designation: formData.designation,
+          chamberRegistration: formData.licenseNumber, // Map to API field
+          vatStatus: formData.vatStatus
+        })
       })
 
       if (response.ok) {
         const data = await response.json()
-        setProfile(data.profile)
+        refetch() // Refresh the profile data
         // Show success message (you could add a toast here)
       } else {
         const errorData = await response.json()
-        setError(errorData.error || 'Failed to save profile')
+        setSaveError(errorData.error || 'Failed to save profile')
       }
     } catch (err) {
-      setError('Network error saving profile')
+      setSaveError('Network error saving profile')
     } finally {
       setIsSaving(false)
     }
@@ -111,6 +106,30 @@ export function ProfileTab({ profileData }: ProfileTabProps) {
           <p className="text-gray-500">Loading profile...</p>
         </div>
       </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Failed to load profile</h3>
+              <p className="text-red-600 text-sm mt-1">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="mt-3 border-red-300 text-red-700 hover:bg-red-100"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -258,8 +277,17 @@ export function ProfileTab({ profileData }: ProfileTabProps) {
               </div>
             </div>
 
+            {saveError && (
+              <div className="p-3 bg-red-100 border border-red-300 rounded-md">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <p className="text-red-800 text-sm">{saveError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end space-x-3">
-              <Button variant="outline" onClick={fetchProfile}>
+              <Button variant="outline" onClick={() => refetch()}>
                 Cancel
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
