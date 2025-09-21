@@ -97,7 +97,7 @@ export function Sidebar() {
   ]
 
   return (
-    <div className={`flex min-h-screen ${isCollapsed ? 'w-16' : 'w-64'} flex-col bg-white border-r border-gray-200 transition-all duration-300`}>
+    <div className={`flex min-h-screen ${isCollapsed ? 'w-16' : 'w-64'} flex-col bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0`}>
       {/* Professional Branding Header */}
       <div className={`flex h-20 shrink-0 items-center border-b border-gray-100 ${isCollapsed ? 'px-3' : 'px-6'}`}>
         <div className="flex items-center justify-between w-full">
@@ -106,9 +106,13 @@ export function Sidebar() {
               <span className="text-white font-bold text-lg">M</span>
             </div>
             {!isCollapsed && (
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">{t('sidebar.brand.title', 'MyoFlow Therapy')}</h1>
-                <p className="text-sm text-gray-500">{t('sidebar.brand.subtitle', 'Physiotherapie Praxis')}</p>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                  {t('sidebar.brand.title', 'MyoFlow Therapy')}
+                </h1>
+                <p className="text-sm text-gray-500 truncate">
+                  {t('sidebar.brand.subtitle', 'Physiotherapie Praxis')}
+                </p>
               </div>
             )}
           </div>
@@ -145,7 +149,13 @@ export function Sidebar() {
                 title={isCollapsed ? item.name : undefined}
               >
                 <IconComponent size={20} className={`flex-shrink-0 ${!isCollapsed && 'mr-3'}`} />
-                {!isCollapsed && <span className="flex-1 min-w-0 truncate">{item.name}</span>}
+                {!isCollapsed && (
+                  <span className="flex-1 min-w-0 overflow-hidden">
+                    <span className="block truncate text-ellipsis whitespace-nowrap">
+                      {item.name}
+                    </span>
+                  </span>
+                )}
 
                 {/* Notification Badge */}
                 {item.badge && !isCollapsed && (
