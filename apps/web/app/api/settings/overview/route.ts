@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
       include: {
         travelSettingsDetail: true,
         Preferences: true,
+        TaxComplianceSettings: true,
         Credentials: {
           where: { status: { in: ['ACTIVE', 'EXPIRING'] } },
           orderBy: { expirationDate: 'asc' },
@@ -133,15 +134,8 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Fetch TaxComplianceSettings separately with error handling
-    let taxSettings = null
-    try {
-      taxSettings = await prisma.taxComplianceSettings.findUnique({
-        where: { therapistId: therapist.id },
-      })
-    } catch (error) {
-      console.warn('TaxComplianceSettings query failed, continuing without:', error)
-    }
+    // Extract tax settings from the include
+    const taxSettings = detailedTherapist?.TaxComplianceSettings
 
     if (!detailedTherapist) {
       return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
