@@ -1,13 +1,14 @@
 # Known Issues - User Settings Branch
 
 **Last Updated:** 2025-09-21
-**Critical Issues Resolved:** 4 of 8 issues ✅
+**Critical Issues Resolved:** 5 of 8 issues ✅
 
 ## ✅ Recently Fixed (2025-09-21)
 - **Public Invoice Security Vulnerability** - Implemented signed token authentication and removed PII exposure
 - **GET Handler Side Effects** - Made API endpoints idempotent and side-effect free
 - **Encryption Key Inconsistency** - Standardized on ENCRYPTION_KEY_B64 across all packages
 - **Translation System Layout Glitches** - Applied CSS containment and flex layout improvements for stable internationalization
+- **RKSV Compliance Implementation** - Complete Austrian Registrierkassenpflicht monitoring with dedicated API endpoint
 
 ## 🐛 Outstanding Issues
 
