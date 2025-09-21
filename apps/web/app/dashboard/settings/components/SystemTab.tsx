@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from '@myoflow/lib'
 import {
   Card,
@@ -11,38 +11,18 @@ import {
   Button
 } from '@/components/ui'
 import { Settings as SettingsIcon, AlertCircle, Bell, Globe, Monitor } from 'lucide-react'
+import { useSettingsEndpoint } from '../lib/api-config'
 
 interface SystemTabProps {
   profileData: any
+  isActive?: boolean
 }
 
-export function SystemTab({ profileData }: SystemTabProps) {
+export function SystemTab({ profileData, isActive = false }: SystemTabProps) {
   const { t } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [systemSettings, setSystemSettings] = useState<any>(null)
 
-  useEffect(() => {
-    fetchSystemSettings()
-  }, [])
-
-  const fetchSystemSettings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const response = await fetch('/api/settings/system')
-      if (response.ok) {
-        const data = await response.json()
-        setSystemSettings(data.systemSettings)
-      } else {
-        setError('Failed to load system settings')
-      }
-    } catch (err) {
-      setError('Network error loading system settings')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Only fetch when tab is active
+  const { data: systemSettings, loading: isLoading, error } = useSettingsEndpoint('system', isActive)
 
   if (isLoading) {
     return (
