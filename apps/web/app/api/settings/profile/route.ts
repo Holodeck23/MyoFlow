@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
+
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
 
 const updateSchema = z.object({
   businessName: z.string().min(1).max(200).optional(),
@@ -16,44 +18,13 @@ const updateSchema = z.object({
   vatStatus: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']).optional(),
 })
 
-async function authenticate(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Therapist',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Therapist',
-      role: 'OWNER',
-    },
-  })
-
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: session.user.email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
-  })
-
-  return therapist.id
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await requireTherapist(request)
 
-    const therapist = await prisma.therapist.findUnique({
-      where: { id: therapistId },
+    const therapistProfile = await prisma.therapist.findUnique({
+      where: { id: therapist.id },
       select: {
         businessName: true,
         businessAddress: true,
@@ -69,13 +40,13 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    if (!therapist) {
+    if (!therapistProfile) {
       return NextResponse.json({ error: 'Therapist profile not found' }, { status: 404 })
     }
 
     return NextResponse.json({
       success: true,
-      profile: therapist,
+      profile: therapistProfile,
     })
   } catch (error) {
     if (error instanceof Response) {
@@ -89,12 +60,12 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await ensureTherapistAccount(request)
     const payload = await request.json()
     const parsed = updateSchema.parse(payload)
 
     const updated = await prisma.therapist.update({
-      where: { id: therapistId },
+      where: { id: therapist.id },
       data: {
         ...parsed,
         updatedAt: new Date(),

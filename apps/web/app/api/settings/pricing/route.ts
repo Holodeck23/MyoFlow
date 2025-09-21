@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
+
+// Mark this route as dynamic
+export const dynamic = 'force-dynamic'
 
 const serviceRateSchema = z.object({
   name: z.string().min(1).max(200),
@@ -16,45 +18,14 @@ const serviceRateSchema = z.object({
   travelIncluded: z.boolean().optional(),
 })
 
-async function authenticate(request: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Therapist',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Therapist',
-      role: 'OWNER',
-    },
-  })
-
-  const therapist = await prisma.therapist.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: session.user.email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
-  })
-
-  return therapist.id
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await requireTherapist(request)
 
     const serviceRates = await prisma.serviceRateTemplate.findMany({
       where: {
-        therapistId,
+        therapistId: therapist.id,
         isActive: true
       },
       orderBy: [
@@ -64,57 +35,59 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    // If no service rates exist, create some defaults
+    // GET handler should not create missing data - return default structure instead
     if (serviceRates.length === 0) {
-      const defaultRates = [
+      return NextResponse.json([
         {
-          therapistId,
+          id: null,
+          therapistId: therapist.id,
           name: 'Klassische Massage 60min',
-          category: 'MASSAGE' as const,
+          category: 'MASSAGE',
           durationMin: 60,
           priceCents: 8000, // €80.00
-          vatRate: 'KLEINUNTERNEHMER' as const,
+          vatRate: 'KLEINUNTERNEHMER',
           description: 'Standard full-body massage treatment',
           isDefault: true,
           travelRateCents: 80, // €0.80/km
           travelIncluded: false,
+          isActive: true,
+          // Indicate this is default data, not persisted
+          isDefaultData: true,
         },
         {
-          therapistId,
+          id: null,
+          therapistId: therapist.id,
           name: 'Entspannungsmassage 45min',
-          category: 'MASSAGE' as const,
+          category: 'MASSAGE',
           durationMin: 45,
           priceCents: 6500, // €65.00
-          vatRate: 'KLEINUNTERNEHMER' as const,
+          vatRate: 'KLEINUNTERNEHMER',
           description: 'Relaxation massage for stress relief',
           isDefault: false,
           travelRateCents: 80,
           travelIncluded: false,
+          isActive: true,
+          isDefaultData: true,
         },
         {
-          therapistId,
+          id: null,
+          therapistId: therapist.id,
           name: 'Triggerpunkt-Therapie 45min',
-          category: 'MASSAGE' as const,
+          category: 'MASSAGE',
           durationMin: 45,
           priceCents: 7500, // €75.00
-          vatRate: 'KLEINUNTERNEHMER' as const,
+          vatRate: 'KLEINUNTERNEHMER',
           description: 'Targeted trigger point therapy',
           isDefault: false,
           travelRateCents: 80,
           travelIncluded: false,
+          isActive: true,
+          isDefaultData: true,
         }
-      ]
-
-      const created = await Promise.all(
-        defaultRates.map(rate =>
-          prisma.serviceRateTemplate.create({ data: rate })
-        )
-      )
-
-      return NextResponse.json(created)
+      ])
     }
 
-    return NextResponse.json(serviceRates)
+    return NextResponse.json(serviceRates.map(rate => ({ ...rate, isDefaultData: false })))
   } catch (error) {
     if (error instanceof Response) {
       throw error
@@ -127,7 +100,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const therapistId = await authenticate(request)
+    const { therapist } = await ensureTherapistAccount(request)
     const payload = await request.json()
     const parsed = serviceRateSchema.parse(payload)
 
@@ -135,7 +108,7 @@ export async function POST(request: NextRequest) {
     if (parsed.isDefault) {
       await prisma.serviceRateTemplate.updateMany({
         where: {
-          therapistId,
+          therapistId: therapist.id,
           category: parsed.category,
           isDefault: true,
         },
@@ -147,14 +120,14 @@ export async function POST(request: NextRequest) {
 
     const serviceRate = await prisma.serviceRateTemplate.create({
       data: {
-        therapistId,
+        therapistId: therapist.id,
         ...parsed,
       },
     })
 
     // Update therapist settings timestamp
     await prisma.therapist.update({
-      where: { id: therapistId },
+      where: { id: therapist.id },
       data: {
         settingsLastUpdated: new Date(),
         settingsVersion: { increment: 1 },
