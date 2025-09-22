@@ -29,6 +29,7 @@
 - [x] PDF Invoice Downloads - Professional Austrian-format invoices with download API `S`
 - [x] Service Rate Defaults - Therapist profile settings with pricing templates (Sprint 1.5 IN PROGRESS) `M`
 - [ ] CSV Accounting Exports - BMD/RZL/DATEV integration for tax preparation `M`
+  - **Note:** The database foundation (`ExportConfiguration` model) is complete. The remaining work is to build the specific CSV/XML generation logic.
 - [ ] Client Retention Analytics - Lifetime value tracking and churn analysis `L`
 - [ ] Automated Follow-up System - Reactivation emails and wellness check-ins `L`
 - [ ] Multi-tenant Onboarding - Registration flow with practice setup wizard `L`

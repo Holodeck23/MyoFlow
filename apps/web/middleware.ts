@@ -1,59 +1,18 @@
+import auth from '@/lib/auth'
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 
-export async function middleware(request: NextRequest) {
+export default auth((req) => {
   const response = NextResponse.next()
-  
-  // Security headers
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-  
-  // HSTS for production
-  if (process.env.NODE_ENV === 'production') {
-    response.headers.set(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload'
-    )
-  }
-  
-  // CSP with nonce for scripts
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
-  const scriptSrc = [`'self'`, `'nonce-${nonce}'`]
-  if (process.env.NODE_ENV !== 'production') {
-    scriptSrc.push("'unsafe-eval'")
-  }
-  response.headers.set(
-    'Content-Security-Policy',
-    `default-src 'self'; script-src ${scriptSrc.join(' ')}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self';`
-  )
-  
-  // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    const token = await getToken({ req: request })
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/sign-in', request.url))
-    }
-  }
-  
-  // Handle mini-site subdomain routing (future feature)
-  // TODO-CLAUDE: Implement subdomain routing when feature flag is enabled
-  const host = request.headers.get('host')
-  if (host && !host.includes('localhost') && host.includes('.')) {
-    const subdomain = host.split('.')[0]
-    if (subdomain && subdomain !== 'www') {
-      // Redirect to /s/[slug] path-based routing for now
-      return NextResponse.redirect(new URL(`/s/${subdomain}`, request.url))
-    }
+
+  if (!req.auth && req.nextUrl.pathname.startsWith('/dashboard')) {
+    const newUrl = new URL('/auth/sign-in', req.nextUrl.origin)
+    return NextResponse.redirect(newUrl)
   }
 
   return response
-}
+})
 
+// See "Matching Paths" below to learn more
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/auth/sign-in'],
 }

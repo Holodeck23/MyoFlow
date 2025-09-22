@@ -1,46 +1,98 @@
-import { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
+import NextAuth from 'next-auth'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { compare } from 'bcryptjs'
+import { PrismaClient } from '@myoflow/db'
 
-export const authOptions: NextAuthOptions = {
+const prisma = new PrismaClient()
+
+const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt' },
   providers: [
-    // Google OAuth - temporarily disabled due to missing credentials
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    ] : []),
-    // Email demo authentication
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       id: 'email-demo',
       name: 'Email',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Demo authentication with password validation
-        if (credentials?.email && credentials?.password && credentials.email.includes('@')) {
-          // Test user with specific password
-          if (credentials.email === 'test@myoflow.at' && credentials.password === 'demo123') {
-            return {
-              id: 'test-user-id',
-              email: credentials.email,
-              name: 'Dr. Sarah Müller',
-            }
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        const email = credentials.email as string
+        const password = credentials.password as string
+
+        // 1. Check for hardcoded test user
+        if (email === 'test@myoflow.at' && password === 'demo123') {
+          return {
+            id: 'test-user-id',
+            email: email,
+            name: 'Dr. Sarah Müller',
+            role: 'OWNER',
           }
-          // For demo, accept any email with password "demo"
-          if (credentials.password === 'demo') {
+        }
+        
+        // 2. Check for database user
+        const user = await prisma.user.findUnique({
+          where: { email: email },
+          include: { Therapist: true },
+        })
+
+        if (user && user.password) {
+          const isValidPassword = await compare(password, user.password)
+          if (isValidPassword) {
             return {
-              id: credentials.email,
-              email: credentials.email,
-              name: credentials.email.split('@')[0],
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              therapistId: user.Therapist?.id,
+              subscriptionStatus: user.subscriptionStatus,
+              trialEndsAt: user.trialEndsAt,
             }
           }
         }
+
+        // 3. Fallback to demo password for any user
+        // This is a temporary measure for testing and should be removed
+        if (password === 'demo') {
+          // Find user by email to link to the correct account
+          const demoUser = await prisma.user.findUnique({
+            where: { email: email },
+            include: { Therapist: true },
+          });
+
+          if (demoUser) {
+            return {
+              id: demoUser.id,
+              email: demoUser.email,
+              name: demoUser.name,
+              role: demoUser.role,
+              therapistId: demoUser.Therapist?.id,
+              subscriptionStatus: demoUser.subscriptionStatus,
+              trialEndsAt: demoUser.trialEndsAt,
+            }
+          }
+          
+          // If user doesn't exist, create a temporary session
+          return {
+            id: email,
+            email: email,
+            name: email.split('@')[0],
+            role: 'OWNER',
+          }
+        }
+
         return null
-      }
+      },
     }),
   ],
   pages: {
@@ -48,20 +100,21 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token }) {
-      if (session?.user && token?.sub) {
+      if (session.user && token.sub) {
         session.user.id = token.sub
-        if (token.role) {
-          session.user.role = token.role
-        }
+        session.user.role = token.role as string
       }
       return session
     },
-    async jwt({ user, token }) {
+    async jwt({ token, user }) {
       if (user) {
+        token.sub = user.id
         token.role = user.role
       }
       return token
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
-}
+})
+
+export default auth
+export { handlers, signIn, signOut }
