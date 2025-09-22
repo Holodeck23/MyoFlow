@@ -78,34 +78,17 @@ export default function Dashboard() {
     }).format(cents / 100)
   }
 
-  // Mock data - in real app this would come from API
-  const currentYearRevenue = 38420 // €38,420 (more realistic monthly progression)
+  // Real data for new users - TODO: Replace with API calls
+  const currentYearRevenue = 0 // New user starts with €0
   const kleinunternehmerThreshold = 55000 // €55,000 Austrian threshold
-  const remainingThreshold = kleinunternehmerThreshold - currentYearRevenue // €16,580
+  const remainingThreshold = kleinunternehmerThreshold - currentYearRevenue // Full €55,000 available
   const thresholdProgress = (currentYearRevenue / kleinunternehmerThreshold) * 100
   const monthsIntoYear = 9 // September
-  const averageMonthlyRevenue = currentYearRevenue / monthsIntoYear
+  const averageMonthlyRevenue = currentYearRevenue / (monthsIntoYear || 1) // Avoid division by zero
   const projectedYearEnd = averageMonthlyRevenue * 12
 
-  const recentActivity = [
-    {
-      type: 'invoice',
-      description: t('dashboard.activity.invoiceCreated'),
-      time: t('dashboard.activity.hoursAgo'),
-      amount: '€75.00'
-    },
-    {
-      type: 'appointment',
-      description: t('dashboard.activity.newAppointment'),
-      time: t('dashboard.activity.hoursAgoFour')
-    },
-    {
-      type: 'payment',
-      description: t('dashboard.activity.paymentReceived'),
-      time: t('dashboard.activity.oneDayAgo'),
-      amount: '€120.00'
-    },
-  ]
+  // Empty activity for new users
+  const recentActivity: any[] = []
 
   return (
     <div className="space-y-6">
@@ -169,7 +152,7 @@ export default function Dashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.totalClients')}</p>
-              <p className="text-2xl font-bold text-gray-900">247</p>
+              <p className="text-2xl font-bold text-gray-900">0</p>
             </div>
           </div>
         </div>
@@ -205,7 +188,7 @@ export default function Dashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.actionRequired')}</p>
-              <p className="text-2xl font-bold text-gray-900">3</p>
+              <p className="text-2xl font-bold text-gray-900">0</p>
             </div>
           </div>
         </div>
@@ -272,25 +255,29 @@ export default function Dashboard() {
             <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
           </div>
           <div className="space-y-3">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className={`
-                  w-2 h-2 rounded-full mt-2
-                  ${activity.type === 'invoice' ? 'bg-blue-500' : ''}
-                  ${activity.type === 'appointment' ? 'bg-green-500' : ''}
-                  ${activity.type === 'payment' ? 'bg-purple-500' : ''}
-                `}></div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-900">{activity.description}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">{activity.time}</p>
-                    {activity.amount && (
-                      <span className="text-sm font-medium text-green-600">{activity.amount}</span>
-                    )}
+            {recentActivity.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">{t('dashboard.noRecentActivity')}</p>
+            ) : (
+              recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className={`
+                    w-2 h-2 rounded-full mt-2
+                    ${activity.type === 'invoice' ? 'bg-blue-500' : ''}
+                    ${activity.type === 'appointment' ? 'bg-green-500' : ''}
+                    ${activity.type === 'payment' ? 'bg-purple-500' : ''}
+                  `}></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-900">{activity.description}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                      {activity.amount && (
+                        <span className="text-sm font-medium text-green-600">{activity.amount}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

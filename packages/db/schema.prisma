@@ -8,22 +8,22 @@ datasource db {
 }
 
 model User {
-  id                      String      @id @default(cuid())
-  email                   String      @unique
-  name                    String?
-  password                String?
-  role                    Role        @default(OWNER)
-  createdAt               DateTime    @default(now())
-  emailVerified           DateTime?   @map("emailVerified")
-  emailVerificationToken  String?     @map("emailVerificationToken")
-  passwordResetToken      String?     @map("passwordResetToken")
-  passwordResetExpires    DateTime?   @map("passwordResetExpires")
-  trialStarted            DateTime?   @default(now()) @map("trialStarted")
-  trialEndsAt             DateTime?   @map("trialEndsAt")
-  subscriptionStatus      SubscriptionStatus @default(TRIAL) @map("subscriptionStatus")
-  stripeCustomerId        String?     @map("stripeCustomerId")
-  stripeSubscriptionId    String?     @map("stripeSubscriptionId")
-  Therapist               Therapist?
+  id                     String     @id @default(cuid())
+  email                  String     @unique
+  name                   String?
+  role                   Role       @default(OWNER)
+  createdAt              DateTime   @default(now())
+  password               String?
+  emailVerified          DateTime?  @map("emailVerified") @db.Timestamp(6)
+  emailVerificationToken String?    @map("emailVerificationToken")
+  passwordResetToken     String?    @map("passwordResetToken")
+  passwordResetExpires   DateTime?  @map("passwordResetExpires") @db.Timestamp(6)
+  trialStarted           DateTime?  @default(now()) @map("trialStarted") @db.Timestamp(6)
+  trialEndsAt            DateTime?  @default(dbgenerated("(now() + '30 days'::interval)")) @map("trialEndsAt") @db.Timestamp(6)
+  subscriptionStatus     SubscriptionStatus @default(TRIAL) @map("subscriptionStatus")
+  stripeCustomerId       String?    @map("stripeCustomerId")
+  stripeSubscriptionId   String?    @map("stripeSubscriptionId")
+  Therapist              Therapist?
 
   @@index([emailVerificationToken], map: "idx_user_email_verification")
   @@index([passwordResetToken], map: "idx_user_password_reset")
@@ -549,10 +549,6 @@ enum Role {
   STAFF
   ACCOUNTANT
   AFFILIATE
-  ADMIN // Tenant-level admin (future use)
-  SUPPORT // Platform-level support role
-  FINANCE // Platform-level finance/billing role
-  SUPER_ADMIN // Platform-level super administrator
 }
 
 enum SubscriptionStatus {
