@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
@@ -7,10 +7,10 @@ import { z } from 'zod'
 const UpdateTemplateSchema = z.object({
   name: z.string().min(1, 'Template name is required').max(100, 'Name too long').optional(),
   category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']).optional(),
-  durationMin: z.number().min(15, 'Duration must be at least 15 minutes').max(480, 'Duration cannot exceed 8 hours').optional(),
   priceCents: z.number().min(100, 'Price must be at least €1.00').max(50000, 'Price cannot exceed €500.00').optional(),
   vatRate: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']).optional(),
-  description: z.string().max(500, 'Description too long').optional(),
+  durationMin: z.number().min(15, 'Duration must be at least 15 minutes').max(480, 'Duration cannot exceed 8 hours').optional(),
+  description: z.string().max(500).optional(),
   isDefault: z.boolean().optional(),
 })
 

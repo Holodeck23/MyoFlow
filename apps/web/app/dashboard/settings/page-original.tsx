@@ -1674,7 +1674,6 @@ function ComplianceSettingsTab({ profileData, overviewData }: { profileData: any
                 </div>
               </div>
 
-              {/* VAT Status Configuration */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="vat-status">VAT Status</Label>
@@ -1783,7 +1782,7 @@ function ComplianceSettingsTab({ profileData, overviewData }: { profileData: any
                     <option value="OTHER">Other</option>
                   </select>
                 </div>
-                <div className="space-y-2">
+                <div>
                   <Label htmlFor="license-number">License Number</Label>
                   <Input
                     id="license-number"

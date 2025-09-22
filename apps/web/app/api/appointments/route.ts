@@ -29,8 +29,19 @@ async function getTherapistId(): Promise<string> {
     throw new Error('Not authenticated')
   }
 
-  // Find or create user and therapist using email as unique identifier
-  const user = await prisma.user.upsert({
+  // First, try to find existing user and therapist
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    include: { Therapist: true }
+  })
+
+  if (user && user.Therapist) {
+    // User has an existing therapist profile from registration
+    return user.Therapist.id
+  }
+
+  // Fallback: create/update user and therapist for demo users
+  const fallbackUser = await prisma.user.upsert({
     where: { email: session.user.email },
     update: {
       name: session.user.name || session.user.email || 'Unknown User',
@@ -42,15 +53,15 @@ async function getTherapistId(): Promise<string> {
   })
 
   let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
+    where: { userId: fallbackUser.id },
   })
 
   if (!therapist) {
     // Create therapist with Austrian defaults
     therapist = await prisma.therapist.create({
       data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
+        userId: fallbackUser.id,
+        slug: `therapist-${fallbackUser.id}`,
         designation: 'HEILMASSEUR',
         vatStatus: 'KLEINUNTERNEHMER',
         kleinunternehmer: true,

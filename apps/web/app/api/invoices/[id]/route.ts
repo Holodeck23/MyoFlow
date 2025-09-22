@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 
@@ -16,7 +15,7 @@ const UpdateInvoiceSchema = z.object({
 })
 
 async function getTherapistId(): Promise<string> {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
@@ -274,6 +273,7 @@ export async function PUT(
             },
           },
         },
+        Payments: true,
       },
     })
 

@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!validatePassword(password)) {
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.isValid) {
       return NextResponse.json(
-        { error: 'Password must be at least 8 characters long and contain letters and numbers' },
+        { error: 'Password requirements not met', details: passwordValidation.errors },
         { status: 400 }
       )
     }

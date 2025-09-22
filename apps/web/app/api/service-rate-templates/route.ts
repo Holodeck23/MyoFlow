@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-
-const ServiceRateTemplateSchema = z.object({
-  name: z.string().min(1, 'Service name is required').max(255),
+const CreateTemplateSchema = z.object({
+  name: z.string().min(1, 'Template name is required').max(100, 'Name too long'),
   category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']),
   priceCents: z.number().min(0, 'Price must be positive'),
   vatRate: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']),
   durationMin: z.number().min(15, 'Duration must be at least 15 minutes').max(480),
-  description: z.string().max(1000).optional(),
-  isDefault: z.boolean().default(false)
+  description: z.string().max(500).optional(),
+  isDefault: z.boolean().default(false),
+})
+
+const UpdateTemplateSchema = CreateTemplateSchema.partial()
+
+const QuerySchema = z.object({
+  category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']).optional(),
+  isActive: z.string().transform(val => val === 'true').default('true'),
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -60,18 +64,59 @@ export async function GET(request: NextRequest) {
     }
 
     const therapistId = await getTherapistId(session)
-    
-    // Get service rate templates
+    const { searchParams } = new URL(request.url)
+    const query = QuerySchema.parse(Object.fromEntries(searchParams))
+
+    const whereClause: any = {
+      therapistId,
+      isActive: query.isActive,
+    }
+
+    if (query.category) {
+      whereClause.category = query.category
+    }
+
     const templates = await prisma.serviceRateTemplate.findMany({
-      where: { therapistId },
+      where: whereClause,
       orderBy: [
         { category: 'asc' },
         { isDefault: 'desc' },
-        { name: 'asc' }
-      ]
+        { name: 'asc' },
+      ],
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        durationMin: true,
+        priceCents: true,
+        vatRate: true,
+        description: true,
+        isDefault: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     })
 
-    return NextResponse.json({ templates })
+    // Generate category summary
+    const categorySummary: Record<string, { count: number; defaultTemplate?: string }> = {}
+    
+    templates.forEach(template => {
+      if (!categorySummary[template.category]) {
+        categorySummary[template.category] = { count: 0 }
+      }
+      
+      categorySummary[template.category].count++
+      
+      if (template.isDefault) {
+        categorySummary[template.category].defaultTemplate = template.id
+      }
+    })
+
+    return NextResponse.json({
+      templates,
+      categorySummary,
+    })
 
   } catch (error) {
     console.error('Error fetching service rate templates:', error)
@@ -89,32 +134,47 @@ export async function POST(request: NextRequest) {
 
     const therapistId = await getTherapistId(session)
     const body = await request.json()
-    
-    // Validate input
-    const validatedData = ServiceRateTemplateSchema.parse(body)
-    
-    // If this is set as default, unset other defaults in the same category
+    const validatedData = CreateTemplateSchema.parse(body)
+
+    // If setting as default, unset other defaults in the same category
     if (validatedData.isDefault) {
       await prisma.serviceRateTemplate.updateMany({
         where: {
           therapistId,
-          category: validatedData.category
+          category: validatedData.category,
+          isDefault: true,
         },
         data: {
-          isDefault: false
-        }
+          isDefault: false,
+        },
       })
     }
-    
-    // Create new service rate template
+
     const template = await prisma.serviceRateTemplate.create({
       data: {
+        therapistId,
         ...validatedData,
-        therapistId
+      },
+      select: {
+        id: true,
+        therapistId: true,
+        name: true,
+        category: true,
+        durationMin: true,
+        priceCents: true,
+        vatRate: true,
+        description: true,
+        isDefault: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
       }
     })
 
-    return NextResponse.json({ success: true, template })
+    return NextResponse.json({
+      success: true,
+      template,
+    })
 
   } catch (error) {
     if (error instanceof z.ZodError) {
