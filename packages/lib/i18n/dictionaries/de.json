@@ -132,7 +132,11 @@
     "create": "Erstellen",
     "loading": "Lädt...",
     "error": "Fehler",
-    "success": "Erfolgreich"
+    "success": "Erfolgreich",
+    "language": {
+      "en": "English",
+      "de": "Deutsch"
+    }
   },
   "dashboardLayout": {
     "header": {

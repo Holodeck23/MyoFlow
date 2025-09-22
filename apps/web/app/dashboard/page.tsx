@@ -104,15 +104,15 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <div className="text-2xl font-bold">{formatAustrianCurrency(currentYearRevenue)}</div>
+            <div className="text-2xl font-bold">{formatAustrianCurrency(currentYearRevenue * 100)}</div>
             <div className="text-sm text-medical-blue-100">{t('dashboard.currentYearRevenue')}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold">{formatAustrianCurrency(remainingThreshold)}</div>
+            <div className="text-2xl font-bold">{formatAustrianCurrency(remainingThreshold * 100)}</div>
             <div className="text-sm text-medical-blue-100">{t('dashboard.remainingAllowance')}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold">{formatAustrianCurrency(Math.round(projectedYearEnd))}</div>
+            <div className="text-2xl font-bold">{formatAustrianCurrency(Math.round(projectedYearEnd) * 100)}</div>
             <div className="text-sm text-medical-blue-100">{t('dashboard.projectedTotal')}</div>
           </div>
           <div>

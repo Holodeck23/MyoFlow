@@ -132,7 +132,11 @@
     "create": "Create",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "language": {
+      "en": "English",
+      "de": "Deutsch"
+    }
   },
   "dashboardLayout": {
     "header": {
