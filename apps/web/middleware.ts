@@ -1,15 +1,13 @@
+import { NextRequest, NextResponse } from 'next/server'
 import auth from '@/lib/auth'
-import { NextResponse } from 'next/server'
 
-export default auth((req) => {
-  const response = NextResponse.next()
-
-  if (!req.auth && req.nextUrl.pathname.startsWith('/dashboard')) {
-    const newUrl = new URL('/auth/sign-in', req.nextUrl.origin)
-    return NextResponse.redirect(newUrl)
-  }
-
-  return response
+export default auth(async function middleware(req: NextRequest) {
+  // Add your middleware logic here
+  // For example, redirect if not authenticated
+  // if (!req.auth) {
+  //   return NextResponse.redirect(new URL('/auth/sign-in', req.url))
+  // }
+  return NextResponse.next()
 })
 
 // See "Matching Paths" below to learn more

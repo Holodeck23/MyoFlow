@@ -45,10 +45,10 @@ export default function DashboardLayout({
               onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
               variant="outline"
               size="sm"
-              title={t('auth.signOut')}
+              title={t('auth.signOut', 'Sign Out')}
             >
               <LogOut size={16} />
-              <span className="text-sm font-medium">{t('auth.signOut')}</span>
+              <span className="text-sm font-medium">{t('auth.signOut', 'Sign Out')}</span>
             </Button>
           </div>
         </header>
