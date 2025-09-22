@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-
-const UpdateServiceRateTemplateSchema = z.object({
-  name: z.string().min(1, 'Service name is required').max(255).optional(),
+const UpdateTemplateSchema = z.object({
+  name: z.string().min(1, 'Template name is required').max(100, 'Name too long').optional(),
   category: z.enum(['MASSAGE', 'YOGA', 'CONSULTING', 'OTHER']).optional(),
-  priceCents: z.number().min(0, 'Price must be positive').optional(),
+  priceCents: z.number().min(100, 'Price must be at least €1.00').max(50000, 'Price cannot exceed €500.00').optional(),
   vatRate: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']).optional(),
-  durationMin: z.number().min(15, 'Duration must be at least 15 minutes').max(480).optional(),
-  description: z.string().max(1000).optional(),
-  isDefault: z.boolean().optional()
+  durationMin: z.number().min(15, 'Duration must be at least 15 minutes').max(480, 'Duration cannot exceed 8 hours').optional(),
+  description: z.string().max(500, 'Description too long').optional(),
+  isDefault: z.boolean().optional(),
 })
 
 async function getTherapistId(session: any): Promise<string> {
@@ -63,47 +60,63 @@ export async function PUT(
     }
 
     const therapistId = await getTherapistId(session)
+    const templateId = params.id
     const body = await request.json()
-    
-    // Validate input
-    const validatedData = UpdateServiceRateTemplateSchema.parse(body)
-    
-    // Check if template exists and belongs to therapist
+    const validatedData = UpdateTemplateSchema.parse(body)
+
+    // Verify template ownership
     const existingTemplate = await prisma.serviceRateTemplate.findFirst({
       where: {
-        id: params.id,
-        therapistId
-      }
+        id: templateId,
+        therapistId,
+      },
     })
 
     if (!existingTemplate) {
-      return NextResponse.json({ error: 'Service rate template not found' }, { status: 404 })
+      return NextResponse.json({ 
+        error: 'Template not found or not authorized' 
+      }, { status: 404 })
     }
-    
+
     // If setting as default, unset other defaults in the same category
     if (validatedData.isDefault) {
-      const category = validatedData.category || existingTemplate.category
+      const targetCategory = validatedData.category || existingTemplate.category
       await prisma.serviceRateTemplate.updateMany({
         where: {
           therapistId,
-          category,
-          id: { not: params.id }
+          category: targetCategory,
+          isDefault: true,
+          id: { not: templateId }, // Don't unset the current template
         },
         data: {
-          isDefault: false
-        }
+          isDefault: false,
+        },
       })
     }
-    
-    // Update service rate template
-    const template = await prisma.serviceRateTemplate.update({
-      where: {
-        id: params.id
-      },
-      data: validatedData
+
+    const updatedTemplate = await prisma.serviceRateTemplate.update({
+      where: { id: templateId },
+      data: validatedData,
+      select: {
+        id: true,
+        therapistId: true,
+        name: true,
+        category: true,
+        durationMin: true,
+        priceCents: true,
+        vatRate: true,
+        description: true,
+        isDefault: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     })
 
-    return NextResponse.json({ success: true, template })
+    return NextResponse.json({
+      success: true,
+      template: updatedTemplate,
+    })
 
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -130,27 +143,32 @@ export async function DELETE(
     }
 
     const therapistId = await getTherapistId(session)
-    
-    // Check if template exists and belongs to therapist
+    const templateId = params.id
+
+    // Verify template ownership
     const existingTemplate = await prisma.serviceRateTemplate.findFirst({
       where: {
-        id: params.id,
-        therapistId
-      }
+        id: templateId,
+        therapistId,
+      },
     })
 
     if (!existingTemplate) {
-      return NextResponse.json({ error: 'Service rate template not found' }, { status: 404 })
+      return NextResponse.json({ 
+        error: 'Template not found or not authorized' 
+      }, { status: 404 })
     }
-    
-    // Delete service rate template
-    await prisma.serviceRateTemplate.delete({
-      where: {
-        id: params.id
-      }
+
+    // Soft delete - set active to false to preserve historical data
+    await prisma.serviceRateTemplate.update({
+      where: { id: templateId },
+      data: { isActive: false },
     })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      message: 'Service rate template deactivated successfully',
+    })
 
   } catch (error) {
     console.error('Error deleting service rate template:', error)

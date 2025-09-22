@@ -2,7 +2,6 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { Sidebar } from '@/app/components/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { LanguageToggle } from '@/components/ui/LanguageToggle'
@@ -14,27 +13,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { data: session } = useSession()
   const { t } = useTranslation()
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-    }
-  }, [status, router])
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -46,15 +26,15 @@ export default function DashboardLayout({
             <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-lg">
               <div className="w-8 h-8 bg-medical-blue rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
-                  {session.user?.email?.charAt(0).toUpperCase()}
+                  {session?.user?.email?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900">
-                  {session.user?.name || t('dashboardLayout.user.fallbackName')}
+                  {session?.user?.name || t('dashboardLayout.user.fallbackName')}
                 </div>
                 <div className="text-xs text-gray-500">
-                  {session.user?.email}
+                  {session?.user?.email}
                 </div>
               </div>
             </div>
