@@ -397,7 +397,37 @@
         "kleinunternehmer": "Kleinunternehmer",
         "regular": "Regulär",
         "certificates": "Zertifikat(e)"
+      },
+      "placeholder": {
+        "title": "Profilverwaltung",
+        "description": "Die Profilverwaltung wird in einer kommenden Version implementiert.",
+        "button": "Demnächst verfügbar"
       }
+    },
+    "quickActions": {
+      "title": "Schnellaktionen",
+      "profile": "Profil bearbeiten",
+      "profileDesc": "Geschäftsinformationen aktualisieren",
+      "pricing": "Preise anpassen",
+      "pricingDesc": "Behandlungspreise verwalten",
+      "export": "Daten exportieren",
+      "exportDesc": "BMD/RZL Export erstellen"
+    },
+    "completion": {
+      "title": "Profilvollständigkeit",
+      "description": "Vervollständigen Sie Ihr Profil für optimale Nutzung",
+      "missingTitle": "Noch zu erledigen:"
+    },
+    "status": {
+      "title": "Systemstatus",
+      "database": "Datenbank",
+      "encryption": "Verschlüsselung",
+      "compliance": "DSGVO-Compliance"
+    },
+    "help": {
+      "title": "Hilfe & Support",
+      "documentation": "Dokumentation",
+      "support": "Support kontaktieren"
     }
   }
 }
