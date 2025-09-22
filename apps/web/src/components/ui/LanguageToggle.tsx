@@ -27,7 +27,7 @@ export function LanguageToggle() {
       <Button
         variant="outline"
         size="sm"
-        className="flex items-center space-x-2 hover:bg-gray-100 hover:text-gray-900"
+        className="flex items-center space-x-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
         disabled
       >
         <Globe className="w-4 h-4" />
@@ -43,7 +43,7 @@ export function LanguageToggle() {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center space-x-2 hover:bg-gray-100 hover:text-gray-900"
+      className="flex items-center space-x-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
       title="Switch language"
     >
       <Globe className="w-4 h-4" />
