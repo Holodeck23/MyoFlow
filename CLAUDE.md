@@ -1,13 +1,35 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** September 19, 2025
-**Branch:** `user-settings-design`
-**Status:** 🔄 HANDOFF TO CODEX REQUIRED
+**Current Session:** September 22, 2025
+**Branch:** `user-settings-design-resume`
+**Status:** 🔧 NextAuth v5 Upgrade In Progress
 
 ---
 
-## 🎯 Session Summary - September 19, 2025
+## 🎯 Session Summary - September 22, 2025
+
+### **Completed Tasks**
+- ✅ **Google Sign-in Button Fix:** Implemented conditional display - only shows when Google OAuth credentials are configured
+- ✅ **Logo Improvement:** Replaced placeholder `shield-logo.png` with proper `myoflow-logo-full.png` for professional branding
+- ✅ **NextAuth v5 Upgrade:** Core migration from v4 to v5 completed (next-auth@5.0.0-beta.29)
+- ✅ **Middleware Update:** Fixed to proper NextAuth v5 pattern with `auth(async function middleware...)`
+
+### **Current Critical Issue**
+- 🔧 **Authentication System Broken:** NextAuth v5 `handlers` export not working properly
+- 🔧 **API Route Failure:** `/api/auth/[...nextauth]/route.ts` throwing `TypeError: Cannot destructure property 'GET' of handlers as it is undefined`
+- 🔧 **Multiple Dev Servers:** 6+ background processes running, need cleanup
+- 🔧 **Session Data Confusion:** User seeing "therapist" instead of expected name due to cached session
+
+### **Technical Status**
+- **NextAuth v5 Migration:** 90% complete, just needs final export/import fix
+- **Authentication:** Temporarily broken but solvable configuration issue
+- **UI Improvements:** All completed and working
+- **Database:** Clean, existing test users present
+
+---
+
+## 🎯 Previous Session Summary - September 19, 2025
 
 ### **Original Task Scope**
 Working on **comprehensive user settings design** implementation following Agent OS spec:
@@ -134,7 +156,12 @@ When ending session:
 3. Update `AGENT_ACTIVITY_LOG.md` with work completed and next steps
 4. Document any new decisions in `DECISION_LOG.md`
 
-**Next Developer:** Continue user settings implementation per coordination plan
+**Next Developer:**
+1. **IMMEDIATE PRIORITY:** Fix NextAuth v5 handlers export issue to restore authentication
+2. Clean up multiple background dev server processes
+3. Clear session data to resolve user name confusion
+4. Verify authentication system works end-to-end
+5. Then continue user settings implementation per coordination plan
 
 ---
 
@@ -148,5 +175,5 @@ When ending session:
 
 ---
 
-**Last Updated:** September 18, 2025
-**Next Priority:** User settings design implementation
+**Last Updated:** September 22, 2025
+**Next Priority:** Fix NextAuth v5 authentication system
