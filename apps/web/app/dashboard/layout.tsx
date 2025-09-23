@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Sidebar } from '@/app/components/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { LanguageToggle } from '@/components/ui/LanguageToggle'
@@ -74,7 +75,7 @@ function Footer() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div className="flex flex-col space-y-3">
           <div className="flex items-center space-x-2">
-            <img src="/logo.png" alt="MyoFlow" className="h-6 w-6" />
+            <Image src="/logo.png" alt="MyoFlow" width={24} height={24} className="h-6 w-6" />
             <span className="font-semibold text-gray-900">MyoFlow</span>
           </div>
           <p className="text-sm text-gray-600 max-w-xs truncate">{t('dashboardLayout.footer.tagline')}</p>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -47,17 +47,7 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-    if (status === 'authenticated') {
-      fetchClient()
-    }
-  }, [status, router, params.id])
-
-  const fetchClient = async () => {
+  const fetchClient = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/clients/${params.id}`)
@@ -76,7 +66,17 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+    if (status === 'authenticated') {
+      fetchClient()
+    }
+  }, [status, router, fetchClient])
 
   const handleDeleteClient = async () => {
     if (!client || !confirm(`Are you sure you want to delete ${client.name}? This action cannot be undone.`)) {

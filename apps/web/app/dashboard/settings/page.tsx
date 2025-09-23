@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, Suspense, lazy, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from '@myoflow/lib'
@@ -62,14 +62,7 @@ export default function SettingsPage() {
   const [overviewData, setOverviewData] = useState<any>(null)
   const [isDataLoading, setIsDataLoading] = useState(false)
 
-  // Only fetch overview data when overview tab is active
-  useEffect(() => {
-    if (status === 'authenticated' && activeTab === 'overview') {
-      fetchSettingsOverview()
-    }
-  }, [status, activeTab])
-
-  const fetchSettingsOverview = async () => {
+  const fetchSettingsOverview = useCallback(async () => {
     try {
       setIsDataLoading(true)
       const response = await fetch('/api/settings/overview')
@@ -116,7 +109,14 @@ export default function SettingsPage() {
     } finally {
       setIsDataLoading(false)
     }
-  }
+  }, [])
+
+  // Only fetch overview data when overview tab is active
+  useEffect(() => {
+    if (status === 'authenticated' && activeTab === 'overview') {
+      fetchSettingsOverview()
+    }
+  }, [status, activeTab, fetchSettingsOverview])
 
   const setStaticFallbackData = () => {
     setProfileData({
