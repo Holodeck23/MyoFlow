@@ -6,7 +6,7 @@
 ```bash
 # Check versions
 node --version   # ≥ v20.0.0
-pnpm --version   # ≥ v8.0.0  
+pnpm --version   # ≥ v8.0.0
 docker --version # Any recent version
 ```
 
@@ -49,7 +49,7 @@ The seed creates a test user: `dev@myoflow.local`
 ### 🏗️ Development Commands
 ```bash
 pnpm dev         # Start all servers
-pnpm build       # Build everything  
+pnpm build       # Build everything
 pnpm typecheck   # Type checking
 pnpm lint        # Code linting
 pnpm test        # Run tests (when available)
@@ -65,7 +65,7 @@ pnpm docker:down  # Stop containers
 
 ### 🛡️ Security Features Active
 - ✅ Field-level encryption (libsodium)
-- ✅ Audit logging for sensitive operations  
+- ✅ Audit logging for sensitive operations
 - ✅ RBAC with role-based data access
 - ✅ Security headers (HSTS, CSP, etc.)
 - ✅ Rate limiting on auth endpoints
@@ -80,7 +80,7 @@ pnpm docker:down  # Stop containers
 
 ### 📱 What's Included
 - **Dashboard:** Revenue tracking, booking stats, KPIs
-- **Client Management:** Encrypted health data, intake forms  
+- **Client Management:** Encrypted health data, intake forms
 - **Appointment System:** Multi-location scheduling
 - **Invoice System:** Austrian-compliant PDF generation
 - **Mini-Sites:** Public booking pages at `/s/[slug]`
@@ -101,7 +101,7 @@ pnpm prisma:generate
 
 **Port conflicts:**
 - PostgreSQL: 5432
-- Redis: 6379  
+- Redis: 6379
 - Next.js: 3000
 
 ---

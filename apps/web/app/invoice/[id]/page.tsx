@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Invoice {
@@ -61,11 +61,7 @@ export default function PublicInvoicePage({ params }: { params: { id: string } }
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchInvoice()
-  }, [])
-
-  const fetchInvoice = async () => {
+  const fetchInvoice = useCallback(async () => {
     try {
       const response = await fetch(`/api/public/invoices/${params.id}`)
       if (!response.ok) {
@@ -78,7 +74,11 @@ export default function PublicInvoicePage({ params }: { params: { id: string } }
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    fetchInvoice()
+  }, [fetchInvoice])
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('de-AT', {

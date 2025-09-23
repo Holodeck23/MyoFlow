@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { useTranslation } from '@myoflow/lib'
@@ -36,18 +36,7 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-
-    if (status === 'authenticated') {
-      fetchInvoices()
-    }
-  }, [status, router])
-
-  const fetchInvoices = async () => {
+  const fetchInvoices = useCallback(async () => {
     try {
       const response = await fetch('/api/invoices')
       if (!response.ok) {
@@ -60,7 +49,18 @@ export default function InvoicesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchInvoices()
+    }
+  }, [status, router, fetchInvoices])
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('de-AT', {

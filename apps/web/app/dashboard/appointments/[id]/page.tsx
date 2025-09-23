@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Appointment {
@@ -52,6 +52,21 @@ export default function AppointmentDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const fetchAppointment = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch appointment')
+      }
+      const data = await response.json()
+      setAppointment(data.appointment)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }, [appointmentId])
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/sign-in')
@@ -61,22 +76,7 @@ export default function AppointmentDetailPage() {
     if (status === 'authenticated' && appointmentId) {
       fetchAppointment()
     }
-  }, [status, router, appointmentId])
-
-  const fetchAppointment = async () => {
-    try {
-      const response = await fetch(`/api/appointments/${appointmentId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch appointment')
-      }
-      const data = await response.json()
-      setAppointment(data.appointment)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [status, router, appointmentId, fetchAppointment])
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
