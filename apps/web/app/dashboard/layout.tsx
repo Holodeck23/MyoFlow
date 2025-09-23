@@ -14,7 +14,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const { data: session } = useSession()
-  const { t } = useTranslation()
+  const { t, isLoading: translationLoading } = useTranslation()
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -31,7 +31,7 @@ export default function DashboardLayout({
               </div>
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900">
-                  {session?.user?.name || t('dashboardLayout.user.fallbackName')}
+                  {session?.user?.name || (translationLoading ? 'Therapist' : t('dashboardLayout.user.fallbackName', 'Therapist'))}
                 </div>
                 <div className="text-xs text-gray-500">
                   {session?.user?.email}
@@ -45,10 +45,11 @@ export default function DashboardLayout({
               onClick={() => signOut({ callbackUrl: '/auth/sign-in' })}
               variant="outline"
               size="sm"
-              title={t('auth.signOut')}
+              title={t('auth.signOut', 'Sign Out')}
+              className="[&>span]:hover:text-white"
             >
               <LogOut size={16} />
-              <span className="text-sm font-medium">{t('auth.signOut')}</span>
+              <span className="font-medium">{t('auth.signOut', 'Sign Out')}</span>
             </Button>
           </div>
         </header>

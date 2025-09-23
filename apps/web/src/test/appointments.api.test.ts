@@ -5,6 +5,7 @@ const mockGetServerSession = vi.hoisted(() => vi.fn())
 const mockPrisma = vi.hoisted(() => ({
   user: {
     upsert: vi.fn(),
+    findUnique: vi.fn(),
   },
   therapist: {
     findUnique: vi.fn(),
@@ -29,12 +30,29 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }))
 
+const mockAuth = vi.hoisted(() => vi.fn())
+
 vi.mock('next-auth', () => ({
+  default: vi.fn(() => ({
+    handlers: {},
+    auth: mockAuth,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  })),
   getServerSession: mockGetServerSession,
+}))
+
+// Mock the auth export specifically
+vi.mock('../../lib/auth', () => ({
+  auth: mockAuth,
+  handlers: {},
+  signIn: vi.fn(),
+  signOut: vi.fn(),
 }))
 
 vi.mock('@myoflow/db', () => ({
   prisma: mockPrisma,
+  PrismaClient: vi.fn(() => mockPrisma),
 }))
 
 import { POST } from '../../app/api/appointments/route'
@@ -44,14 +62,18 @@ describe('Appointment API time validation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mockGetServerSession.mockResolvedValue({
+    const mockSession = {
       user: {
         email: 'therapist@example.com',
         name: 'Therapist',
       },
-    })
+    }
+
+    mockGetServerSession.mockResolvedValue(mockSession)
+    mockAuth.mockResolvedValue(mockSession)
 
     mockPrisma.user.upsert.mockResolvedValue({ id: 'user-1' })
+    mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', Therapist: { id: 'therapist-1' } })
     mockPrisma.therapist.findUnique.mockResolvedValue({ id: 'therapist-1' })
     mockPrisma.therapist.create.mockResolvedValue({ id: 'therapist-1' })
     mockPrisma.client.findFirst.mockResolvedValue({ id: 'client-1' })

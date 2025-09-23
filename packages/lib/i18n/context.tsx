@@ -41,10 +41,26 @@ export function LocaleProvider({ children, initialLocale }: LocaleProviderProps)
         setDictionary(dict)
       } catch (error) {
         console.error('Failed to load dictionary:', error)
-        // Fallback to default locale
+        // Fallback to default locale if we're not already on it
         if (locale !== defaultLocale) {
-          const fallbackDict = await getDictionary(defaultLocale)
-          setDictionary(fallbackDict)
+          try {
+            const fallbackDict = await getDictionary(defaultLocale)
+            setDictionary(fallbackDict)
+          } catch (fallbackError) {
+            console.error('Failed to load fallback dictionary:', fallbackError)
+            // Set minimal fallback dictionary to prevent empty state
+            setDictionary({
+              common: { loading: "Loading...", error: "Error" },
+              nav: { dashboard: "Dashboard" }
+            })
+          }
+        } else {
+          // We're already on default locale and it failed, provide minimal fallback
+          console.error('Default locale dictionary failed to load, using minimal fallback')
+          setDictionary({
+            common: { loading: "Loading...", error: "Error" },
+            nav: { dashboard: "Dashboard" }
+          })
         }
       } finally {
         setIsLoading(false)
