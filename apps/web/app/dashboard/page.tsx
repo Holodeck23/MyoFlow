@@ -1,7 +1,7 @@
 'use client'
 
 import { formatAustrianCurrency, useTranslation } from '@myoflow/lib'
-import { Card, CardContent, VisualRouteMap } from '@/components/ui'
+import { Card, CardContent } from '@/components/ui'
 import {
   Calendar,
   Euro,
