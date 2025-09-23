@@ -39,7 +39,7 @@ const { handlers, auth, signIn, signOut } = NextAuth({
             role: 'OWNER',
           }
         }
-        
+
         // 2. Check for database user
         const user = await prisma.user.findUnique({
           where: { email: email },
@@ -81,7 +81,7 @@ const { handlers, auth, signIn, signOut } = NextAuth({
               trialEndsAt: demoUser.trialEndsAt,
             }
           }
-          
+
           // If user doesn't exist, create a temporary session
           return {
             id: email,
@@ -99,14 +99,14 @@ const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/auth/sign-in',
   },
   callbacks: {
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user && token.sub) {
         session.user.id = token.sub
         session.user.role = token.role as string
       }
       return session
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.sub = user.id
         token.role = user.role
@@ -116,5 +116,5 @@ const { handlers, auth, signIn, signOut } = NextAuth({
   },
 })
 
+export { handlers, auth, signIn, signOut }
 export default auth
-export { handlers, signIn, signOut }

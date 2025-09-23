@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { NextRequest } from 'next/server'
 
@@ -8,7 +7,7 @@ import { NextRequest } from 'next/server'
  * Throws an error if the therapist doesn't exist instead of creating one.
  */
 export async function requireTherapist(request: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session?.user?.email) {
     throw new Response('Unauthorized', { status: 401 })
   }
@@ -45,7 +44,7 @@ export async function ensureTherapistAccount(emailOrRequest: string | NextReques
     userName = name
   } else {
     // Handle NextRequest - extract from session
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session?.user?.email) {
       throw new Response('Unauthorized', { status: 401 })
     }
