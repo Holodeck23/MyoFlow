@@ -5,8 +5,21 @@ export function useTranslation() {
   const { dictionary, locale, isLoading } = useLocale()
 
   const t = (key: string, fallback?: string): string => {
+    // If loading, return a better fallback based on the key
     if (isLoading) {
-      return fallback || key
+      if (fallback) return fallback
+
+      // Better fallbacks for common keys
+      const keyParts = key.split('.')
+      const lastPart = keyParts[keyParts.length - 1]
+
+      // Convert camelCase to readable text
+      const readableFallback = lastPart
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .trim()
+
+      return readableFallback || key
     }
 
     // Support nested keys like 'nav.dashboard'
@@ -17,8 +30,16 @@ export function useTranslation() {
       if (value && typeof value === 'object' && k in value) {
         value = value[k]
       } else {
-        // Key not found, return fallback or key itself
-        return fallback || key
+        // Key not found, return fallback or better readable key
+        if (fallback) return fallback
+
+        const lastPart = keys[keys.length - 1]
+        const readableFallback = lastPart
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim()
+
+        return readableFallback || key
       }
     }
 
