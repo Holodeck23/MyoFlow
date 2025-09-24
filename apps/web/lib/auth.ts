@@ -94,6 +94,62 @@ const { handlers, auth, signIn, signOut } = NextAuth({
         return null
       },
     }),
+    CredentialsProvider({
+      id: 'admin-credentials',
+      name: 'Admin',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        const email = credentials.email as string
+        const password = credentials.password as string
+
+        // Check for admin user in database
+        const user = await prisma.user.findUnique({
+          where: { email: email },
+          include: { Therapist: true },
+        })
+
+        // Verify user exists and has admin role
+        if (!user || !['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
+          return null
+        }
+
+        // For development - hardcoded admin credentials
+        console.log('Admin auth attempt:', { email, hasPassword: !!password })
+        if (email === 'admin@myoflow.at' && password === 'admin123') {
+          console.log('Admin credentials matched, returning admin user')
+          return {
+            id: 'admin-user-id',
+            email: email,
+            name: 'Platform Admin',
+            role: 'SUPER_ADMIN',
+          }
+        } else {
+          console.log('Admin credentials did not match')
+        }
+
+        // Check password for real admin users
+        if (user.password) {
+          const isValidPassword = await compare(password, user.password)
+          if (isValidPassword) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            }
+          }
+        }
+
+        return null
+      },
+    }),
   ],
   pages: {
     signIn: '/auth/sign-in',
