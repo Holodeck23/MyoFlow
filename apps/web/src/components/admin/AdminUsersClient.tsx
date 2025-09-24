@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/Input'
 import { Shield, Users, Search, ArrowLeft, Mail, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { useRouter } from 'next/navigation'
 
 interface TherapistData {
   id: string
@@ -36,37 +35,27 @@ export default function AdminUsersClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const router = useRouter()
 
   useEffect(() => {
-    // Check for admin session
-    const storedUser = sessionStorage.getItem('admin-user')
-    if (!storedUser) {
-      router.push('/admin/login')
-      return
-    }
-
-    try {
-      const user = JSON.parse(storedUser)
-      if (['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
-        fetchUsers()
-      } else {
-        router.push('/admin/login')
-      }
-    } catch (error) {
-      console.error('Error parsing admin user:', error)
-      router.push('/admin/login')
-    }
-  }, [router])
+    fetchUsers()
+  }, [])
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users')
+      const response = await fetch('/api/admin/users', {
+        credentials: 'include' // Include cookies for authentication
+      })
+
       if (!response.ok) {
-        throw new Error('Failed to fetch users')
+        if (response.status === 401) {
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}: Failed to fetch users`)
       }
+
       const data = await response.json()
-      setUsers(data.users)
+      setUsers(data.users || [])
     } catch (error) {
       setError('Failed to load users')
       console.error('Error fetching users:', error)

@@ -1,19 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Users, DollarSign, Activity, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import AdminSignOutButton from '@/components/admin/AdminSignOutButton'
-
-interface AdminUser {
-  id: string
-  email: string
-  name: string
-  role: string
-}
+import { useAdminUser } from '@/components/admin/AdminUserProvider'
 
 interface DashboardStats {
   totalTherapists: number
@@ -22,39 +15,29 @@ interface DashboardStats {
 }
 
 export default function AdminDashboardClient() {
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null)
+  const adminUser = useAdminUser() // Get admin user from context
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
-    // Check for admin session
-    const storedUser = sessionStorage.getItem('admin-user')
-    if (!storedUser) {
-      router.push('/admin/login')
-      return
-    }
-
-    try {
-      const user = JSON.parse(storedUser) as AdminUser
-      if (['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
-        setAdminUser(user)
-        fetchStats()
-      } else {
-        router.push('/admin/login')
-      }
-    } catch (error) {
-      console.error('Error parsing admin user:', error)
-      router.push('/admin/login')
-    }
-  }, [router])
+    fetchStats()
+  }, [])
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats')
+      const response = await fetch('/api/admin/stats', {
+        credentials: 'include' // Include cookies for authentication
+      })
+
       if (response.ok) {
         const data = await response.json()
         setStats(data)
+      } else {
+        if (response.status === 401) {
+          window.location.href = '/admin/login'
+          return
+        }
+        console.error('Failed to fetch stats:', response.status)
       }
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -70,7 +53,7 @@ export default function AdminDashboardClient() {
     }).format(cents / 100)
   }
 
-  if (loading || !adminUser) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

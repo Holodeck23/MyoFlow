@@ -1,17 +1,11 @@
-import { auth } from '@/lib/auth'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@myoflow/db'
+import { withAdminAuth } from '@/lib/admin-auth'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
-  try {
-    const session = await auth()
-
-    // Verify admin authentication
-    if (!session?.user?.role || !['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export async function GET(request: NextRequest) {
+  return withAdminAuth(request, async (req, adminUser) => {
 
     // Get current date info
     const now = new Date()
@@ -187,11 +181,5 @@ export async function GET() {
     }
 
     return NextResponse.json(analytics)
-  } catch (error) {
-    console.error('Admin analytics API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+  })
 }
