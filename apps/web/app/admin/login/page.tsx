@@ -22,19 +22,28 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      const result = await signIn('admin-credentials', {
-        email,
-        password,
-        redirect: false,
+      // Use custom admin login API
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (result?.error) {
-        setError('Invalid credentials or insufficient permissions')
-      } else if (result?.ok) {
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // Store admin session info (simple approach for MVP)
+        sessionStorage.setItem('admin-user', JSON.stringify(data.user))
+        // Redirect to admin dashboard
         router.push('/admin/dashboard')
+      } else {
+        setError(data.error || 'Invalid admin credentials or insufficient permissions')
       }
     } catch (error) {
       setError('An unexpected error occurred')
+      console.error('Admin login error:', error)
     } finally {
       setIsLoading(false)
     }
