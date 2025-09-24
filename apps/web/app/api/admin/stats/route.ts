@@ -1,12 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@myoflow/db'
+import { withAdminAuth } from '@/lib/admin-auth'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
-  try {
-    // For MVP, we'll skip admin auth check here and rely on client-side verification
-    // In production this should have proper server-side admin session validation
+export async function GET(request: NextRequest) {
+  return withAdminAuth(request, async (req, adminUser) => {
 
     // Fetch dashboard stats
     const [totalTherapists, monthlyRevenue, totalInvoices] = await Promise.all([
@@ -30,11 +29,5 @@ export async function GET() {
       monthlyRevenue: monthlyRevenue._sum.totalGrossCents || 0,
       totalInvoices
     })
-  } catch (error) {
-    console.error('Admin stats API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+  })
 }
