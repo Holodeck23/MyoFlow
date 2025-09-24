@@ -8,10 +8,17 @@ export default function AdminSignOutButton() {
   const router = useRouter()
 
   const handleSignOut = async () => {
-    // Clear admin session
-    sessionStorage.removeItem('admin-user')
-    // Redirect to admin login
-    router.push('/admin/login')
+    try {
+      // Call logout API to clear httpOnly cookie
+      await fetch('/api/admin/logout', { method: 'POST' })
+
+      // Force redirect to admin login
+      window.location.href = '/admin/login'
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Fallback redirect even if API fails
+      window.location.href = '/admin/login'
+    }
   }
 
   return (
