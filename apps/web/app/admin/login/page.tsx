@@ -34,10 +34,12 @@ export default function AdminLogin() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // Store admin session info (simple approach for MVP)
-        sessionStorage.setItem('admin-user', JSON.stringify(data.user))
-        // Redirect to admin dashboard
-        router.push('/admin/dashboard')
+        // Cookie-based authentication - no need to store in sessionStorage
+        // The httpOnly cookie is automatically set by the server
+        console.log('Admin login successful, redirecting to dashboard')
+
+        // Force a full page redirect to ensure cookies are properly set
+        window.location.href = '/admin/dashboard'
       } else {
         setError(data.error || 'Invalid admin credentials or insufficient permissions')
       }
