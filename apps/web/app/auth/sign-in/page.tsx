@@ -2,6 +2,7 @@
 
 import { signIn, getProviders } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
@@ -63,7 +64,7 @@ export default function SignIn() {
       <Card className="max-w-md w-full bg-white shadow-xl border border-gray-200 rounded-lg">
         <CardHeader className="text-center space-y-4 pb-8">
           <div className="mx-auto h-48 w-48 flex items-center justify-center">
-            <img src="/myoflow-logo-full.png" alt="MyoFlow" className="h-48 w-48 object-contain drop-shadow-xl" />
+            <Image src="/myoflow-logo-full.png" alt="MyoFlow" width={192} height={192} className="h-48 w-48 object-contain drop-shadow-xl" priority />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             Welcome to MyoFlow

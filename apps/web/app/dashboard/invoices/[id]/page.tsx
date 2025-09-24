@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Invoice {
@@ -69,18 +69,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-
-    if (status === 'authenticated') {
-      fetchInvoice()
-    }
-  }, [status, router])
-
-  const fetchInvoice = async () => {
+  const fetchInvoice = useCallback(async () => {
     try {
       const response = await fetch(`/api/invoices/${params.id}`)
       if (!response.ok) {
@@ -93,7 +82,18 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchInvoice()
+    }
+  }, [status, router, fetchInvoice])
 
   const updateStatus = async (newStatus: string) => {
     if (!invoice) return

@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useTranslation } from '@myoflow/lib'
 import { Calendar, CalendarEvent, Button, TravelRouteMap } from '@/components/ui'
@@ -59,18 +59,7 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-
-    if (status === 'authenticated') {
-      fetchAppointments()
-    }
-  }, [status, router])
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       const response = await fetch('/api/appointments')
       if (!response.ok) {
@@ -83,7 +72,18 @@ export default function CalendarPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchAppointments()
+    }
+  }, [status, router, fetchAppointments])
 
   // Convert appointments to calendar events with debug logging
   const calendarEvents: CalendarEvent[] = appointments.map((appointment) => {

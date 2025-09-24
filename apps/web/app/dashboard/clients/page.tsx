@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -38,17 +38,7 @@ export default function ClientsPage() {
     return tags.sort()
   }, [])
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-    if (status === 'authenticated') {
-      fetchClients()
-    }
-  }, [status, router, search, selectedTag])
-
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -65,7 +55,17 @@ export default function ClientsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [search, selectedTag, t])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+    if (status === 'authenticated') {
+      fetchClients()
+    }
+  }, [status, router, fetchClients])
 
   const handleDeleteClient = async (clientId: string, clientName: string) => {
     if (!confirm(`${t('clients.deleteConfirm')} ${clientName}${t('clients.deleteConfirmContinue')}`)) {

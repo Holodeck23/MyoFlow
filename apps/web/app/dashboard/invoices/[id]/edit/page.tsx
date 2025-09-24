@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Client {
@@ -69,18 +69,7 @@ export default function EditInvoicePage({ params }: { params: { id: string } }) 
     serviceDate: new Date().toISOString().split('T')[0]
   })
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/sign-in')
-      return
-    }
-
-    if (status === 'authenticated') {
-      fetchData()
-    }
-  }, [status, router])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [invoiceRes, clientsRes, appointmentsRes] = await Promise.all([
         fetch(`/api/invoices/${params.id}`),
@@ -120,7 +109,18 @@ export default function EditInvoicePage({ params }: { params: { id: string } }) 
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/sign-in')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchData()
+    }
+  }, [status, router, fetchData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
