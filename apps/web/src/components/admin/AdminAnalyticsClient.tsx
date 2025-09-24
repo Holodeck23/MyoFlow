@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Shield, ArrowLeft, DollarSign, TrendingUp, TrendingDown, FileText, Users, Activity } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface AnalyticsData {
   totalRevenue: {
@@ -48,10 +49,28 @@ export default function AdminAnalyticsClient() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
-    fetchAnalytics()
-  }, [])
+    // Check for admin session
+    const storedUser = sessionStorage.getItem('admin-user')
+    if (!storedUser) {
+      router.push('/admin/login')
+      return
+    }
+
+    try {
+      const user = JSON.parse(storedUser)
+      if (['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
+        fetchAnalytics()
+      } else {
+        router.push('/admin/login')
+      }
+    } catch (error) {
+      console.error('Error parsing admin user:', error)
+      router.push('/admin/login')
+    }
+  }, [router])
 
   const fetchAnalytics = async () => {
     try {

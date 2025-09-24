@@ -1,12 +1,17 @@
 'use client'
 
-import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { LogOut } from 'lucide-react'
 
 export default function AdminSignOutButton() {
+  const router = useRouter()
+
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/admin/login' })
+    // Clear admin session
+    sessionStorage.removeItem('admin-user')
+    // Redirect to admin login
+    router.push('/admin/login')
   }
 
   return (

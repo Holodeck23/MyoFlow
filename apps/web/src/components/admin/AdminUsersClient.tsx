@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input'
 import { Shield, Users, Search, ArrowLeft, Mail, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 interface TherapistData {
   id: string
@@ -35,10 +36,28 @@ export default function AdminUsersClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    // Check for admin session
+    const storedUser = sessionStorage.getItem('admin-user')
+    if (!storedUser) {
+      router.push('/admin/login')
+      return
+    }
+
+    try {
+      const user = JSON.parse(storedUser)
+      if (['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
+        fetchUsers()
+      } else {
+        router.push('/admin/login')
+      }
+    } catch (error) {
+      console.error('Error parsing admin user:', error)
+      router.push('/admin/login')
+    }
+  }, [router])
 
   const fetchUsers = async () => {
     try {

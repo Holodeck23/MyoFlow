@@ -121,13 +121,17 @@ const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         // For development - hardcoded admin credentials
+        console.log('Admin auth attempt:', { email, hasPassword: !!password })
         if (email === 'admin@myoflow.at' && password === 'admin123') {
+          console.log('Admin credentials matched, returning admin user')
           return {
             id: 'admin-user-id',
             email: email,
             name: 'Platform Admin',
             role: 'SUPER_ADMIN',
           }
+        } else {
+          console.log('Admin credentials did not match')
         }
 
         // Check password for real admin users
