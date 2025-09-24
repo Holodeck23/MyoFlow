@@ -549,6 +549,9 @@ enum Role {
   STAFF
   ACCOUNTANT
   AFFILIATE
+  SUPER_ADMIN
+  SUPPORT
+  FINANCE
 }
 
 enum SubscriptionStatus {
