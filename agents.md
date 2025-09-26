@@ -90,3 +90,14 @@ git checkout -b feat/codex-feature
 
 **Last Updated:** September 23, 2025 - MVP Complete
 **Status:** Single workspace development, worktrees available for multi-agent sessions
+
+---
+
+## Update - September 26, 2025
+
+- Auth consolidation: single NextAuth config at apps/web/src/lib/auth.ts; removed duplication via re-export from apps/web/lib/auth.ts
+- Prisma policy: enforce shared prisma singleton import from @myoflow/db (no new PrismaClient in routes)
+- Demo gating: AUTH_ENABLE_DEMO added; guarded any dev backdoors under non-production + flag
+- Admin routes/pages: marked as dynamic due to cookies() usage; silences build dynamic server warnings
+- E2E: Playwright config now sets AUTH_ENABLE_DEMO=true and includes smoke tests for auth and admin flows
+- TS Paths: tightened to prefer src-only resolution and explicit '@/app/*' alias

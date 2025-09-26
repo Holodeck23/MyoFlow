@@ -3,9 +3,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
-import { PrismaClient } from '@myoflow/db'
-
-const prisma = new PrismaClient()
+import { prisma } from '@myoflow/db'
 
 const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -30,13 +28,15 @@ const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string
         const password = credentials.password as string
 
-        // 1. Check for hardcoded test user
-        if (email === 'test@myoflow.at' && password === 'demo123') {
-          return {
-            id: 'test-user-id',
-            email: email,
-            name: 'Dr. Sarah Müller',
-            role: 'OWNER',
+        // 1. Optional hardcoded test user (dev only)
+        if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
+          if (email === 'test@myoflow.at' && password === 'demo123') {
+            return {
+              id: 'test-user-id',
+              email: email,
+              name: 'Dr. Sarah Müller',
+              role: 'OWNER',
+            }
           }
         }
 
@@ -61,33 +61,34 @@ const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        // 3. Fallback to demo password for any user
-        // This is a temporary measure for testing and should be removed
-        if (password === 'demo') {
-          // Find user by email to link to the correct account
-          const demoUser = await prisma.user.findUnique({
-            where: { email: email },
-            include: { Therapist: true },
-          });
+        // 3. Optional demo password fallback (dev only)
+        if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
+          if (password === 'demo') {
+            // Find user by email to link to the correct account
+            const demoUser = await prisma.user.findUnique({
+              where: { email: email },
+              include: { Therapist: true },
+            });
 
-          if (demoUser) {
-            return {
-              id: demoUser.id,
-              email: demoUser.email,
-              name: demoUser.name,
-              role: demoUser.role,
-              therapistId: demoUser.Therapist?.id,
-              subscriptionStatus: demoUser.subscriptionStatus,
-              trialEndsAt: demoUser.trialEndsAt,
+            if (demoUser) {
+              return {
+                id: demoUser.id,
+                email: demoUser.email,
+                name: demoUser.name,
+                role: demoUser.role,
+                therapistId: demoUser.Therapist?.id,
+                subscriptionStatus: demoUser.subscriptionStatus,
+                trialEndsAt: demoUser.trialEndsAt,
+              }
             }
-          }
 
-          // If user doesn't exist, create a temporary session
-          return {
-            id: email,
-            email: email,
-            name: email.split('@')[0],
-            role: 'OWNER',
+            // If user doesn't exist, create a temporary session
+            return {
+              id: email,
+              email: email,
+              name: email.split('@')[0],
+              role: 'OWNER',
+            }
           }
         }
 

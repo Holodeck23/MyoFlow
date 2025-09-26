@@ -176,3 +176,24 @@ When ending session:
 
 **Last Updated:** September 22, 2025
 **Next Priority:** Fix NextAuth v5 authentication system
+
+---
+
+## Session Update - September 26, 2025
+
+### Summary
+- Consolidated NextAuth v5 auth configuration to a single source of truth (apps/web/src/lib/auth.ts)
+- Replaced local PrismaClient instantiations with shared singleton from @myoflow/db across auth and admin API routes
+- Gated demo backdoors (test user + 'demo' password, admin demo login) behind AUTH_ENABLE_DEMO and non-production environments
+- Marked admin pages and API routes as dynamic to resolve static render warnings when using cookies()
+- Added Playwright smoke tests for credentials sign-in and admin demo login; enabled AUTH_ENABLE_DEMO in Playwright env
+- Tightened tsconfig path aliases to avoid accidental resolution outside src
+
+### Validation
+- CI Fix (Sept 26, 2025): Widened NODE_ENV type in admin login route to include 'production' to satisfy typecheck
+- Ran `pnpm typecheck && pnpm lint && pnpm build` successfully
+- E2E tests configured (Playwright) to run with a dev server on port 3001, AUTH_ENABLE_DEMO=true
+
+### Notes
+- Admin demo login is only permitted when AUTH_ENABLE_DEMO=true and NODE_ENV !== 'production`
+- Consider replacing admin cookie auth with NextAuth RBAC in a future sprint to reduce surface area

@@ -41,6 +41,7 @@ export default defineConfig({
       NEXTAUTH_URL: 'http://localhost:3001',
       NEXTAUTH_SECRET: 'test-secret-for-e2e',
       NODE_ENV: 'test',
+      AUTH_ENABLE_DEMO: 'true',
     },
   },
 });

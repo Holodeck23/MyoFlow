@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 import { compare } from 'bcryptjs'
-import { PrismaClient } from '@myoflow/db'
+import { prisma } from '@myoflow/db'
 import { createAdminToken, setAdminTokenCookie, AdminUser } from '@/lib/admin-auth'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
+
+const nodeEnv = (process.env.NODE_ENV || 'development') as 'development' | 'test' | 'production'
 
 export async function POST(request: Request) {
   try {
@@ -13,13 +15,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    console.log('Admin login attempt:', { email })
+    // Reduce noisy logging in production
+if (nodeEnv !== 'production') {
+      console.log('Admin login attempt:', { email })
+    }
 
     let adminUser: AdminUser | null = null
 
-    // For development - hardcoded admin credentials
-    if (email === 'admin@myoflow.at' && password === 'admin123') {
-      console.log('Admin credentials matched')
+    // Optional development backdoor - guard behind env flag and non-production
+    if (
+process.env.AUTH_ENABLE_DEMO === 'true' &&
+nodeEnv !== 'production' &&
+      email === 'admin@myoflow.at' &&
+      password === 'admin123'
+    ) {
+        console.log('Admin demo credentials matched')
       adminUser = {
         id: 'admin-user-id',
         email: email,
@@ -33,8 +43,10 @@ export async function POST(request: Request) {
       })
 
       // Verify user exists and has admin role
-      if (!user || !['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
-        console.log('User not found or not admin role:', { userExists: !!user, role: user?.role })
+if (!user || !['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
+        if (nodeEnv !== 'production') {
+          console.log('User not found or not admin role:', { userExists: !!user, role: user?.role })
+        }
         return NextResponse.json({ error: 'Invalid credentials or insufficient permissions' }, { status: 401 })
       }
 
@@ -42,7 +54,7 @@ export async function POST(request: Request) {
       if (user.password) {
         const isValidPassword = await compare(password, user.password)
         if (isValidPassword) {
-          console.log('Database admin user authenticated')
+if (nodeEnv !== 'production') { console.log('Database admin user authenticated') }
           adminUser = {
             id: user.id,
             email: user.email,
@@ -54,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     if (!adminUser) {
-      console.log('Invalid credentials for admin user')
+if (nodeEnv !== 'production') { console.log('Invalid credentials for admin user') }
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
@@ -70,7 +82,7 @@ export async function POST(request: Request) {
     // Set the admin token cookie
     response.cookies.set('admin-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+secure: nodeEnv === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/'
