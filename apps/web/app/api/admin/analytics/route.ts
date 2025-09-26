@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@myoflow/db'
+import { prisma } from '@myoflow/db'
 import { withAdminAuth } from '@/lib/admin-auth'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   return withAdminAuth(request, async (req, adminUser) => {
