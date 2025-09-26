@@ -1,5 +1,26 @@
 # MyoFlow Development Decision Log
 
+## 2025-09-26: Auth consolidation, demo gating, and admin dynamic routing
+
+### Context
+- Duplicate NextAuth configuration caused ambiguity in handler exports and environment resolution
+- Multiple PrismaClient instances risked dev/HMR connection noise
+- Admin cookie-based flows accessed cookies() in routes/pages, causing dynamic server warnings at build time
+
+### Decision
+- Consolidate NextAuth to apps/web/src/lib/auth.ts and re-export from apps/web/lib/auth.ts
+- Enforce Prisma singleton usage by importing `prisma` from `@myoflow/db` in server code
+- Gate demo auth paths (test user, fallback password, admin demo) behind `AUTH_ENABLE_DEMO` and never allow in production
+- Mark admin pages and routes `dynamic = 'force-dynamic'` to make cookie usage explicit
+
+### Impact
+- Stable auth handlers and consistent server runtime behavior
+- Fewer database client instances during development
+- Clear security posture for demo features; production safe by default
+- Clean Next.js build without dynamic server warnings for admin features
+
+---
+
 ## 2025-09-23: MVP Complete - Architecture Decisions Finalized
 
 ### Context

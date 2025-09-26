@@ -46,6 +46,17 @@ Required in `.env.local`:
 - `NEXTAUTH_SECRET` - Authentication secret
 - `ENCRYPTION_KEY_B64` - Base64 encryption key for client data
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - OAuth (optional)
+- `AUTH_ENABLE_DEMO` - Optional (default false). When set to `true` in non-production, enables demo auth paths:
+  - Test user: `test@myoflow.at` / `demo123`
+  - Fallback password: `demo` for credentials provider
+  - Admin demo: `admin@myoflow.at` / `admin123`
+
+## Running E2E Tests
+
+Playwright is configured to boot the web app on port 3001 with AUTH_ENABLE_DEMO enabled for tests:
+```bash
+pnpm --filter @myoflow/web test:e2e
+```
 
 ## Current Status
 
