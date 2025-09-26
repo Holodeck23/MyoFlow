@@ -36,6 +36,23 @@ Parallel Claude/Codex sessions were creating schema conflicts, merge issues, and
 
 ## Previous Session - September 19, 2025
 
+---
+
+## Latest Session - September 26, 2025
+
+- Consolidated NextAuth v5 auth to a single source of truth at apps/web/src/lib/auth.ts; legacy path re-exports
+- Replaced ad-hoc PrismaClient instantiations with shared singleton import from @myoflow/db
+- Gated demo auth backdoors (test user, 'demo' password, admin demo) behind AUTH_ENABLE_DEMO and non-production
+- Marked admin pages and API routes as dynamic to explicitly allow cookies() usage during build
+- Added Playwright smoke tests for credentials sign-in and admin demo login; set AUTH_ENABLE_DEMO=true in test env
+- Tightened TypeScript path aliases to prefer src/* and added explicit '@/app/*' alias
+- Updated docs: CLAUDE.md session update, DECISION_LOG.md entry, DEVELOPMENT.md env + E2E docs, agents.md update
+
+Next steps:
+- Optional: Migrate admin cookie auth to NextAuth with RBAC to reduce surface area
+- Optional: Fix existing failing E2E tests unrelated to auth (appointments suite assumptions)
+- Proceed to code review and merge once CI passes
+
 **Codex Session Complete:**
 - Added Prisma models for travel settings, tax compliance, credentials, user preferences
 - Created migration `20250919120000_user_settings_infrastructure` enabling PostGIS
