@@ -190,6 +190,7 @@ When ending session:
 - Tightened tsconfig path aliases to avoid accidental resolution outside src
 
 ### Validation
+- CI Fix (Sept 26, 2025): Widened NODE_ENV type in admin login route to include 'production' to satisfy typecheck
 - Ran `pnpm typecheck && pnpm lint && pnpm build` successfully
 - E2E tests configured (Playwright) to run with a dev server on port 3001, AUTH_ENABLE_DEMO=true
 
