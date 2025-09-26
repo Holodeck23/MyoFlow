@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { compare } from 'bcryptjs'
-import { PrismaClient } from '@myoflow/db'
+import { prisma } from '@myoflow/db'
 import { createAdminToken, setAdminTokenCookie, AdminUser } from '@/lib/admin-auth'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
@@ -13,13 +13,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    console.log('Admin login attempt:', { email })
+    // Reduce noisy logging in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Admin login attempt:', { email })
+    }
 
     let adminUser: AdminUser | null = null
 
-    // For development - hardcoded admin credentials
-    if (email === 'admin@myoflow.at' && password === 'admin123') {
-      console.log('Admin credentials matched')
+    // Optional development backdoor - guard behind env flag and non-production
+    if (
+      process.env.AUTH_ENABLE_DEMO === 'true' &&
+      process.env.NODE_ENV !== 'production' &&
+      email === 'admin@myoflow.at' &&
+      password === 'admin123'
+    ) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Admin demo credentials matched')
+      }
       adminUser = {
         id: 'admin-user-id',
         email: email,
@@ -34,7 +44,9 @@ export async function POST(request: Request) {
 
       // Verify user exists and has admin role
       if (!user || !['SUPER_ADMIN', 'SUPPORT', 'FINANCE'].includes(user.role)) {
-        console.log('User not found or not admin role:', { userExists: !!user, role: user?.role })
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('User not found or not admin role:', { userExists: !!user, role: user?.role })
+        }
         return NextResponse.json({ error: 'Invalid credentials or insufficient permissions' }, { status: 401 })
       }
 

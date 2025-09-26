@@ -8,7 +8,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*", "./*"],
+      "@/*": ["./src/*"],
+      "@/app/*": ["./app/*"],
       "@/components/*": ["./src/components/*"],
       "@/lib/*": ["./src/lib/*"],
       "@myoflow/ui": ["../../packages/ui"],
