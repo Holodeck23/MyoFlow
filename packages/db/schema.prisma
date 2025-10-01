@@ -160,24 +160,26 @@ model Location {
 }
 
 model Client {
-  id             String        @id @default(cuid())
-  therapistId    String
-  name           String
-  email          String?
-  phone          String?
-  tags           String[]      @default([])
-  healthFlagsEnc String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  street         String?
-  postalCode     String?
-  city           String?
-  country        String?
-  Appointments   Appointment[]
-  Therapist      Therapist     @relation(fields: [therapistId], references: [id])
-  Consents       Consent[]
-  Invoices       Invoice[]
-  Notes          Note[]
+  id                    String             @id @default(cuid())
+  therapistId           String
+  name                  String
+  email                 String?
+  phone                 String?
+  tags                  String[]           @default([])
+  healthFlagsEnc        String?
+  emailRemindersEnabled Boolean            @default(true)
+  reminderPreference    ReminderPreference @default(BOTH)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  street                String?
+  postalCode            String?
+  city                  String?
+  country               String?
+  Appointments          Appointment[]
+  Therapist             Therapist          @relation(fields: [therapistId], references: [id])
+  Consents              Consent[]
+  Invoices              Invoice[]
+  Notes                 Note[]
 
   @@index([therapistId, name])
 }
@@ -395,7 +397,9 @@ model AppointmentReminder {
   status        ReminderStatus @default(PENDING)
   scheduledFor  DateTime
   sentAt        DateTime?
+  deliveredAt   DateTime?
   errorMessage  String?
+  failureReason String?
   Appointment   Appointment    @relation(fields: [appointmentId], references: [id])
 
   @@index([status, scheduledFor])
@@ -678,6 +682,13 @@ enum ReminderStatus {
   PENDING
   SENT
   FAILED
+}
+
+enum ReminderPreference {
+  BOTH
+  HOURS_24_ONLY
+  HOURS_2_ONLY
+  NONE
 }
 
 enum ProductType {
