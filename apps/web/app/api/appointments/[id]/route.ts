@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 // Validation schemas
 const UpdateAppointmentSchema = z.object({
@@ -14,51 +15,14 @@ const UpdateAppointmentSchema = z.object({
   notes: z.string().optional(),
 })
 
-async function getTherapistId(): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.email) {
-    throw new Error('Not authenticated')
-  }
-
-  // Find or create user and therapist using email as unique identifier
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
-  })
-
-  if (!therapist) {
-    // Create therapist with Austrian defaults
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
-  }
-
-  return therapist.id
-}
-
 // GET /api/appointments/[id] - Get single appointment
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const { therapist } = await requireTherapist()
+    const therapistId = therapist.id
     const appointmentId = params.id
 
     const appointment = await prisma.appointment.findFirst({
@@ -123,7 +87,14 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await auth()
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const appointmentId = params.id
     const body = await request.json()
     
@@ -297,7 +268,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await auth()
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const appointmentId = params.id
 
     // Check if appointment exists and belongs to therapist

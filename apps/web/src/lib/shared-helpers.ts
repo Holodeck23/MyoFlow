@@ -5,8 +5,9 @@ import { NextRequest } from 'next/server'
 /**
  * Shared helper to require an authenticated therapist without side effects.
  * Throws an error if the therapist doesn't exist instead of creating one.
+ * Use this for GET/read-only operations.
  */
-export async function requireTherapist(request: NextRequest) {
+export async function requireTherapist() {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Response('Unauthorized', { status: 401 })

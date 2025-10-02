@@ -4,6 +4,7 @@ import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
 import { encryptString, decryptString, requireRole } from '@myoflow/lib'
 import { logAudit } from '@myoflow/db'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const UpdateClientSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -13,52 +14,13 @@ const UpdateClientSchema = z.object({
   healthFlags: z.string().optional(),
 })
 
-async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.email) {
-    throw new Error('Unauthorized')
-  }
-
-  // Find or create user using email as unique identifier
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: user.id }
-  })
-
-  if (!therapist) {
-
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
-  }
-
-  return therapist.id
-}
-
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    const therapistId = await getTherapistId(session)
+    const { therapist, user, session } = await requireTherapist()
+    const therapistId = therapist.id
 
     const client = await prisma.client.findFirst({
       where: {
@@ -126,10 +88,11 @@ export async function PUT(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const therapistId = await getTherapistId(session)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
 
     const body = await request.json()
     const validatedData = UpdateClientSchema.parse(body)
@@ -200,10 +163,11 @@ export async function DELETE(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const therapistId = await getTherapistId(session)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
 
     const client = await prisma.client.findFirst({
       where: {

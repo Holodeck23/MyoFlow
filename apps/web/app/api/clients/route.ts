@@ -21,7 +21,7 @@ const CreateClientSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const { therapist, session } = await requireTherapist(request)
+    const { therapist, session } = await requireTherapist()
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''

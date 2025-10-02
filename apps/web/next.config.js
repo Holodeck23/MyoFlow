@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@myoflow/ui", "@myoflow/lib", "@myoflow/db"],
+  // TODO: Re-enable instrumentation hook once build-time handling is fixed
+  // experimental: {
+  //   instrumentationHook: true,
+  // },
   images: {
     domains: ['localhost'],
   },

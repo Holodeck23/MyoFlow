@@ -50,18 +50,34 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
-    // Get therapist profile information from settings
+    // Validate required therapist contact information before PDF generation
     const therapist = user.Therapist
+
+    // Check for required fields - prevent placeholder data in PDFs
+    const missingFields: string[] = []
+    if (!therapist.businessEmail) missingFields.push('business email')
+    if (!therapist.businessPhone) missingFields.push('business phone')
+    if (!therapist.businessAddress) missingFields.push('business address')
+    if (!therapist.businessName && !user.name) missingFields.push('business name')
+
+    if (missingFields.length > 0) {
+      return NextResponse.json({
+        error: 'Therapist contact information incomplete. Please complete your profile before generating invoices.',
+        missingFields,
+        profileUrl: '/settings/profile'
+      }, { status: 400 })
+    }
+
     const therapistInfo = {
-      name: therapist.businessName || user.name || 'Dr. Therapist',
-      address: therapist.businessAddress || 'Mariahilfer Straße 123',
+      name: therapist.businessName || user.name!,
+      address: therapist.businessAddress!,
       city: 'Wien',
       postalCode: '1060',
       country: 'Österreich',
-      phone: therapist.businessPhone || '+43 664 123 4567',
-      email: therapist.businessEmail || user.email,
+      phone: therapist.businessPhone!,
+      email: therapist.businessEmail!,
       uid: therapist.uidNumber || undefined,
-      iban: therapist.iban || 'AT61 1904 3002 3457 3201',
+      iban: therapist.iban || undefined,
       bic: undefined, // BIC will be omitted when unknown to avoid SEPA conflicts
       businessForm: 'eingetragenes Einzelunternehmen',
       kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER')

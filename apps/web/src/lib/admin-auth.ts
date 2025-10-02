@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { SignJWT, jwtVerify } from 'jose'
+import { getAdminJwtSecret } from './config-validation'
 
 // Admin user interface
 export interface AdminUser {
@@ -10,10 +11,8 @@ export interface AdminUser {
   role: 'SUPER_ADMIN' | 'SUPPORT' | 'FINANCE'
 }
 
-// JWT secret for admin tokens
-const ADMIN_JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || 'your-super-secret-admin-key-change-in-production'
-)
+// JWT secret for admin tokens (validated at boot time)
+const ADMIN_JWT_SECRET = getAdminJwtSecret()
 
 const ADMIN_TOKEN_COOKIE = 'admin-token'
 const TOKEN_EXPIRY = '24h'
@@ -105,20 +104,15 @@ export async function getAdminUserFromCookies(): Promise<AdminUser | null> {
 }
 
 /**
- * Client-side admin authentication check
+ * Server-side admin authentication check for client components
+ * Use this by calling it from a server component and passing the result as props
+ *
+ * @deprecated Use getAdminUserFromCookies() in server components instead
+ * Client-side auth checks are not possible with httpOnly cookies (by design for security)
  */
 export function useAdminAuth() {
-  if (typeof window === 'undefined') {
-    return null
-  }
-
-  // Check for token in cookie (client-side)
-  const token = document.cookie
-    .split('; ')
-    .find(row => row.startsWith(`${ADMIN_TOKEN_COOKIE}=`))
-    ?.split('=')[1]
-
-  return token ? true : false
+  console.warn('useAdminAuth() is deprecated. Use getAdminUserFromCookies() in server components.')
+  return false
 }
 
 /**
