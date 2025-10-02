@@ -1,9 +1,35 @@
-import NextAuth from 'next-auth'
+import NextAuth, { Session, User } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import Google from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { prisma } from '@myoflow/db'
+
+/**
+ * Extended session interface with MyoFlow-specific fields
+ */
+export interface MyoFlowSession extends Session {
+  user: {
+    id: string
+    email: string
+    name?: string | null
+    image?: string | null
+    role: 'OWNER' | 'ADMIN' | 'THERAPIST' | 'RECEPTIONIST' | 'BILLING'
+    therapistId?: string
+    organizationId?: string
+  }
+}
+
+/**
+ * Extended JWT token interface with MyoFlow-specific claims
+ */
+export interface MyoFlowToken extends JWT {
+  sub: string
+  role: 'OWNER' | 'ADMIN' | 'THERAPIST' | 'RECEPTIONIST' | 'BILLING'
+  therapistId?: string
+  organizationId?: string
+}
 
 const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -102,19 +128,35 @@ const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: '/auth/sign-in',
   },
   callbacks: {
-    async session({ session, token }: any) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub
-        session.user.role = token.role as string
+    async session({ session, token }: { session: Session; token: JWT }): Promise<MyoFlowSession> {
+      const typedToken = token as MyoFlowToken
+
+      return {
+        ...session,
+        user: {
+          id: typedToken.sub,
+          email: session.user?.email || '',
+          name: session.user?.name,
+          image: session.user?.image,
+          role: typedToken.role || 'OWNER',
+          therapistId: typedToken.therapistId,
+          organizationId: typedToken.organizationId,
+        }
       }
-      return session
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }: { token: JWT; user?: User }): Promise<MyoFlowToken> {
+      // On sign-in, add user fields to token
       if (user) {
-        token.sub = user.id
-        token.role = user.role
+        return {
+          ...token,
+          sub: user.id!,
+          role: (user as any).role || 'OWNER',
+          therapistId: (user as any).therapistId,
+          organizationId: (user as any).organizationId,
+        } as MyoFlowToken
       }
-      return token
+
+      return token as MyoFlowToken
     },
   },
 })

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
-import { verifyIntakeToken } from '@/lib/intake'
+import { verifyIntakeToken } from '@myoflow/lib/security'
 import { encryptJson } from '@myoflow/lib'
 
 const rateStore: Map<string, { count: number; reset: number }> =
