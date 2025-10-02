@@ -21,7 +21,7 @@ const updateSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const { therapist } = await requireTherapist(request)
+    const { therapist } = await requireTherapist()
 
     const preferences = await prisma.userPreferences.findUnique({
       where: { therapistId: therapist.id },

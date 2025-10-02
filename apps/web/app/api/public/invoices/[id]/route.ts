@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@myoflow/db'
-import { verifyPublicInvoiceToken } from '../../../../../src/lib/intake'
+import { verifyPublicInvoiceToken } from '@myoflow/lib/security'
 
 export async function GET(
   request: NextRequest,

@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
-import { 
-  generateInvoiceNumber, 
+import {
+  generateInvoiceNumber,
   createInvoiceLineFromService,
   calculateInvoiceTotals,
   validateInvoiceData,
   type AustrianInvoiceData,
   type InvoiceLine
 } from '@myoflow/lib/src/austrian-invoicing'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 // Validation schemas
 const CreateInvoiceSchema = z.object({
@@ -31,43 +32,6 @@ const InvoiceQuerySchema = z.object({
   start: z.string().datetime().optional(),
   end: z.string().datetime().optional()
 })
-
-async function getTherapistId(): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.email) {
-    throw new Error('Not authenticated')
-  }
-
-  // Find or create user and therapist using email as unique identifier
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: user.id },
-  })
-
-  if (!therapist) {
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: `therapist-${user.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
-  }
-
-  return therapist.id
-}
 
 async function getNextInvoiceNumber(therapistId: string): Promise<string> {
   const currentYear = new Date().getFullYear()
@@ -99,7 +63,8 @@ async function getNextInvoiceNumber(therapistId: string): Promise<string> {
 // GET /api/invoices - List invoices
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const { therapist } = await requireTherapist()
+    const therapistId = therapist.id
     const { searchParams } = new URL(request.url)
     
     const query = InvoiceQuerySchema.safeParse({
@@ -180,7 +145,14 @@ export async function GET(request: NextRequest) {
 // POST /api/invoices - Create invoice
 export async function POST(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await auth()
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { therapist: therapistFromAccount } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapistFromAccount.id
     const body = await request.json()
     
     const validation = CreateInvoiceSchema.safeParse(body)

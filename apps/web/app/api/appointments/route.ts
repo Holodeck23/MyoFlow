@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 // Validation schemas
 const CreateAppointmentSchema = z.object({
@@ -22,59 +23,11 @@ const AppointmentQuerySchema = z.object({
   status: z.enum(['BOOKED', 'COMPLETED', 'CANCELLED', 'NO_SHOW']).optional(),
 })
 
-async function getTherapistId(): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.email) {
-    throw new Error('Not authenticated')
-  }
-
-  // First, try to find existing user and therapist
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { Therapist: true }
-  })
-
-  if (user && user.Therapist) {
-    // User has an existing therapist profile from registration
-    return user.Therapist.id
-  }
-
-  // Fallback: create/update user and therapist for demo users
-  const fallbackUser = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findUnique({
-    where: { userId: fallbackUser.id },
-  })
-
-  if (!therapist) {
-    // Create therapist with Austrian defaults
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: fallbackUser.id,
-        slug: `therapist-${fallbackUser.id}`,
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER',
-        kleinunternehmer: true,
-      },
-    })
-  }
-
-  return therapist.id
-}
-
 // GET /api/appointments - List appointments
 export async function GET(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const { therapist } = await requireTherapist()
+    const therapistId = therapist.id
     const { searchParams } = new URL(request.url)
     
     const query = AppointmentQuerySchema.safeParse({
@@ -182,7 +135,14 @@ export async function GET(request: NextRequest) {
 // POST /api/appointments - Create appointment
 export async function POST(request: NextRequest) {
   try {
-    const therapistId = await getTherapistId()
+    const session = await auth()
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const body = await request.json()
     
     const validation = CreateAppointmentSchema.safeParse(body)

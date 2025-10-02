@@ -63,7 +63,7 @@ function calculateRksvComplianceDetails(revenue: number, taxSettings: any) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { therapist } = await requireTherapist(request)
+    const { therapist } = await requireTherapist()
 
     // Get tax compliance settings
     const taxSettings = await prisma.taxComplianceSettings.findUnique({

@@ -119,7 +119,7 @@ function getNextCredentialExpiryDays(credentials: any[]) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { therapist } = await requireTherapist(request)
+    const { therapist } = await requireTherapist()
 
    const detailedTherapist = await prisma.therapist.findUnique({
       where: { id: therapist.id },

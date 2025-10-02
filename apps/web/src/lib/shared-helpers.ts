@@ -1,15 +1,32 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+/**
+ * Structured authentication error for proper HTTP status code handling
+ */
+export class AuthError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public errorCode?: string
+  ) {
+    super(message)
+    this.name = 'AuthError'
+  }
+}
 
 /**
  * Shared helper to require an authenticated therapist without side effects.
- * Throws an error if the therapist doesn't exist instead of creating one.
+ * Throws AuthError if the therapist doesn't exist instead of creating one.
+ * Use this for GET/read-only operations.
+ *
+ * @throws {AuthError} 401 if not authenticated, 404 if user/therapist not found
  */
-export async function requireTherapist(request: NextRequest) {
+export async function requireTherapist() {
   const session = await auth()
   if (!session?.user?.email) {
-    throw new Response('Unauthorized', { status: 401 })
+    throw new AuthError('Unauthorized - No active session', 401, 'NO_SESSION')
   }
 
   const user = await prisma.user.findUnique({
@@ -17,7 +34,7 @@ export async function requireTherapist(request: NextRequest) {
   })
 
   if (!user) {
-    throw new Response('User account not found. Please complete setup first.', { status: 404 })
+    throw new AuthError('User account not found. Please complete setup first.', 404, 'USER_NOT_FOUND')
   }
 
   const therapist = await prisma.therapist.findFirst({
@@ -25,10 +42,41 @@ export async function requireTherapist(request: NextRequest) {
   })
 
   if (!therapist) {
-    throw new Response('Therapist profile not found. Please complete setup first.', { status: 404 })
+    throw new AuthError('Therapist profile not found. Please complete setup first.', 404, 'THERAPIST_NOT_FOUND')
   }
 
   return { therapist, user, session }
+}
+
+/**
+ * Error handler wrapper for API routes to properly handle AuthError instances
+ *
+ * @example
+ * export async function GET(request: NextRequest) {
+ *   return handleAuthErrors(async () => {
+ *     const { therapist } = await requireTherapist()
+ *     // ... rest of handler
+ *   })
+ * }
+ */
+export async function handleAuthErrors(
+  handler: () => Promise<NextResponse>
+): Promise<NextResponse> {
+  try {
+    return await handler()
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: error.errorCode
+        },
+        { status: error.statusCode }
+      )
+    }
+    // Re-throw unexpected errors for global error handler
+    throw error
+  }
 }
 
 /**
