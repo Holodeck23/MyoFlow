@@ -1,7 +1,7 @@
 import { prisma } from '@myoflow/db'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { verifyIntakeToken } from '@/lib/intake'
+import { verifyIntakeToken } from '@myoflow/lib/security'
 
 export default async function IntakePage({ params }: { params: { token: string } }) {
   const data = verifyIntakeToken(params.token)
