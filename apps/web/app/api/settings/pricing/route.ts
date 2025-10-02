@@ -21,7 +21,7 @@ const serviceRateSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const { therapist } = await requireTherapist(request)
+    const { therapist } = await requireTherapist()
 
     const serviceRates = await prisma.serviceRateTemplate.findMany({
       where: {

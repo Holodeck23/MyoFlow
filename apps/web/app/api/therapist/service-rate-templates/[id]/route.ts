@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import { ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const UpdateTemplateSchema = z.object({
   name: z.string().min(1, 'Template name is required').max(100, 'Name too long').optional(),
@@ -13,52 +14,19 @@ const UpdateTemplateSchema = z.object({
   isDefault: z.boolean().optional(),
 })
 
-async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.email) {
-    throw new Error('Unauthorized')
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: user.id }
-  })
-
-  if (!therapist) {
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
-  }
-
-  return therapist.id
-}
-
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await auth()
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const therapistId = await getTherapistId(session)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const templateId = params.id
     const body = await request.json()
     const validatedData = UpdateTemplateSchema.parse(body)
@@ -136,12 +104,13 @@ export async function DELETE(
 ) {
   try {
     const session = await auth()
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const therapistId = await getTherapistId(session)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const templateId = params.id
 
     // Verify template ownership

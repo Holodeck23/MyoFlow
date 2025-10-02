@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
-import { PrismaClient } from '@myoflow/db'
+import { prisma } from '@myoflow/db'
 import { validateEmail, validatePassword } from '../../../../lib/validation'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -163,7 +161,5 @@ export async function POST(request: NextRequest) {
       { error: 'Internal server error during registration' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

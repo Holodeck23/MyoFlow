@@ -4,44 +4,11 @@ import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 import { encryptString, decryptString } from '@myoflow/lib'
 import { logAudit } from '@myoflow/db'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const CreateNoteSchema = z.object({
   body: z.string().min(1, 'Note content is required'),
 })
-
-async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.email) {
-    throw new Error('Unauthorized')
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: user.id }
-  })
-
-  if (!therapist) {
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: 'HEILMASSEUR',
-        vatStatus: 'KLEINUNTERNEHMER'
-      }
-    })
-  }
-
-  return therapist.id
-}
 
 export async function GET(
   request: NextRequest,
@@ -52,7 +19,9 @@ export async function GET(
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const therapistId = await getTherapistId(session)
+
+    const { therapist } = await requireTherapist()
+    const therapistId = therapist.id
 
     const client = await prisma.client.findFirst({
       where: {
@@ -110,10 +79,12 @@ export async function POST(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const therapistId = await getTherapistId(session)
+
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
 
     const client = await prisma.client.findFirst({
       where: {

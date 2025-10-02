@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma, TherapistDesignation, VatStatus } from '@myoflow/db'
 import { z } from 'zod'
+import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const UpdateProfileSchema = z.object({
   businessName: z.string().min(1).max(100).optional(),
@@ -26,40 +27,6 @@ const UpdateProfileSchema = z.object({
   enableSmsReminders: z.boolean().optional(),
   defaultReminderDays: z.number().min(0).max(30).optional(),
 })
-
-async function getTherapistId(session: any): Promise<string> {
-  if (!session?.user?.email) {
-    throw new Error('Unauthorized')
-  }
-
-  const user = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-    create: {
-      email: session.user.email,
-      name: session.user.name || session.user.email || 'Unknown User',
-    },
-  })
-
-  let therapist = await prisma.therapist.findFirst({
-    where: { userId: user.id }
-  })
-
-  if (!therapist) {
-    therapist = await prisma.therapist.create({
-      data: {
-        userId: user.id,
-        slug: session.user.email?.split('@')[0] || 'therapist',
-        designation: TherapistDesignation.HEILMASSEUR,
-        vatStatus: VatStatus.KLEINUNTERNEHMER
-      }
-    })
-  }
-
-  return therapist.id
-}
 
 function calculateProfileCompletion(therapist: any) {
   const requiredFields = [
@@ -112,13 +79,8 @@ function calculateProfileCompletion(therapist: any) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth()
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const therapistId = await getTherapistId(session)
+    const { therapist: therapistFromSession } = await requireTherapist()
+    const therapistId = therapistFromSession.id
 
     const therapist = await prisma.therapist.findUnique({
       where: { id: therapistId },
@@ -195,7 +157,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const therapistId = await getTherapistId(session)
+    const { therapist } = await ensureTherapistAccount(session.user.email, session.user.name || undefined)
+    const therapistId = therapist.id
     const body = await request.json()
     const validatedData = UpdateProfileSchema.parse(body)
 
