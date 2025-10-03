@@ -58,10 +58,7 @@ export * from './i18n/config'
 export * from './i18n/context'
 export * from './i18n/hooks'
 
-// Encryption utilities
-export * from './src/encryption'
-
-// Security utilities
+// Security utilities (includes encryption)
 export * from './security/crypto'
 export * from './security/permissions'
 export * from './security/intakeToken'
