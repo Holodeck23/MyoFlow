@@ -1,4 +1,10 @@
-// Audit logging types - no Prisma dependency in shared package
+/**
+ * Audit logging types
+ *
+ * NOTE: This interface is duplicated from @myoflow/db for package independence.
+ * The canonical implementation with logAudit() function is in @myoflow/db/index.ts
+ * Keep these in sync!
+ */
 export interface AuditLogEntry {
   actorUserId?: string
   therapistId: string
@@ -8,6 +14,3 @@ export interface AuditLogEntry {
   ip?: string | null
   meta?: any
 }
-
-// Note: logAudit implementation moved to API routes
-// Use: POST /api/audit with AuditLogEntry data

@@ -548,6 +548,14 @@ model AuditLog {
   @@index([therapistId, entity, entityId, at])
 }
 
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 enum Role {
   OWNER
   STAFF

@@ -4,31 +4,56 @@ import { z } from 'zod'
 import { verifyIntakeToken } from '@myoflow/lib/security'
 import { encryptJson } from '@myoflow/lib'
 
-const rateStore: Map<string, { count: number; reset: number }> =
-  (globalThis as any).__consentRateStore || new Map()
-;(globalThis as any).__consentRateStore = rateStore
-
 const schema = z.object({
   token: z.string(),
   docVersion: z.string(),
   payload: z.any(),
 })
 
-function checkRate(ip: string): boolean {
-  const now = Date.now()
-  const rec = rateStore.get(ip)
-  if (!rec || now > rec.reset) {
-    rateStore.set(ip, { count: 1, reset: now + 60_000 })
-    return true
+/**
+ * PostgreSQL-backed rate limiter for production scalability.
+ * Allows 5 requests per minute per IP for consent submission.
+ */
+async function checkRate(ip: string): Promise<boolean> {
+  const windowMs = 60_000 // 1 minute
+  const limit = 5
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - windowMs)
+
+  // Clean up old rate limit records (older than 1 minute)
+  await prisma.rateLimit.deleteMany({
+    where: {
+      key: `consent:${ip}`,
+      createdAt: { lt: windowStart }
+    }
+  })
+
+  // Count requests in current window
+  const count = await prisma.rateLimit.count({
+    where: {
+      key: `consent:${ip}`,
+      createdAt: { gte: windowStart }
+    }
+  })
+
+  if (count >= limit) {
+    return false
   }
-  if (rec.count >= 5) return false
-  rec.count += 1
+
+  // Record this request
+  await prisma.rateLimit.create({
+    data: {
+      key: `consent:${ip}`,
+      createdAt: now
+    }
+  })
+
   return true
 }
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || ''
-  if (!checkRate(ip)) {
+  if (!(await checkRate(ip))) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
