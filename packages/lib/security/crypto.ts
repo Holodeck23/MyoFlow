@@ -32,3 +32,12 @@ export async function decryptString(payload: string): Promise<string> {
   const plain = sodium.crypto_secretbox_open_easy(cipher, nonce, k)
   return sodium.to_string(plain)
 }
+
+export async function encryptJson(data: any): Promise<string> {
+  return encryptString(JSON.stringify(data))
+}
+
+export async function decryptJson<T = any>(payload: string): Promise<T> {
+  const decrypted = await decryptString(payload)
+  return JSON.parse(decrypted) as T
+}

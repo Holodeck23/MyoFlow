@@ -127,28 +127,46 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.totalRevenue - a.totalRevenue)
       .slice(0, 5)
 
-    // Monthly revenue trend (last 6 months)
-    const monthlyTrend = []
-    for (let i = 5; i >= 0; i--) {
-      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1)
+    // Monthly revenue trend (last 6 months) - optimized with single query
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-      const monthData = await prisma.invoice.aggregate({
-        where: {
-          status: { not: 'VOID' },
-          createdAt: {
-            gte: monthStart,
-            lt: monthEnd
-          }
-        },
-        _sum: { totalGrossCents: true },
-        _count: true
+    const monthlyInvoices = await prisma.invoice.groupBy({
+      by: ['createdAt'],
+      where: {
+        status: { not: 'VOID' },
+        createdAt: { gte: sixMonthsAgo }
+      },
+      _sum: { totalGrossCents: true },
+      _count: true
+    })
+
+    // Group by month and build trend array
+    const monthMap = new Map<string, { revenue: number; count: number }>()
+
+    for (const invoice of monthlyInvoices) {
+      const monthKey = new Date(invoice.createdAt).toLocaleDateString('de-AT', {
+        month: 'short',
+        year: 'numeric'
       })
 
+      const existing = monthMap.get(monthKey) || { revenue: 0, count: 0 }
+      monthMap.set(monthKey, {
+        revenue: existing.revenue + (invoice._sum.totalGrossCents || 0),
+        count: existing.count + invoice._count
+      })
+    }
+
+    // Build complete trend array with all 6 months (including zeros)
+    const monthlyTrend = []
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthKey = monthDate.toLocaleDateString('de-AT', { month: 'short', year: 'numeric' })
+      const data = monthMap.get(monthKey) || { revenue: 0, count: 0 }
+
       monthlyTrend.push({
-        month: monthStart.toLocaleDateString('de-AT', { month: 'short', year: 'numeric' }),
-        revenue: monthData._sum.totalGrossCents || 0,
-        invoices: monthData._count || 0
+        month: monthKey,
+        revenue: data.revenue,
+        invoices: data.count
       })
     }
 
