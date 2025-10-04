@@ -2,9 +2,9 @@
 
 ## Branch Strategy
 
-- **`main`** - Production-ready code
-- **`performance-optimization-sprint`** - Current active branch
+- **`main`** - Production-ready code (current)
 - **Feature branches** - `feature/feature-name` or `fix/issue-name`
+- **Sprint branches** - Named after sprint objective (e.g., `runtime-performance-sprint`)
 
 ## Development Workflow
 
@@ -67,10 +67,11 @@ Before every commit:
 
 ## Current Branch Status
 
-**Active:** `performance-optimization-sprint`
-- MVP complete with Austrian compliance
+**Active:** `main`
+- Sprint 1 (Hardening) complete - all 11 Code Quality items merged
 - All quality gates passing
-- Ready for production deployment
+- Production-hardened platform
+- Next: Sprint 2 (Runtime Performance)
 
 ## Emergency Fixes
 
