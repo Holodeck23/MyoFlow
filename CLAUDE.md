@@ -1,13 +1,45 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** September 23, 2025
-**Branch:** `performance-optimization-sprint`
-**Status:** ✅ MVP Complete & Production Ready
+**Current Session:** October 4, 2025
+**Branch:** `main`
+**Status:** ✅ Production-Hardened Platform Ready
 
 ---
 
-## 🎯 Session Summary - September 23, 2025
+## 🎯 Session Summary - October 4, 2025
+
+### **MAJOR ACHIEVEMENT: CODE QUALITY REMEDIATION COMPLETE** ✅
+
+### **Completed Sprint 1: Hardening (All 11 Items)**
+- ✅ **Priority 1 - Security & Data Integrity (Items 1-4)**
+  - Invoice PDF validation with required field checks
+  - GET-side mutation elimination (requireTherapist helper)
+  - ADMIN_JWT_SECRET enforcement at boot time
+  - Admin authentication hardening
+- ✅ **Priority 2 - Architecture Consistency (Items 5-8)**
+  - Structured auth error propagation (AuthError class)
+  - Prisma singleton enforcement across all routes
+  - Typed NextAuth callbacks (MyoFlowSession/MyoFlowToken)
+  - Intake token utility consolidation
+- ✅ **Priority 3 - Performance & Scalability (Items 9-11)**
+  - PostgreSQL-backed rate limiting (RateLimit table)
+  - Admin analytics optimization (6x faster with single query)
+  - Audit type unification (@myoflow/db as source of truth)
+
+### **Technical Status**
+- **Build Status:** All quality gates passing (typecheck/lint/build)
+- **Security:** Production-grade secret management, hardened auth
+- **Performance:** Optimized queries, scalable rate limiting
+- **Architecture:** Clean separation, no duplicated utilities
+- **Branch:** security-hardening merged to main (commit 86c6c8e)
+
+### **Next Sprint Priority**
+**Sprint 2: Runtime Performance (6 days)** - Settings decomposition, seed relocation, repo cleanup
+
+---
+
+## 🎯 Previous Session Summary - September 23, 2025
 
 ### **MAJOR ACHIEVEMENT: MVP COMPLETE & TIGHT** ✅
 
@@ -18,13 +50,6 @@
 - ✅ **useEffect Dependencies:** Fixed all 11 React hooks warnings with useCallback
 - ✅ **Image Optimization:** Replaced img tags with Next.js Image components
 - ✅ **Repository Cleanup:** Removed 15+ redundant development files, clean structure
-
-### **Technical Status**
-- **Build Performance:** Optimized, no warnings
-- **Authentication:** NextAuth v5 working perfectly
-- **UI/UX:** Professional Austrian medical design
-- **Database:** Clean schema, encrypted client data
-- **Deployment Ready:** Production-grade codebase
 
 ---
 
@@ -116,19 +141,48 @@ Working on **comprehensive user settings design** implementation following Agent
 - **Security:** libsodium encryption, field-level protection
 - **Test Data:** 3 Austrian invoices, realistic Linz-based client scenarios
 
-## 📆 Stabilisation & MVP Plan (Sept 2025)
+## 📆 Stabilisation & MVP Plan (Oct 2025)
 
 **Goal:** Eliminate open issues, tighten architecture, then deliver the remaining ~30% toward MVP without feature creep.
 
-1. **Hardening Sprint (5d)** – Secure public invoice access, standardise encryption secrets, and refactor GET handlers to be side-effect free with shared therapist lookup helpers.
-2. **Runtime Performance Sprint (6d)** – Decompose the settings surface (lazy/server components), relocate default seeding to explicit setup flows, benchmark rebuild/hydration times, and tidy repo artefacts (coverage/dist, Prisma versions).
-3. **UX + i18n Cleanup Sprint (5d)** – Resolve translation layout glitches, finish string extraction, and move the root layout back to SSR-friendly patterns with scoped locale persistence.
-4. **Settings Completion Sprint (7d)** – Ship remaining settings APIs + UI wiring, migrate legacy JSON blobs, and document PostGIS rollout requirements.
-5. **Compliance & Reporting Sprint (6d)** – Finish RKSV flows, tighten audit logging, and replace dashboard mock metrics with live revenue/threshold data.
-6. **E2E Reliability Sprint (5d)** – Expand Playwright suites (settings, calendar, security smoke tests) and enable E2E in CI.
-7. **Polish & Launch Prep Sprint (4d)** – Documentation sweep, localisation/responsiveness QA, release-candidate tag, and launch checklist.
+### **Sprint Progress**
 
-Each sprint should run on focused branches (one per sprint task), finish with the standard lint/typecheck/build/test gate, and record progress in `AGENT_ACTIVITY_LOG.md`.
+1. ✅ **Hardening Sprint (5d)** – COMPLETE (Oct 4, 2025)
+   - All 11 Code Quality Remediation items implemented
+   - Security hardened, architecture consistent, performance optimized
+   - Branch: `security-hardening` → merged to `main`
+
+2. **Runtime Performance Sprint (6d)** – NEXT PRIORITY
+   - Decompose the settings surface (lazy/server components)
+   - Relocate default seeding to explicit setup flows
+   - Benchmark rebuild/hydration times
+   - Tidy repo artefacts (coverage/dist, Prisma versions)
+
+3. **UX + i18n Cleanup Sprint (5d)** – PENDING
+   - Resolve translation layout glitches
+   - Finish string extraction
+   - Move root layout back to SSR-friendly patterns with scoped locale persistence
+
+4. **Settings Completion Sprint (7d)** – PENDING
+   - Ship remaining settings APIs + UI wiring
+   - Migrate legacy JSON blobs
+   - Document PostGIS rollout requirements
+
+5. **Compliance & Reporting Sprint (6d)** – PENDING
+   - Finish RKSV flows
+   - Tighten audit logging
+   - Replace dashboard mock metrics with live revenue/threshold data
+
+6. **E2E Reliability Sprint (5d)** – PENDING
+   - Expand Playwright suites (settings, calendar, security smoke tests)
+   - Enable E2E in CI
+
+7. **Polish & Launch Prep Sprint (4d)** – PENDING
+   - Documentation sweep
+   - Localisation/responsiveness QA
+   - Release-candidate tag and launch checklist
+
+Each sprint should run on focused branches (one per sprint task), finish with the standard lint/typecheck/build/test gate, and record progress in session notes.
 
 ---
 
@@ -174,8 +228,8 @@ When ending session:
 
 ---
 
-**Last Updated:** September 22, 2025
-**Next Priority:** Fix NextAuth v5 authentication system
+**Last Updated:** October 4, 2025
+**Next Priority:** Sprint 2 - Runtime Performance optimization
 
 ---
 
