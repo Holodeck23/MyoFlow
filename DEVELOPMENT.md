@@ -33,8 +33,17 @@ pnpm docker:up
 # 4. Setup database
 pnpm prisma:migrate:dev
 
-# 5. Start development server
+# 5. (Optional) Seed test data
+pnpm prisma:seed
+
+# 6. Start development server
 pnpm dev
+```
+
+**Quick Setup (All-in-One):**
+```bash
+pnpm setup
+# This runs: install → docker:up → migrate → seed → ready!
 ```
 
 🎉 **Ready!** Visit http://localhost:3000
@@ -59,7 +68,10 @@ pnpm lint        # Code linting
 pnpm prisma:studio      # Database GUI
 pnpm prisma:migrate:dev # Apply migrations
 pnpm prisma:generate    # Regenerate client
+pnpm prisma:seed        # Seed test data (opt-in)
 ```
+
+**Note:** Seed data is now opt-in. Use `pnpm prisma:seed` to create test users and data when needed.
 
 ### Docker Commands
 ```bash
