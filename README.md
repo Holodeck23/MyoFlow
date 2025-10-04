@@ -31,34 +31,39 @@ MyoFlow is a **single-tenant** practice management platform specifically designe
 - **Infrastructure:** Docker Compose for local development, GitHub Actions CI/CD
 - **Development:** Agent OS structured workflow with Claude-Codex coordination
 
-### 🎉 Current Status (September 2025)
+### 🎉 Current Status (October 2025)
 
-**✅ MVP Features Complete:**
-- 🔐 **Authentication System** - NextAuth.js with professional Austrian UI
-- 👥 **Client Management** - Complete CRUD with Austrian data fields, notes, tags
-- 📅 **Appointment Scheduling** - Austrian holiday system, conflict detection, travel buffers
-- 🧾 **Invoice Generation** - Austrian tax-compliant invoices with VAT/Kleinunternehmer support  
-- 📄 **PDF Generation** - Professional Austrian-formatted invoice PDFs with Puppeteer
-- ⚙️ **Therapist Profiles** - Business settings with Austrian compliance tracking
-- 🎨 **Professional Branding** - MyoFlow design system with Austrian medical colors
+**✅ MVP + Sprint 1 Complete:**
+- 🔐 **Authentication** - NextAuth v5 with Google + credentials, professional UI
+- 👥 **Client Management** - Complete CRUD with encryption, Austrian data fields
+- 📅 **Appointment Scheduling** - Austrian holidays, conflict detection, travel buffers
+- 🧾 **Invoice Generation** - Austrian tax-compliant with VAT/Kleinunternehmer support
+- 📄 **PDF Generation** - Professional Austrian-formatted invoices
+- ⚙️ **Therapist Profiles** - Business settings with compliance tracking
+- 🔒 **Production Hardening** - All 11 Code Quality items complete (security, architecture, performance)
 
-**🚧 In Progress:**
-- 🔧 **Webpack Configuration** - Resolving module resolution with Codex coordination
-- 📱 **Client Profile Tabs** - Enhanced tabbed interface for detailed client information
+**🚀 Active Development (7-Sprint Plan - 1/7 Complete):**
+1. ✅ **Hardening Sprint** - Security, architecture, performance (Oct 4, 2025)
+2. **Runtime Performance** - Settings optimization, seed relocation - NEXT
+3. **UX + i18n Cleanup** - Translation fixes, string extraction
+4. **Settings Completion** - APIs, UI wiring, PostGIS
+5. **Compliance & Reporting** - RKSV flows, live metrics
+6. **E2E Reliability** - Playwright coverage expansion
+7. **Polish & Launch Prep** - Final QA and launch checklist
 
-**🔮 Roadmap Highlights:**
-- **Mobile PWA** - Offline-first experience for mobile practitioners
-- **AI Revenue Optimization** - Austrian tax-aware pricing recommendations  
-- **ÖGK Integration** - Direct billing with Austrian Health Insurance Fund
-- **BMD/RZL/DATEV** - Enhanced accounting software integrations
+**🔮 Post-Launch Roadmap (Archived):**
+- Multi-tenancy migration
+- GDPR compliance enhancement
+- ÖGK integration
+- Advanced analytics
 
-**📊 Market Validation:** External analysis confirms strong positioning with Austrian-first specialization as key differentiator vs international SaaS solutions.
+See `ROADMAP.md` for detailed sprint breakdown and `docs/archive/` for long-term planning.
 
 ---
 
 ## 🚀 Quick Start
 
-> **New to MyoFlow?** See [QUICK_START.md](./QUICK_START.md) for a 5-minute setup guide.
+> **New to MyoFlow?** See [DEVELOPMENT.md](./DEVELOPMENT.md) for complete setup guide.
 
 ### Prerequisites
 ```bash
