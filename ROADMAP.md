@@ -15,15 +15,15 @@ _Last updated: October 4, 2025_
 
 ## Active: 7-Sprint Stabilization Plan
 
-See `CLAUDE.md` for detailed sprint breakdown. Current progress: **1/7 complete**
+See `CLAUDE.md` for detailed sprint breakdown. Current progress: **2/7 complete**
 
 1. ✅ **Hardening Sprint (5d)** - COMPLETE (Oct 4, 2025)
-2. **Runtime Performance Sprint (6d)** - NEXT PRIORITY
-   - Settings decomposition (lazy/server components)
-   - Seed relocation to explicit setup flows
-   - Performance benchmarking
-   - Repository cleanup
-3. **UX + i18n Cleanup (5d)**
+2. ✅ **Runtime Performance Sprint (6d)** - COMPLETE (Oct 4, 2025)
+   - Settings converted to Server Component (537KB → 534KB)
+   - Seed data now opt-in (SEED_DATA=true)
+   - Performance benchmarking complete
+   - Repository cleanup complete
+3. **UX + i18n Cleanup (5d)** - NEXT PRIORITY
 4. **Settings Completion (7d)**
 5. **Compliance & Reporting (6d)**
 6. **E2E Reliability (5d)**
