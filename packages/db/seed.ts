@@ -16,7 +16,15 @@ import {
 
 const prisma = new PrismaClient()
 
+// Check if seeding is explicitly requested
+const shouldSeed = process.env.SEED_DATA === 'true' || process.argv.includes('--seed')
+
 async function main() {
+  if (!shouldSeed) {
+    console.log('⏭️  Skipping seed - use SEED_DATA=true or --seed flag to create test data')
+    return
+  }
+
   console.log('🌱 Starting database seed...')
 
   // Create test user and therapist
