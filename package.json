@@ -15,9 +15,11 @@
     "prisma:migrate:dev": "pnpm --filter db prisma migrate dev",
     "prisma:generate": "pnpm --filter db prisma generate",
     "prisma:studio": "pnpm --filter db prisma studio",
+    "prisma:seed": "pnpm --filter db seed",
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker/docker-compose.yml down",
-    "db:test": "docker compose -f infra/docker/docker-compose.yml up -d && sleep 5 && export DATABASE_URL=postgresql://postgres:password@localhost:5432/myoflow && pnpm prisma:migrate:dev && pnpm --filter db seed"
+    "db:test": "docker compose -f infra/docker/docker-compose.yml up -d && sleep 5 && export DATABASE_URL=postgresql://postgres:password@localhost:5432/myoflow && pnpm prisma:migrate:dev && pnpm prisma:seed",
+    "setup": "pnpm install && pnpm docker:up && sleep 3 && pnpm prisma:migrate:dev && pnpm prisma:seed"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
