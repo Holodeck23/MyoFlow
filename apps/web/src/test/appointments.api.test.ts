@@ -10,6 +10,7 @@ const mockPrisma = vi.hoisted(() => ({
   therapist: {
     findUnique: vi.fn(),
     create: vi.fn(),
+    upsert: vi.fn(),
   },
   client: {
     findFirst: vi.fn(),
@@ -76,6 +77,7 @@ describe('Appointment API time validation', () => {
     mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1', Therapist: { id: 'therapist-1' } })
     mockPrisma.therapist.findUnique.mockResolvedValue({ id: 'therapist-1' })
     mockPrisma.therapist.create.mockResolvedValue({ id: 'therapist-1' })
+    mockPrisma.therapist.upsert.mockResolvedValue({ id: 'therapist-1' })
     mockPrisma.client.findFirst.mockResolvedValue({ id: 'client-1' })
     mockPrisma.service.findFirst.mockResolvedValue({ id: 'service-1' })
     mockPrisma.location.findFirst.mockResolvedValue({ id: 'location-1' })
