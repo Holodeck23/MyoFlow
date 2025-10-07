@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 // Validation schema for branding settings
 const InvoiceBrandingSchema = z.object({
   invoiceLogoUrl: z.string().url('Invalid logo URL format').nullable().optional(),
