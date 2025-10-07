@@ -18,7 +18,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find the therapist user and therapist profile
+    // Find the therapist user and therapist profile with branding settings
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
@@ -80,7 +80,11 @@ export async function GET(
       iban: therapist.iban || undefined,
       bic: undefined, // BIC will be omitted when unknown to avoid SEPA conflicts
       businessForm: 'eingetragenes Einzelunternehmen',
-      kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER')
+      kleinunternehmer: therapist.kleinunternehmer ?? (therapist.vatStatus === 'KLEINUNTERNEHMER'),
+      // Branding settings
+      invoiceLogoUrl: therapist.invoiceLogoUrl || undefined,
+      invoiceDisplayPreference: therapist.invoiceDisplayPreference || undefined,
+      invoiceThankYouMessage: therapist.invoiceThankYouMessage || undefined,
     }
 
     // Cast JSON fields to typed arrays for PDF generation
