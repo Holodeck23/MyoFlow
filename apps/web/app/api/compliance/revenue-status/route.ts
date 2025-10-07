@@ -8,6 +8,8 @@ import {
   type RevenueStatusResult,
 } from '@myoflow/lib'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/compliance/revenue-status
  *

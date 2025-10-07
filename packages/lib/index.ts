@@ -68,6 +68,7 @@ export * from './audit/log'
 
 // Compliance & revenue tracking
 export * from './src/compliance-revenue'
+export * from './src/compliance-checklist'
 
 // Version
 export const MYOFLOW_LIB_VERSION = '0.0.0'
