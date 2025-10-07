@@ -13,6 +13,7 @@ import {
 import { Shield, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { RevenueStatusWidget } from './RevenueStatusWidget'
+import { TaxValidationWidget } from './TaxValidationWidget'
 
 interface ComplianceTabProps {
   profileData: any
@@ -62,48 +63,11 @@ export function ComplianceTab({ profileData, overviewData, isActive = false }: C
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        {/* Revenue Status Widget - New */}
+        {/* Revenue Status Widget */}
         <RevenueStatusWidget />
 
-        {/* Professional Tax Validation Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Shield className="w-5 h-5" />
-              <span>Professional Tax Validation</span>
-            </CardTitle>
-            <CardDescription>
-              Austrian Steuerberater validation status for tax calculations
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-md">
-              <div className="flex">
-                <AlertTriangle className="h-5 w-5 text-orange-400" />
-                <div className="ml-3">
-                  <h4 className="text-sm font-medium text-orange-800">
-                    Validation Recommended
-                  </h4>
-                  <p className="text-sm text-orange-700 mt-1">
-                    We recommend having your tax calculations professionally validated by an Austrian Steuerberater
-                    to ensure compliance with current Austrian tax law.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tax Validation Widget - Interactive tracking & disclaimers */}
+        <TaxValidationWidget />
       </div>
 
       <div className="space-y-6">
