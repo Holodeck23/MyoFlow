@@ -17,7 +17,9 @@ async function getKey(): Promise<Uint8Array> {
 export async function encryptString(plainText: string): Promise<string> {
   const k = await getKey()
   const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
-  const cipher = sodium.crypto_secretbox_easy(plainText, nonce, k)
+  // libsodium requires Uint8Array input; convert string to bytes explicitly
+  const message = sodium.from_string(plainText)
+  const cipher = sodium.crypto_secretbox_easy(message, nonce, k)
   return [
     sodium.to_base64(nonce, sodium.base64_variants.ORIGINAL),
     sodium.to_base64(cipher, sodium.base64_variants.ORIGINAL)

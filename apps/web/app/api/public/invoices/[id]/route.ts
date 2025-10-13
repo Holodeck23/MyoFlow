@@ -73,8 +73,8 @@ export async function GET(
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
-    // Only show SENT or PAID invoices publicly (not DRAFT)
-    if (invoice.status === 'DRAFT') {
+    // Only allow public access for SENT or PAID invoices
+    if (invoice.status !== 'SENT' && invoice.status !== 'PAID') {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
     }
 
