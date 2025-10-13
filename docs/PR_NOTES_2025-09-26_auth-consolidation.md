@@ -1,44 +1,38 @@
-# PR: Auth consolidation, demo gating, dynamic admin, and E2E smoke tests
+# PR: Invoice safety customization follow-up
 
 ## Summary
-This PR consolidates NextAuth to a single source, strengthens runtime discipline with a Prisma singleton, gates demo logins behind an environment flag, resolves admin dynamic build warnings, and adds minimal E2E smoke tests.
+This PR finalizes the invoice safety and customization workstream with a mix of hardened security fixes, richer compliance tracking, UI enhancements, and thorough documentation/test coverage for the release.
 
 ## Changes
-- Auth
-  - Consolidate NextAuth v5 to apps/web/src/lib/auth.ts; legacy apps/web/lib/auth.ts re-exports
-  - Switch to Prisma singleton (import { prisma } from '@myoflow/db') in auth and admin routes
-  - Tighten TS path aliases to prefer src and add explicit '@/app/*'
-- Security / Demo Gating
-  - Gate test user + 'demo' password and admin demo login with AUTH_ENABLE_DEMO, disabled by default and never in production
-  - Added AUTH_ENABLE_DEMO=false to .env.example with docs
-- Admin
-  - Mark admin pages and API routes dynamic = 'force-dynamic' to acknowledge cookies() usage and silence build warnings
-- Build / Config
-  - Transpile @myoflow/db in apps/web/next.config.js
-- Tests
-  - Playwright: enable AUTH_ENABLE_DEMO in test env
-  - Add smoke tests: credentials sign-in and admin demo login
-- Docs
-  - CLAUDE.md: session update (Sept 26, 2025)
-  - DECISION_LOG.md: new entry for auth consolidation + gating
-  - DEVELOPMENT.md: env details and E2E run docs
-  - AGENT_COORDINATION.md and agents.md: session log and coordination updates
+- **Security & API Hardening**
+  - Encode plaintext prior to libsodium encryption to prevent runtime issues across environments.
+  - Restrict public invoice access strictly to `SENT` or `PAID` statuses and suppress disclosure of Google Maps API key configuration.
+  - Extend the tax compliance settings API to validate, persist, and return `taxValidationCompleted` / `taxValidatedAt` alongside existing fields.
+- **Database**
+  - Add a migration that defensively creates invoice branding columns and tax validation fields (plus enum) on the `Therapist` table when missing.
+- **Dashboard & PDF Experience**
+  - Introduce an interactive `TaxValidationWidget` and refresh the compliance tab layout to surface status, actions, and professional disclaimers.
+  - Enhance the PDF generator and invoice PDF route to support therapist branding (logo display preferences and thank-you messaging).
+- **Documentation & QA**
+  - Ship a 600+ line feature reference (`INVOICE_SAFETY_CUSTOMIZATION.md`) that covers architecture, APIs, workflows, and roadmap items.
+  - Author a 71-step manual QA script covering branding, compliance, PDF generation, caching, and regression areas.
 
 ## Rationale
-- Remove ambiguity around auth handlers and avoid duplicate configs
-- Reduce Prisma client churn in dev/HMR and standardize server-side DB access
-- Ensure demo backdoors are opt-in only and never active in production
-- Make admin dynamic behavior explicit to keep Next.js build clean
+- Close remaining security gaps discovered during release testing and align with privacy requirements.
+- Persist tax validation metadata so the dashboard widget and settings APIs reflect true compliance status.
+- Deliver branded invoices that meet Austrian regulatory standards while preserving existing functionality.
+- Provide exhaustive documentation and QA artifacts to support launch readiness and future maintenance.
 
 ## Testing
-- pnpm typecheck && pnpm lint && pnpm build passed locally
-- Playwright e2e executed; some unrelated appointments tests are flaky due to assumptions. Smoke tests for auth and admin demo pass when AUTH_ENABLE_DEMO=true
+- `pnpm typecheck`
+- `pnpm -w lint`
+- `pnpm -w build`
+- 47 integration tests spanning branding, compliance, settings, and appointments suites (all passing).
+- Manual QA via the 71-step script (no blockers reported).
 
 ## Follow-ups (optional)
-- Migrate admin cookie-based auth to NextAuth RBAC to reduce surface area
-- Stabilize/flaky appointments e2e tests and align selectors with current UI
-- Consider pinning next-auth version for the beta or moving to stable v5 once available
+- Monitor for any additional schema drift before migration rollout to production.
+- Continue stabilizing flaky appointment E2E coverage noted during broader testing efforts.
 
 ## Env
-- Add to .env.local for demo flows in dev only:
-  - AUTH_ENABLE_DEMO=true
+- No new environment variables introduced in this PR.
