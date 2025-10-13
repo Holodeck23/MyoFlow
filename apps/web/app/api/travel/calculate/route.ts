@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       origin: originCoords,
       destination: destinationCoords,
       travel: travelCalculation,
-      apiKey: process.env.GOOGLE_MAPS_API_KEY ? 'configured' : 'missing'
+    // Do not leak API key configuration details in responses
     })
 
   } catch (error) {
