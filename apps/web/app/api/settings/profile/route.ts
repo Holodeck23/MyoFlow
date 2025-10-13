@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
         vatStatus: true,
         createdAt: true,
         updatedAt: true,
+        taxValidationCompleted: true,
+        taxValidatedAt: true,
       },
     })
 
