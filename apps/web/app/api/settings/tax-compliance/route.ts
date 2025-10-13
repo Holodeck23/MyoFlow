@@ -34,6 +34,8 @@ const updateSchema = z.object({
       notes: z.string().max(1000).optional().nullable(),
     })
     .optional(),
+  taxValidationCompleted: z.boolean().optional(),
+  taxValidatedAt: z.string().datetime().nullable().optional(),
 })
 
 
@@ -43,6 +45,14 @@ export async function GET(request: NextRequest) {
 
     const settings = await prisma.taxComplianceSettings.findUnique({
       where: { therapistId: therapist.id },
+    })
+
+    const therapistRecord = await prisma.therapist.findUnique({
+      where: { id: therapist.id },
+      select: {
+        taxValidationCompleted: true,
+        taxValidatedAt: true,
+      },
     })
 
     // GET handler should not create missing data - return null structure instead
@@ -57,10 +67,17 @@ export async function GET(request: NextRequest) {
         rksvEnabled: false,
         // Indicate this is default data, not persisted
         isDefault: true,
+        taxValidationCompleted: therapistRecord?.taxValidationCompleted ?? false,
+        taxValidatedAt: therapistRecord?.taxValidatedAt ?? null,
       })
     }
 
-    return NextResponse.json({ ...settings, isDefault: false })
+    return NextResponse.json({
+      ...settings,
+      isDefault: false,
+      taxValidationCompleted: therapistRecord?.taxValidationCompleted ?? false,
+      taxValidatedAt: therapistRecord?.taxValidatedAt ?? null,
+    })
   } catch (error) {
     if (error instanceof Response) {
       throw error
@@ -90,7 +107,11 @@ export async function PUT(request: NextRequest) {
       },
     })
 
-    const updateData: any = {}
+    const updateData: Record<string, any> = {}
+    const therapistUpdateData: Record<string, any> = {
+      settingsLastUpdated: new Date(),
+      settingsVersion: { increment: 1 },
+    }
 
     if (parsed.vatRegistered !== undefined) {
       updateData.vatRegistered = parsed.vatRegistered
@@ -137,6 +158,19 @@ export async function PUT(request: NextRequest) {
       updateData.rksvNotes = parsed.rksv.notes ?? null
     }
 
+    if (parsed.taxValidationCompleted !== undefined) {
+      therapistUpdateData.taxValidationCompleted = parsed.taxValidationCompleted
+      if (!parsed.taxValidationCompleted) {
+        therapistUpdateData.taxValidatedAt = null
+      }
+    }
+
+    if (parsed.taxValidatedAt !== undefined) {
+      therapistUpdateData.taxValidatedAt = parsed.taxValidatedAt
+        ? new Date(parsed.taxValidatedAt)
+        : null
+    }
+
     const updated = await prisma.taxComplianceSettings.update({
       where: { therapistId: therapist.id },
       data: {
@@ -147,10 +181,7 @@ export async function PUT(request: NextRequest) {
 
     await prisma.therapist.update({
       where: { id: therapist.id },
-      data: {
-        settingsLastUpdated: new Date(),
-        settingsVersion: { increment: 1 },
-      },
+      data: therapistUpdateData,
     })
 
     return NextResponse.json({ success: true, settings: updated })
