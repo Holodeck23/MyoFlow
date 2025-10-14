@@ -37,88 +37,16 @@ interface TodayAppointment {
   }
 }
 
-interface Activity {
-  type: 'appointment' | 'invoice'
-  description: string
-  time: Date
-  amount: string
-}
-
 export default function Dashboard() {
   const { t } = useTranslation()
   const { data: session } = useSession()
   const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([])
-  const [totalClients, setTotalClients] = useState(0)
-  const [actionRequiredCount, setActionRequiredCount] = useState(0)
-  const [recentActivity, setRecentActivity] = useState<Activity[]>([])
 
   useEffect(() => {
     if (session) {
       fetchTodayAppointments()
-      fetchTotalClients()
-      fetchActionRequired()
-      fetchRecentActivity()
     }
   }, [session])
-
-  const fetchRecentActivity = async () => {
-    try {
-      const [appointmentsResponse, invoicesResponse] = await Promise.all([
-        fetch('/api/appointments'),
-        fetch('/api/invoices')
-      ])
-
-      if (appointmentsResponse.ok && invoicesResponse.ok) {
-        const appointmentsData = await appointmentsResponse.json()
-        const invoicesData = await invoicesResponse.json()
-
-        const mappedAppointments: Activity[] = appointmentsData.appointments.map((a: any) => ({
-          type: 'appointment',
-          description: `Appointment with ${a.Client.name}`,
-          time: new Date(a.start),
-          amount: formatPrice(a.Service.priceCents)
-        }))
-
-        const mappedInvoices: Activity[] = invoicesData.invoices.map((i: any) => ({
-          type: 'invoice',
-          description: `Invoice #${i.number} to ${i.Client.name}`,
-          time: new Date(i.createdAt),
-          amount: formatPrice(i.totalGrossCents)
-        }))
-
-        const combinedActivity: Activity[] = [...mappedAppointments, ...mappedInvoices]
-        combinedActivity.sort((a, b) => b.time.getTime() - a.time.getTime())
-
-        setRecentActivity(combinedActivity.slice(0, 5)) // Get top 5 recent
-      }
-    } catch (error) {
-      console.error('Failed to fetch recent activity:', error)
-    }
-  }
-
-  const fetchActionRequired = async () => {
-    try {
-      const response = await fetch('/api/invoices?status=DRAFT')
-      if (response.ok) {
-        const data = await response.json()
-        setActionRequiredCount(data.invoices.length || 0)
-      }
-    } catch (error) {
-      console.error('Failed to fetch action required count:', error)
-    }
-  }
-
-  const fetchTotalClients = async () => {
-    try {
-      const response = await fetch('/api/clients')
-      if (response.ok) {
-        const data = await response.json()
-        setTotalClients(data.length || 0)
-      }
-    } catch (error) {
-      console.error('Failed to fetch total clients:', error)
-    }
-  }
 
   const fetchTodayAppointments = async () => {
     try {
@@ -160,7 +88,7 @@ export default function Dashboard() {
   const projectedYearEnd = averageMonthlyRevenue * 12
 
   // Empty activity for new users
-  // const recentActivity: any[] = []
+  const recentActivity: any[] = []
 
   return (
     <div className="space-y-6">
@@ -224,7 +152,7 @@ export default function Dashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.totalClients')}</p>
-              <p className="text-2xl font-bold text-gray-900">{totalClients}</p>
+              <p className="text-2xl font-bold text-gray-900">0</p>
             </div>
           </div>
         </div>
@@ -260,7 +188,7 @@ export default function Dashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t('dashboard.actionRequired')}</p>
-              <p className="text-2xl font-bold text-gray-900">{actionRequiredCount}</p>
+              <p className="text-2xl font-bold text-gray-900">0</p>
             </div>
           </div>
         </div>
@@ -341,7 +269,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <p className="text-sm text-gray-900">{activity.description}</p>
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-500">{new Date(activity.time).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
                       {activity.amount && (
                         <span className="text-sm font-medium text-green-600">{activity.amount}</span>
                       )}

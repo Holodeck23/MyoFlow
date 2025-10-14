@@ -11,7 +11,7 @@ ALTER TYPE "Role" ADD VALUE 'SUPPORT';
 ALTER TYPE "Role" ADD VALUE 'FINANCE';
 
 -- AlterTable
-ALTER TABLE "Therapist" ALTER COLUMN "tax_validated_at" SET DATA TYPE TIMESTAMP(6);
+ALTER TABLE "Therapist" ADD COLUMN "tax_validated_at" TIMESTAMP(6);
 
 -- CreateTable
 CREATE TABLE "RateLimit" (
