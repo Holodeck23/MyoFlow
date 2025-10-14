@@ -61,6 +61,10 @@ interface TherapistInfo {
   bic?: string
   businessForm?: string
   kleinunternehmer: boolean
+  // Branding fields
+  invoiceLogoUrl?: string | null
+  invoiceDisplayPreference?: 'NAME' | 'LOGO' | 'BOTH'
+  invoiceThankYouMessage?: string | null
 }
 
 export async function generateInvoicePDF(
@@ -336,7 +340,33 @@ async function generateInvoiceHTML(
     <body>
       <div class="invoice-header">
         <div class="therapist-info">
-          <div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>
+          ${/* Logo and/or Name based on display preference */ ''}
+          ${(() => {
+            const displayPref = therapistInfo.invoiceDisplayPreference || 'NAME'
+            const hasLogo = therapistInfo.invoiceLogoUrl
+
+            // LOGO preference: show logo if available, otherwise fall back to name
+            if (displayPref === 'LOGO') {
+              if (hasLogo) {
+                return `<div style="margin-bottom: 15px;"><img src="${therapistInfo.invoiceLogoUrl}" alt="${therapistInfo.name}" style="max-height: 60px; max-width: 200px; object-fit: contain;" /></div>`
+              } else {
+                return `<div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>`
+              }
+            }
+
+            // BOTH preference: show both logo and name
+            if (displayPref === 'BOTH') {
+              let output = ''
+              if (hasLogo) {
+                output += `<div style="margin-bottom: 10px;"><img src="${therapistInfo.invoiceLogoUrl}" alt="${therapistInfo.name}" style="max-height: 50px; max-width: 180px; object-fit: contain;" /></div>`
+              }
+              output += `<div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>`
+              return output
+            }
+
+            // NAME preference (default): just show name
+            return `<div class="bold" style="font-size: 14pt; color: #1f2937;">${therapistInfo.name}</div>`
+          })()}
           ${therapistInfo.businessForm ? `<div style="font-size: 10pt; color: #6b7280;">${therapistInfo.businessForm}</div>` : ''}
           <div>${therapistInfo.address || '[Geschäftsadresse erforderlich]'}</div>
           ${therapistInfo.postalCode || therapistInfo.city || therapistInfo.country ?
@@ -500,6 +530,14 @@ async function generateInvoiceHTML(
           ` : ''}
         </div>
       </div>
+
+      ${therapistInfo.invoiceThankYouMessage ? `
+        <div style="margin: 30px 0; padding: 20px; background-color: #f9fafb; border-left: 4px solid #3b82f6; border-radius: 4px;">
+          <div style="font-style: italic; color: #374151; line-height: 1.6;">
+            ${therapistInfo.invoiceThankYouMessage}
+          </div>
+        </div>
+      ` : ''}
 
       <div class="footer">
         ${isKU ? `
