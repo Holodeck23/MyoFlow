@@ -12,6 +12,8 @@ import {
 } from '@/components/ui'
 import { Shield, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react'
 import { useSettingsEndpoint } from '../lib/api-config'
+import { RevenueStatusWidget } from './RevenueStatusWidget'
+import { TaxValidationWidget } from './TaxValidationWidget'
 
 interface ComplianceTabProps {
   profileData: any
@@ -60,100 +62,12 @@ export function ComplianceTab({ profileData, overviewData, isActive = false }: C
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Shield className="w-5 h-5" />
-              <span>Austrian Tax Compliance</span>
-            </CardTitle>
-            <CardDescription>
-              Monitor your Kleinunternehmer status and Austrian tax compliance.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Revenue Status Widget */}
+        <RevenueStatusWidget />
 
-            <div className="space-y-6">
-              {/* Kleinunternehmer Status */}
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center space-x-3 mb-4">
-                  {getComplianceStatusIcon(complianceData?.kleinunternehmerStatus)}
-                  <div>
-                    <h3 className="text-lg font-medium">Kleinunternehmer Status</h3>
-                    <p className="text-sm text-gray-600">
-                      {getComplianceStatusText(complianceData?.kleinunternehmerStatus)}
-                    </p>
-                  </div>
-                </div>
-
-                {complianceData?.revenue && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Current Year Revenue</p>
-                      <p className="text-lg font-semibold">
-                        €{complianceData.revenue.currentYear.toLocaleString('de-AT')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Previous Year Revenue</p>
-                      <p className="text-lg font-semibold">
-                        €{complianceData.revenue.previousYear.toLocaleString('de-AT')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Threshold Usage</p>
-                      <p className="text-lg font-semibold">
-                        {complianceData.thresholdPercentage?.toFixed(1)}%
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Revenue Thresholds */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Revenue Thresholds (2025)</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                    <span className="text-sm">Annual Threshold</span>
-                    <span className="font-medium">€35,000</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                    <span className="text-sm">Previous Year Threshold</span>
-                    <span className="font-medium">€35,000</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Compliance Actions */}
-              {complianceData?.kleinunternehmerStatus === 'threshold_warning' && (
-                <div className="p-4 bg-orange-50 border border-orange-200 rounded-md">
-                  <div className="flex">
-                    <AlertTriangle className="h-5 w-5 text-orange-400" />
-                    <div className="ml-3">
-                      <h4 className="text-sm font-medium text-orange-800">
-                        Threshold Warning
-                      </h4>
-                      <p className="text-sm text-orange-700 mt-1">
-                        You are approaching the Kleinunternehmer revenue limit. Consider consulting with a tax advisor.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tax Validation Widget - Interactive tracking & disclaimers */}
+        <TaxValidationWidget />
       </div>
 
       <div className="space-y-6">

@@ -78,6 +78,11 @@ model Therapist {
   taxAdvisorName             String?                @map("tax_advisor_name")
   taxAdvisorEmail            String?                @map("tax_advisor_email")
   taxAdvisorPhone            String?                @map("tax_advisor_phone")
+  invoiceLogoUrl             String?                @map("invoice_logo_url")
+  invoiceDisplayPreference   InvoiceDisplayPreference @default(NAME) @map("invoice_display_preference")
+  invoiceThankYouMessage     String?                @map("invoice_thank_you_message")
+  taxValidationCompleted     Boolean                @default(false) @map("tax_validation_completed")
+  taxValidatedAt             DateTime?              @map("tax_validated_at") @db.Timestamp(6)
   Affiliates                 Affiliate[]
   Appointments               Appointment[]
   AuditLogs                  AuditLog[]
@@ -733,4 +738,10 @@ enum ServiceCategory {
   YOGA
   CONSULTING
   OTHER
+}
+
+enum InvoiceDisplayPreference {
+  NAME
+  LOGO
+  BOTH
 }
