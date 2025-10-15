@@ -43,16 +43,20 @@ export function TaxValidationWidget() {
     try {
       setLoading(true)
       const response = await fetch('/api/settings/profile')
+      const json = await response.json()
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch validation status')
+      if (!response.ok || (json && json.success === false)) {
+        throw new Error(
+          (json && typeof json.error === 'string' && json.error) ||
+            'Failed to fetch validation status',
+        )
       }
 
-      const data = await response.json()
+      const data = json && typeof json === 'object' && 'data' in json ? json.data : json
       setStatus({
-        isValidated: data.profile?.taxValidationCompleted || false,
-        validatedAt: data.profile?.taxValidatedAt || null,
-        validatedBy: data.profile?.taxValidatedBy || null,
+        isValidated: data?.taxValidationCompleted || false,
+        validatedAt: data?.taxValidatedAt || null,
+        validatedBy: data?.taxValidatedBy || null,
       })
       setError(null)
     } catch (err) {
@@ -76,9 +80,12 @@ export function TaxValidationWidget() {
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update validation status')
+      const json = await response.json()
+      if (!response.ok || (json && json.success === false)) {
+        const errorMessage =
+          (json && typeof json.error === 'string' && json.error) ||
+          'Failed to update validation status'
+        throw new Error(errorMessage)
       }
 
       await fetchValidationStatus() // Refresh status
@@ -103,9 +110,12 @@ export function TaxValidationWidget() {
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to clear validation status')
+      const json = await response.json()
+      if (!response.ok || (json && json.success === false)) {
+        const errorMessage =
+          (json && typeof json.error === 'string' && json.error) ||
+          'Failed to clear validation status'
+        throw new Error(errorMessage)
       }
 
       await fetchValidationStatus() // Refresh status

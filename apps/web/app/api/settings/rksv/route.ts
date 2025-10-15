@@ -1,37 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { differenceInDays, addMonths, isAfter } from 'date-fns'
+import { addMonths, differenceInDays, isAfter } from 'date-fns'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
-import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
+import {
+  ensureTherapistAccount,
+  handleAuthErrors,
+  requireTherapist,
+} from '@/lib/shared-helpers'
 
-// Mark this route as dynamic
 export const dynamic = 'force-dynamic'
 
 const RKSV_THRESHOLD_CENTS = 1_500_000 // €15,000 annual revenue threshold
 
-const updateSchema = z.object({
-  enabled: z.boolean().optional(),
-  cashRegisterId: z.string().max(100).optional().nullable(),
-  signatureDeviceId: z.string().max(100).optional().nullable(),
-  lastAuditAt: z.string().datetime().optional().nullable(),
-  nextAuditDue: z.string().datetime().optional().nullable(),
-  notes: z.string().max(1000).optional().nullable(),
-})
+const updateSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    cashRegisterId: z.string().trim().max(100).nullable().optional(),
+    signatureDeviceId: z.string().trim().max(100).nullable().optional(),
+    lastAuditAt: z.string().datetime().nullable().optional(),
+    nextAuditDue: z.string().datetime().nullable().optional(),
+    notes: z.string().trim().max(1000).nullable().optional(),
+  })
+  .strict()
 
-function calculateRksvComplianceDetails(revenue: number, taxSettings: any) {
-  const rksvRequired = revenue >= RKSV_THRESHOLD_CENTS
-  const rksvImplemented = taxSettings?.rksvEnabled || false
+type UpdatePayload = z.infer<typeof updateSchema>
 
-  // Calculate months until RKSV implementation deadline (4 months after crossing threshold)
-  const monthsUntilDeadline = rksvRequired && !rksvImplemented ? 4 : null
+interface RouteParams {
+  params: {
+    id?: string
+  }
+}
 
-  // Check audit status
+function normalizeNullableString(value: string | null | undefined) {
+  if (value === undefined) return undefined
+  if (value === null) return null
+  const trimmed = value.trim()
+  return trimmed.length === 0 ? null : trimmed
+}
+
+function calculateRksvComplianceDetails(revenueCents: number, taxSettings: any) {
+  const rksvRequired = revenueCents >= RKSV_THRESHOLD_CENTS
+  const rksvImplemented = Boolean(taxSettings?.rksvEnabled)
+
   const lastAudit = taxSettings?.lastRksvAuditAt ? new Date(taxSettings.lastRksvAuditAt) : null
   const nextAuditDue = taxSettings?.nextRksvAuditDue ? new Date(taxSettings.nextRksvAuditDue) : null
   const isAuditOverdue = nextAuditDue ? isAfter(new Date(), nextAuditDue) : false
   const daysUntilAudit = nextAuditDue ? differenceInDays(nextAuditDue, new Date()) : null
 
-  let status: 'not_required' | 'implementation_required' | 'compliant' | 'audit_overdue' = 'not_required'
+  let status: 'not_required' | 'implementation_required' | 'compliant' | 'audit_overdue' =
+    'not_required'
 
   if (rksvRequired) {
     if (!rksvImplemented) {
@@ -48,71 +65,106 @@ function calculateRksvComplianceDetails(revenue: number, taxSettings: any) {
     required: rksvRequired,
     implemented: rksvImplemented,
     revenueThreshold: RKSV_THRESHOLD_CENTS / 100,
-    currentRevenue: revenue / 100,
-    thresholdPercentage: (revenue / RKSV_THRESHOLD_CENTS) * 100,
-    monthsUntilDeadline,
-    lastAuditAt: lastAudit?.toISOString() || null,
-    nextAuditDue: nextAuditDue?.toISOString() || null,
+    currentRevenue: revenueCents / 100,
+    thresholdPercentage: (revenueCents / RKSV_THRESHOLD_CENTS) * 100,
+    monthsUntilDeadline: rksvRequired && !rksvImplemented ? 4 : null,
+    lastAuditAt: lastAudit ? lastAudit.toISOString() : null,
+    nextAuditDue: nextAuditDue ? nextAuditDue.toISOString() : null,
     daysUntilAudit,
     isAuditOverdue,
-    cashRegisterId: taxSettings?.cashRegisterId || null,
-    signatureDeviceId: taxSettings?.signatureDeviceId || null,
-    notes: taxSettings?.rksvNotes || null,
+    cashRegisterId: taxSettings?.cashRegisterId ?? null,
+    signatureDeviceId: taxSettings?.signatureDeviceId ?? null,
+    notes: taxSettings?.rksvNotes ?? null,
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const { therapist } = await requireTherapist()
-
-    // Get tax compliance settings
-    const taxSettings = await prisma.taxComplianceSettings.findUnique({
-      where: { therapistId: therapist.id },
-    })
-
-    // Calculate current year revenue
-    const currentYearRevenue = await prisma.invoice.aggregate({
+async function getRksvSnapshot(therapistId: string) {
+  const [taxSettings, revenueAggregation] = await Promise.all([
+    prisma.taxComplianceSettings.findUnique({
+      where: { therapistId },
+    }),
+    prisma.invoice.aggregate({
       _sum: { totalGrossCents: true },
       where: {
-        therapistId: therapist.id,
+        therapistId,
         status: { in: ['SENT', 'PAID'] },
         createdAt: {
-          gte: new Date(new Date().getFullYear(), 0, 1), // Start of current year
+          gte: new Date(new Date().getFullYear(), 0, 1),
         },
       },
-    })
+    }),
+  ])
 
-    const revenueCents = currentYearRevenue._sum.totalGrossCents ?? 0
-    const complianceDetails = calculateRksvComplianceDetails(revenueCents, taxSettings)
+  const revenueCents = revenueAggregation._sum.totalGrossCents ?? 0
+  const complianceDetails = calculateRksvComplianceDetails(revenueCents, taxSettings)
 
-    return NextResponse.json({
-      ...complianceDetails,
-      requirements: {
-        annualRevenueThreshold: '€15,000',
-        implementationDeadline: '4 months after crossing threshold',
-        auditFrequency: 'Annual signature device audit required',
-        penalties: 'Up to €5,000 for non-compliance',
-        documentation: 'Receipt signatures, audit trail required',
-      },
-    })
-  } catch (error) {
-    if (error instanceof Response) {
-      throw error
-    }
-
-    console.error('RKSV compliance fetch failed:', error)
-    return NextResponse.json({ error: 'Failed to fetch RKSV compliance status' }, { status: 500 })
+  return {
+    ...complianceDetails,
+    requirements: {
+      annualRevenueThreshold: '€15,000',
+      implementationDeadline: '4 months after crossing threshold',
+      auditFrequency: 'Annual signature device audit required',
+      penalties: 'Up to €5,000 for non-compliance',
+      documentation: 'Receipt signatures, audit trail required',
+    },
   }
 }
 
-export async function PUT(request: NextRequest) {
+function buildUpdateData(payload: UpdatePayload, current: any) {
+  const updateData: Record<string, unknown> = {}
+
+  if (payload.enabled !== undefined) {
+    updateData.rksvEnabled = payload.enabled
+    if (payload.enabled && !current?.rksvEnabled) {
+      updateData.nextRksvAuditDue = addMonths(new Date(), 12)
+    }
+  }
+
+  if (payload.cashRegisterId !== undefined) {
+    updateData.cashRegisterId = normalizeNullableString(payload.cashRegisterId)
+  }
+
+  if (payload.signatureDeviceId !== undefined) {
+    updateData.signatureDeviceId = normalizeNullableString(payload.signatureDeviceId)
+  }
+
+  if (payload.lastAuditAt !== undefined) {
+    updateData.lastRksvAuditAt = payload.lastAuditAt ? new Date(payload.lastAuditAt) : null
+    if (payload.lastAuditAt) {
+      updateData.nextRksvAuditDue = addMonths(new Date(payload.lastAuditAt), 12)
+    }
+  }
+
+  if (payload.nextAuditDue !== undefined) {
+    updateData.nextRksvAuditDue = payload.nextAuditDue ? new Date(payload.nextAuditDue) : null
+  }
+
+  if (payload.notes !== undefined) {
+    updateData.rksvNotes = normalizeNullableString(payload.notes)
+  }
+
+  return updateData
+}
+
+export async function GET(request: NextRequest, _context: RouteParams) {
+  return handleAuthErrors(async () => {
+    const { therapist } = await requireTherapist()
+    const snapshot = await getRksvSnapshot(therapist.id)
+
+    return NextResponse.json({
+      success: true,
+      data: snapshot,
+    })
+  })
+}
+
+export async function PUT(request: NextRequest, _context: RouteParams) {
   try {
     const { therapist } = await ensureTherapistAccount(request)
-    const payload = await request.json()
+    const payload = (await request.json()) as unknown
     const parsed = updateSchema.parse(payload)
 
-    // Ensure tax compliance settings exist
-    const current = await prisma.taxComplianceSettings.upsert({
+    const currentSettings = await prisma.taxComplianceSettings.upsert({
       where: { therapistId: therapist.id },
       update: {},
       create: {
@@ -123,70 +175,49 @@ export async function PUT(request: NextRequest) {
       },
     })
 
-    const updateData: any = {}
+    const updateData = buildUpdateData(parsed, currentSettings)
 
-    if (parsed.enabled !== undefined) {
-      updateData.rksvEnabled = parsed.enabled
+    await prisma.$transaction(async (tx) => {
+      await tx.taxComplianceSettings.update({
+        where: { therapistId: therapist.id },
+        data: {
+          ...updateData,
+          updatedAt: new Date(),
+        },
+      })
 
-      // If enabling RKSV for the first time, set up next audit date (1 year from now)
-      if (parsed.enabled && !current.rksvEnabled) {
-        updateData.nextRksvAuditDue = addMonths(new Date(), 12)
-      }
-    }
-
-    if (parsed.cashRegisterId !== undefined) {
-      updateData.cashRegisterId = parsed.cashRegisterId
-    }
-
-    if (parsed.signatureDeviceId !== undefined) {
-      updateData.signatureDeviceId = parsed.signatureDeviceId
-    }
-
-    if (parsed.lastAuditAt !== undefined) {
-      updateData.lastRksvAuditAt = parsed.lastAuditAt ? new Date(parsed.lastAuditAt) : null
-
-      // If updating last audit, set next audit due date
-      if (parsed.lastAuditAt) {
-        updateData.nextRksvAuditDue = addMonths(new Date(parsed.lastAuditAt), 12)
-      }
-    }
-
-    if (parsed.nextAuditDue !== undefined) {
-      updateData.nextRksvAuditDue = parsed.nextAuditDue ? new Date(parsed.nextAuditDue) : null
-    }
-
-    if (parsed.notes !== undefined) {
-      updateData.rksvNotes = parsed.notes
-    }
-
-    const updated = await prisma.taxComplianceSettings.update({
-      where: { therapistId: therapist.id },
-      data: {
-        ...updateData,
-        updatedAt: new Date(),
-      },
+      await tx.therapist.update({
+        where: { id: therapist.id },
+        data: {
+          settingsLastUpdated: new Date(),
+          settingsVersion: { increment: 1 },
+        },
+      })
     })
 
-    // Update therapist settings timestamp
-    await prisma.therapist.update({
-      where: { id: therapist.id },
-      data: {
-        settingsLastUpdated: new Date(),
-        settingsVersion: { increment: 1 },
-      },
-    })
+    const snapshot = await getRksvSnapshot(therapist.id)
 
-    return NextResponse.json({ success: true, settings: updated })
+    return NextResponse.json({
+      success: true,
+      data: snapshot,
+      message: 'RKSV settings updated successfully',
+    })
   } catch (error) {
     if (error instanceof Response) {
       throw error
     }
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: error.flatten() },
+        { status: 400 },
+      )
     }
 
     console.error('RKSV settings update failed:', error)
-    return NextResponse.json({ error: 'Failed to update RKSV settings' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: 'Failed to update RKSV settings' },
+      { status: 500 },
+    )
   }
 }

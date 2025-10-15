@@ -112,16 +112,42 @@ export async function ensureTherapistAccount(emailOrRequest: string | NextReques
     },
   })
 
-  const therapist = await prisma.therapist.upsert({
+  let therapist = await prisma.therapist.findUnique({
     where: { userId: user.id },
-    update: {},
-    create: {
-      userId: user.id,
-      slug: email?.split('@')[0] || `therapist-${user.id}`,
-      designation: 'HEILMASSEUR',
-      vatStatus: 'KLEINUNTERNEHMER',
-    },
   })
+
+  if (!therapist) {
+    const baseSlug = email?.split('@')[0] || `therapist-${user.id}`
+    let slugCandidate = baseSlug
+    let suffix = 1
+
+    while (true) {
+      try {
+        therapist = await prisma.therapist.create({
+          data: {
+            userId: user.id,
+            slug: slugCandidate,
+            designation: 'HEILMASSEUR',
+            vatStatus: 'KLEINUNTERNEHMER',
+          },
+        })
+        break
+      } catch (error: any) {
+        const isUniqueViolation =
+          typeof error === 'object' &&
+          error !== null &&
+          'code' in error &&
+          (error as any).code === 'P2002'
+
+        if (!isUniqueViolation) {
+          throw error
+        }
+
+        slugCandidate = `${baseSlug}-${suffix}`
+        suffix += 1
+      }
+    }
+  }
 
   return { therapist, user }
 }

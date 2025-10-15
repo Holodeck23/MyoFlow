@@ -36,6 +36,7 @@
     "next-auth": "5.0.0-beta.29",
     "puppeteer": "^21.11.0",
     "react": "^18.2.0",
+    "react-hook-form": "^7.53.0",
     "react-dom": "^18.2.0",
     "stripe": "^14.9.0",
     "tailwind-merge": "^2.6.0",
