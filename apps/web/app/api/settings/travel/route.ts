@@ -88,8 +88,12 @@ function buildUpdateData(payload: UpdatePayload) {
   if (payload.basePostalCode !== undefined) {
     const postal = payload.basePostalCode.trim()
     if (postal.length > 0) {
-      assertValidAustrianPostalCode(postal)
-      data.basePostalCode = postal
+      try {
+        assertValidAustrianPostalCode(postal)
+        data.basePostalCode = postal
+      } catch {
+        throw new Error('Invalid Austrian postal code (must be 4xxx format)')
+      }
     } else {
       data.basePostalCode = null
     }
