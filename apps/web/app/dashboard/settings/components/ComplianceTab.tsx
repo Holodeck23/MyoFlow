@@ -1,99 +1,367 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from '@myoflow/lib'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Button
-} from '@/components/ui'
-import { Shield, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Label, Input } from '@/components/ui'
+import { Shield, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { RevenueStatusWidget } from './RevenueStatusWidget'
 import { TaxValidationWidget } from './TaxValidationWidget'
 
 interface ComplianceTabProps {
-  profileData: any
-  overviewData: any
   isActive?: boolean
 }
 
-export function ComplianceTab({ profileData, overviewData, isActive = false }: ComplianceTabProps) {
-  const { t } = useTranslation()
+interface FormValues {
+  vatRegistered: boolean
+  kleinunternehmerActive: boolean
+  vatNumber: string
+  taxAdvisorName: string
+  taxAdvisorEmail: string
+  taxAdvisorPhone: string
+  rksvEnabled: boolean
+  cashRegisterId: string
+  signatureDeviceId: string
+  rksvNotes: string
+  taxValidationCompleted: boolean
+}
 
-  // Only fetch when tab is active
-  const { data: complianceData, loading: isLoading, error } = useSettingsEndpoint('tax-compliance', isActive)
+const DEFAULT_FORM_VALUES: FormValues = {
+  vatRegistered: false,
+  kleinunternehmerActive: true,
+  vatNumber: '',
+  taxAdvisorName: '',
+  taxAdvisorEmail: '',
+  taxAdvisorPhone: '',
+  rksvEnabled: false,
+  cashRegisterId: '',
+  signatureDeviceId: '',
+  rksvNotes: '',
+  taxValidationCompleted: false,
+}
+
+export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
+  const { t } = useTranslation()
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const {
+    data: complianceResponse,
+    loading: isLoading,
+    error: fetchError,
+    message: fetchMessage,
+    refetch,
+  } = useSettingsEndpoint('tax-compliance', isActive)
+
+  const form = useForm<FormValues>({
+    defaultValues: DEFAULT_FORM_VALUES,
+  })
+
+  useEffect(() => {
+    if (complianceResponse) {
+      form.reset({
+        vatRegistered: Boolean(complianceResponse.vatRegistered),
+        kleinunternehmerActive: Boolean(complianceResponse.kleinunternehmerActive),
+        vatNumber: complianceResponse.vatNumber ?? '',
+        taxAdvisorName: complianceResponse.taxAdvisor?.name ?? '',
+        taxAdvisorEmail: complianceResponse.taxAdvisor?.email ?? '',
+        taxAdvisorPhone: complianceResponse.taxAdvisor?.phone ?? '',
+        rksvEnabled: Boolean(complianceResponse.rksv?.enabled),
+        cashRegisterId: complianceResponse.rksv?.cashRegisterId ?? '',
+        signatureDeviceId: complianceResponse.rksv?.signatureDeviceId ?? '',
+        rksvNotes: complianceResponse.rksv?.notes ?? '',
+        taxValidationCompleted: Boolean(complianceResponse.taxValidationCompleted),
+      })
+    }
+  }, [complianceResponse, form])
+
+  const handleSubmit = form.handleSubmit(async (values: FormValues) => {
+    setSaveError(null)
+    setSaveSuccess(null)
+    setIsSaving(true)
+
+    try {
+      const response = await fetch('/api/settings/tax-compliance', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vatRegistered: values.vatRegistered,
+          vatNumber: values.vatNumber || null,
+          kleinunternehmerActive: values.kleinunternehmerActive,
+          taxAdvisor: {
+            name: values.taxAdvisorName || null,
+            email: values.taxAdvisorEmail || null,
+            phone: values.taxAdvisorPhone || null,
+          },
+          rksv: {
+            enabled: values.rksvEnabled,
+            cashRegisterId: values.cashRegisterId || null,
+            signatureDeviceId: values.signatureDeviceId || null,
+            notes: values.rksvNotes || null,
+          },
+          taxValidationCompleted: values.taxValidationCompleted,
+        }),
+      })
+
+      const json = await response.json()
+
+      if (!response.ok || (json && json.success === false)) {
+        const errorMessage =
+          (json && typeof json.error === 'string' && json.error) ||
+          'Failed to update compliance settings'
+        setSaveError(errorMessage)
+        return
+      }
+
+      setSaveSuccess('Compliance settings saved successfully')
+      await refetch()
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : 'Network error saving compliance settings',
+      )
+    } finally {
+      setIsSaving(false)
+    }
+  })
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
           <p className="text-gray-500">Loading compliance settings...</p>
         </div>
       </div>
     )
   }
 
-  const getComplianceStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="w-5 h-5 text-green-600" />
-      case 'threshold_warning':
-        return <AlertTriangle className="w-5 h-5 text-orange-600" />
-      default:
-        return <AlertCircle className="w-5 h-5 text-red-600" />
-    }
-  }
-
-  const getComplianceStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'Compliant'
-      case 'threshold_warning':
-        return 'Warning'
-      default:
-        return 'Needs Review'
-    }
+  if (fetchError) {
+    return (
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Failed to load compliance settings</h3>
+              <p className="text-red-600 text-sm mt-1">{fetchError}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="mt-3 border-red-300 text-red-700 hover:bg-red-100"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        {/* Revenue Status Widget */}
         <RevenueStatusWidget />
-
-        {/* Tax Validation Widget - Interactive tracking & disclaimers */}
         <TaxValidationWidget />
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Tax Compliance</CardTitle>
+              <CardDescription>
+                Manage VAT status, Kleinunternehmer threshold, and tax advisor details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {(saveError || fetchMessage) && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-red-400" />
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{saveError ?? fetchMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {saveSuccess && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-md p-4">
+                  <div className="flex">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    <div className="ml-3">
+                      <p className="text-sm text-emerald-700">{saveSuccess}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">VAT Registered</Label>
+                    <p className="text-sm text-gray-600">
+                      Toggle if you have registered for Austrian VAT (UID)
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={form.watch('vatRegistered')}
+                    onChange={(event) => {
+                      form.setValue('vatRegistered', event.target.checked)
+                      form.setValue('kleinunternehmerActive', !event.target.checked)
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">Kleinunternehmer</Label>
+                    <p className="text-sm text-gray-600">
+                      Applies to businesses under €55,000 annual revenue
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={form.watch('kleinunternehmerActive')}
+                    onChange={(event) => {
+                      form.setValue('kleinunternehmerActive', event.target.checked)
+                      if (event.target.checked) {
+                        form.setValue('vatRegistered', false)
+                        form.setValue('vatNumber', '')
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vatNumber">VAT / UID Number</Label>
+                  <Input
+                    id="vatNumber"
+                    placeholder="ATU12345678"
+                    disabled={!form.watch('vatRegistered')}
+                    {...form.register('vatNumber')}
+                  />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="text-lg font-medium">Tax Advisor</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="taxAdvisorName">Advisor Name</Label>
+                    <Input id="taxAdvisorName" {...form.register('taxAdvisorName')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="taxAdvisorEmail">Advisor Email</Label>
+                    <Input
+                      id="taxAdvisorEmail"
+                      type="email"
+                      {...form.register('taxAdvisorEmail')}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="taxAdvisorPhone">Advisor Phone</Label>
+                    <Input id="taxAdvisorPhone" {...form.register('taxAdvisorPhone')} />
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">RKSV Enabled</Label>
+                    <p className="text-sm text-gray-600">
+                      Track cash register compliance requirements and audits
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={form.watch('rksvEnabled')}
+                    onChange={(event) => form.setValue('rksvEnabled', event.target.checked)}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="cashRegisterId">Cash Register ID</Label>
+                    <Input id="cashRegisterId" {...form.register('cashRegisterId')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="signatureDeviceId">Signature Device ID</Label>
+                    <Input id="signatureDeviceId" {...form.register('signatureDeviceId')} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="rksvNotes">RKSV Notes</Label>
+                    <textarea
+                      id="rksvNotes"
+                      rows={3}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...form.register('rksvNotes')}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Professional Validation Complete</Label>
+                  <p className="text-sm text-gray-600">
+                    Mark once an Austrian Steuerberater has validated your tax logic.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  checked={form.watch('taxValidationCompleted')}
+                  onChange={(event) =>
+                    form.setValue('taxValidationCompleted', event.target.checked)
+                  }
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <Button type="button" variant="outline" onClick={() => refetch()}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
       </div>
 
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Compliance Status</CardTitle>
+            <CardTitle className="text-lg">Compliance Summary</CardTitle>
+            <CardDescription>
+              Current VAT and RKSV status based on stored compliance data.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">VAT Status</span>
-                <span className="font-medium">Kleinunternehmer</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Tax Year</span>
-                <span className="font-medium">2025</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Last Updated</span>
-                <span className="font-medium">
-                  {complianceData?.lastUpdated ?
-                    new Date(complianceData.lastUpdated).toLocaleDateString('de-AT') :
-                    'Never'
-                  }
-                </span>
-              </div>
+          <CardContent className="space-y-3">
+            <div>
+              <p className="text-sm text-gray-600">VAT Registered</p>
+              <p className="font-medium">
+                {form.watch('vatRegistered') ? 'Yes' : 'No (Kleinunternehmer)'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">VAT / UID Number</p>
+              <p className="font-medium">{form.watch('vatNumber') || 'Not provided'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Tax Advisor</p>
+              <p className="font-medium">
+                {form.watch('taxAdvisorName') || 'Not specified'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">RKSV Enabled</p>
+              <p className="font-medium">{form.watch('rksvEnabled') ? 'Enabled' : 'Disabled'}</p>
             </div>
           </CardContent>
         </Card>
