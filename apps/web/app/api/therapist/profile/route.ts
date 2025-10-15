@@ -29,27 +29,46 @@ const UpdateProfileSchema = z.object({
 })
 
 function calculateProfileCompletion(therapist: any) {
+  const isKleinunternehmer = Boolean(
+    therapist?.kleinunternehmer ?? (therapist?.vatStatus === 'KLEINUNTERNEHMER')
+  )
+
   const requiredFields = [
     'businessName',
     'businessAddress',
     'businessEmail',
     'businessPhone',
-    'uidNumber'
-  ]
+    // uidNumber will be conditionally added below
+  ] as string[]
+
+  if (!isKleinunternehmer) {
+    requiredFields.push('uidNumber')
+  }
 
   const importantFields = [
     'certificates',
     'iban',
-    'chamberRegistration'
+    'chamberRegistration',
+    // Accept either invoiceFooter or invoiceThankYouMessage for footer content
+    'invoiceFooter',
   ]
 
-  const requiredCompleted = requiredFields.filter(field =>
-    therapist[field] && therapist[field].trim && therapist[field].trim().length > 0
-  ).length
+  const requiredCompleted = requiredFields.filter(field => {
+    const value = therapist[field]
+    return value && value.trim && value.trim().length > 0
+  }).length
 
   const importantCompleted = importantFields.filter(field => {
     if (field === 'certificates') {
       return therapist[field] && therapist[field].length > 0
+    }
+    if (field === 'invoiceFooter') {
+      const footer = therapist.invoiceFooter
+      const thanks = therapist.invoiceThankYouMessage
+      const val = (footer && footer.trim && footer.trim().length > 0)
+        ? footer
+        : (thanks && thanks.trim && thanks.trim().length > 0 ? thanks : '')
+      return val.length > 0
     }
     return therapist[field] && therapist[field].trim && therapist[field].trim().length > 0
   }).length
@@ -65,14 +84,24 @@ function calculateProfileCompletion(therapist: any) {
     requiredTotal: requiredFields.length,
     importantCompleted,
     importantTotal: importantFields.length,
-    missingRequired: requiredFields.filter(field =>
-      !therapist[field] || !therapist[field].trim || therapist[field].trim().length === 0
-    ),
+    missingRequired: requiredFields.filter(field => {
+      const value = therapist[field]
+      return !(value && value.trim && value.trim().length > 0)
+    }),
     missingImportant: importantFields.filter(field => {
       if (field === 'certificates') {
         return !therapist[field] || therapist[field].length === 0
       }
-      return !therapist[field] || !therapist[field].trim || therapist[field].trim().length === 0
+      if (field === 'invoiceFooter') {
+        const footer = therapist.invoiceFooter
+        const thanks = therapist.invoiceThankYouMessage
+        const val = (footer && footer.trim && footer.trim().length > 0)
+          ? footer
+          : (thanks && thanks.trim && thanks.trim().length > 0 ? thanks : '')
+        return !(val && val.length > 0)
+      }
+      const value = therapist[field]
+      return !(value && value.trim && value.trim().length > 0)
     })
   }
 }
