@@ -12,30 +12,41 @@ import {
   Label,
   Input
 } from '@/components/ui'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle } from 'lucide-react'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { InvoiceBrandingWidget } from './InvoiceBrandingWidget'
 
+type TherapistDesignation = 'HEILMASSEUR' | 'MEDIZINISCHER_MASSEUR' | 'GEWERBLICHER_MASSEUR'
+type VatStatusOption = 'KLEINUNTERNEHMER' | 'UST_10' | 'UST_13' | 'UST_20'
+
+interface ProfileFormData {
+  businessName: string
+  businessAddress: string
+  businessEmail: string
+  businessPhone: string
+  businessWebsite: string
+  designation: TherapistDesignation
+  chamberRegistration: string
+  vatStatus: VatStatusOption
+}
+
 interface ProfileTabProps {
-  profileData: any
   isActive?: boolean
 }
 
-export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
+export function ProfileTab({ isActive = false }: ProfileTabProps) {
   const { t } = useTranslation()
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
+  const [success, setSuccess] = useState(false)
+  const [formData, setFormData] = useState<ProfileFormData>({
     businessName: '',
-    businessAddressLine1: '',
-    businessAddressLine2: '',
-    businessCity: '',
-    businessPostalCode: '',
-    businessCountry: 'Austria',
+    businessAddress: '',
     businessEmail: '',
     businessPhone: '',
+    businessWebsite: '',
     designation: 'HEILMASSEUR',
-    licenseNumber: '',
+    chamberRegistration: '',
     vatStatus: 'KLEINUNTERNEHMER'
   })
 
@@ -48,15 +59,12 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
       const profileData = profile.profile
       setFormData({
         businessName: profileData.businessName || '',
-        businessAddressLine1: profileData.businessAddress || '', // API uses businessAddress not businessAddressLine1
-        businessAddressLine2: '',
-        businessCity: '',
-        businessPostalCode: '',
-        businessCountry: 'Austria',
+        businessAddress: profileData.businessAddress || '',
         businessEmail: profileData.businessEmail || '',
         businessPhone: profileData.businessPhone || '',
+        businessWebsite: profileData.businessWebsite || '',
         designation: profileData.designation || 'HEILMASSEUR',
-        licenseNumber: profileData.chamberRegistration || '', // API uses chamberRegistration
+        chamberRegistration: profileData.chamberRegistration || '',
         vatStatus: profileData.vatStatus || 'KLEINUNTERNEHMER'
       })
     }
@@ -71,31 +79,33 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           businessName: formData.businessName,
-          businessAddress: formData.businessAddressLine1, // Map to API field
+          businessAddress: formData.businessAddress,
           businessEmail: formData.businessEmail,
           businessPhone: formData.businessPhone,
+          businessWebsite: formData.businessWebsite || null,
           designation: formData.designation,
-          chamberRegistration: formData.licenseNumber, // Map to API field
+          chamberRegistration: formData.chamberRegistration || null,
           vatStatus: formData.vatStatus
         })
       })
 
       if (response.ok) {
-        const data = await response.json()
-        refetch() // Refresh the profile data
-        // Show success message (you could add a toast here)
+        await refetch() // Refresh the profile data
+        setSuccess(true)
       } else {
         const errorData = await response.json()
         setSaveError(errorData.error || 'Failed to save profile')
+        setSuccess(false)
       }
     } catch (err) {
       setSaveError('Network error saving profile')
+      setSuccess(false)
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = <K extends keyof ProfileFormData>(field: K, value: ProfileFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -156,6 +166,17 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
               </div>
             )}
 
+            {success && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                <div className="flex">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <div className="ml-3">
+                    <p className="text-sm text-green-800">Profile updated successfully.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Business Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Business Information</h3>
@@ -189,11 +210,20 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="license-number">License Number</Label>
+                  <Label htmlFor="business-website">Business Website</Label>
+                  <Input
+                    id="business-website"
+                    value={formData.businessWebsite}
+                    onChange={(e) => handleChange('businessWebsite', e.target.value)}
+                    placeholder="https://www.example.at"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="license-number">Chamber Registration</Label>
                   <Input
                     id="license-number"
-                    value={formData.licenseNumber}
-                    onChange={(e) => handleChange('licenseNumber', e.target.value)}
+                    value={formData.chamberRegistration}
+                    onChange={(e) => handleChange('chamberRegistration', e.target.value)}
                     placeholder="HM-2025-001234"
                   />
                 </div>
@@ -203,43 +233,18 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
             {/* Address Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Business Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="address-line-1">Address Line 1</Label>
-                  <Input
-                    id="address-line-1"
-                    value={formData.businessAddressLine1}
-                    onChange={(e) => handleChange('businessAddressLine1', e.target.value)}
-                    placeholder="Landstraße 15"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="address-line-2">Address Line 2 (Optional)</Label>
-                  <Input
-                    id="address-line-2"
-                    value={formData.businessAddressLine2}
-                    onChange={(e) => handleChange('businessAddressLine2', e.target.value)}
-                    placeholder="Suite 201"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.businessCity}
-                    onChange={(e) => handleChange('businessCity', e.target.value)}
-                    placeholder="Linz"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="postal-code">Postal Code</Label>
-                  <Input
-                    id="postal-code"
-                    value={formData.businessPostalCode}
-                    onChange={(e) => handleChange('businessPostalCode', e.target.value)}
-                    placeholder="4020"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="address-full">Address</Label>
+                <textarea
+                  id="address-full"
+                  value={formData.businessAddress}
+                  onChange={(e) => handleChange('businessAddress', e.target.value)}
+                  placeholder="Landstraße 15, 4020 Linz"
+                  className="w-full min-h-[100px] rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Enter the full official business address as it should appear on invoices.
+                </p>
               </div>
             </div>
 
@@ -252,14 +257,12 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
                   <select
                     id="designation"
                     value={formData.designation}
-                    onChange={(e) => handleChange('designation', e.target.value)}
+                    onChange={(e) => handleChange('designation', e.target.value as TherapistDesignation)}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="HEILMASSEUR">Heilmasseur</option>
-                    <option value="PHYSIOTHERAPEUT">Physiotherapeut</option>
-                    <option value="FITNESSTRAINER">Fitnesstrainer</option>
-                    <option value="OSTEOPATH">Osteopath</option>
-                    <option value="OTHER">Other</option>
+                    <option value="MEDIZINISCHER_MASSEUR">Medizinischer Masseur</option>
+                    <option value="GEWERBLICHER_MASSEUR">Gewerblicher Masseur</option>
                   </select>
                 </div>
                 <div>
@@ -267,12 +270,13 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
                   <select
                     id="vat-status"
                     value={formData.vatStatus}
-                    onChange={(e) => handleChange('vatStatus', e.target.value)}
+                    onChange={(e) => handleChange('vatStatus', e.target.value as VatStatusOption)}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="KLEINUNTERNEHMER">Kleinunternehmer</option>
-                    <option value="VAT_REGISTERED">VAT Registered</option>
-                    <option value="VAT_EXEMPT">VAT Exempt</option>
+                    <option value="UST_10">USt 10%</option>
+                    <option value="UST_13">USt 13%</option>
+                    <option value="UST_20">USt 20%</option>
                   </select>
                 </div>
               </div>
@@ -314,42 +318,48 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
               <div>
                 <p className="text-sm text-gray-600">Practice Name</p>
                 <p className="font-medium">
-                  {profile?.businessName || 'Not configured'}
+                  {profile?.profile?.businessName || 'Not configured'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Business Address</p>
                 <p className="font-medium">
-                  {profile?.businessAddressLine1 && profile?.businessCity ?
-                    `${profile.businessAddressLine1}, ${profile.businessPostalCode} ${profile.businessCity}` :
-                    'Not configured'
-                  }
+                  {profile?.profile?.businessAddress || 'Not configured'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Email</p>
                 <p className="font-medium">
-                  {profile?.businessEmail || 'Not configured'}
+                  {profile?.profile?.businessEmail || 'Not configured'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Professional Title</p>
                 <p className="font-medium">
-                  {profile?.designation || 'Not specified'}
+                  {profile?.profile?.designation || 'Not specified'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">VAT Status</p>
                 <p className="font-medium">
-                  {profile?.vatStatus === 'KLEINUNTERNEHMER' ? 'Small Business (Kleinunternehmer)' :
-                   profile?.vatStatus === 'VAT_REGISTERED' ? 'VAT Registered' :
-                   profile?.vatStatus === 'VAT_EXEMPT' ? 'VAT Exempt' : 'Not specified'}
+                  {profile?.profile?.vatStatus === 'KLEINUNTERNEHMER' ? 'Small Business (Kleinunternehmer)' :
+                   profile?.profile?.vatStatus === 'UST_10' ? 'USt 10%' :
+                   profile?.profile?.vatStatus === 'UST_13' ? 'USt 13%' :
+                   profile?.profile?.vatStatus === 'UST_20' ? 'USt 20%' : 'Not specified'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">License Number</p>
                 <p className="font-medium">
-                  {profile?.licenseNumber || 'Not specified'}
+                  {profile?.profile?.chamberRegistration || 'Not specified'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Tax Validation</p>
+                <p className="font-medium">
+                  {profile?.profile?.taxValidationCompleted
+                    ? `Completed on ${profile.profile.taxValidatedAt ? new Date(profile.profile.taxValidatedAt).toLocaleDateString('de-AT') : 'unknown date'}`
+                    : 'Pending'}
                 </p>
               </div>
             </div>

@@ -42,9 +42,9 @@ MyoFlow is a **single-tenant** practice management platform specifically designe
 - ⚙️ **Therapist Profiles** - Business settings with compliance tracking
 - 🔒 **Production Hardening** - All 11 Code Quality items complete (security, architecture, performance)
 
-**🚀 Active Development (7-Sprint Plan - 1/7 Complete):**
+**🚀 Active Development (7-Sprint Plan - 2/7 Complete):**
 1. ✅ **Hardening Sprint** - Security, architecture, performance (Oct 4, 2025)
-2. **Runtime Performance** - Settings optimization, seed relocation - NEXT
+2. ✅ **Runtime Performance** - Settings optimization, seed relocation (Oct 4, 2025)
 3. **UX + i18n Cleanup** - Translation fixes, string extraction
 4. **Settings Completion** - APIs, UI wiring, PostGIS
 5. **Compliance & Reporting** - RKSV flows, live metrics
@@ -57,7 +57,7 @@ MyoFlow is a **single-tenant** practice management platform specifically designe
 - ÖGK integration
 - Advanced analytics
 
-See `ROADMAP.md` for detailed sprint breakdown and `docs/archive/` for long-term planning.
+See `docs/current/project-status.md` for current status and `ROADMAP.md` for detailed sprint breakdown. Historical plans are in `docs/archive/`.
 
 ---
 
