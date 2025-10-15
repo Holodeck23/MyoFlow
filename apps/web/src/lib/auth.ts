@@ -56,19 +56,7 @@ const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string
         const password = credentials.password as string
 
-        // 1. Optional hardcoded test user (dev only)
-        if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
-          if (email === 'test@myoflow.at' && password === 'demo123') {
-            return {
-              id: 'test-user-id',
-              email: email,
-              name: 'Dr. Sarah Müller',
-              role: 'OWNER',
-            }
-          }
-        }
-
-        // 2. Check for database user
+        // Check for database user
         const user = await prisma.user.findUnique({
           where: { email: email },
           include: { Therapist: true },

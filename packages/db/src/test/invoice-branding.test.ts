@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma, InvoiceDisplayPreference } from '../..'
 
 describe('Invoice Branding Settings Database Integration', () => {
   let testUserId: string

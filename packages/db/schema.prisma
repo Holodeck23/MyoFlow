@@ -187,6 +187,7 @@ model Client {
   Notes                 Note[]
 
   @@index([therapistId, name])
+  @@index([email])
 }
 
 model Service {
