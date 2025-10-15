@@ -207,7 +207,14 @@ export async function PUT(request: NextRequest) {
     const parsed = updateSchema.parse(payload)
 
     if (parsed.vatNumber) {
-      assertValidVatNumber(parsed.vatNumber)
+      try {
+        assertValidVatNumber(parsed.vatNumber)
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid VAT/UID number (must follow ATU######## format)' },
+          { status: 400 },
+        )
+      }
     }
 
     const current = await prisma.taxComplianceSettings.upsert({
