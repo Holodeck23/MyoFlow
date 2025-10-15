@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  try {
+  return handleAuthErrors(async () => {
     const { therapist } = await ensureTherapistAccount(request)
     const payload = (await request.json()) as Record<string, unknown>
 
@@ -148,15 +148,5 @@ export async function PUT(request: NextRequest) {
       data: serializeBranding(updatedBranding),
       message: 'Invoice branding updated successfully',
     })
-  } catch (error) {
-    if (error instanceof Response) {
-      throw error
-    }
-
-    console.error('Error updating invoice branding settings:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update branding settings' },
-      { status: 500 },
-    )
-  }
+  })
 }
