@@ -2,7 +2,7 @@
 // This file runs before each test suite
 
 import { beforeAll, afterAll } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../..'
 
 let isDatabaseAvailable = false
 
@@ -19,9 +19,7 @@ beforeAll(async () => {
   
   // Test database connectivity
   try {
-    const prisma = new PrismaClient()
     await prisma.$connect()
-    await prisma.$disconnect()
     isDatabaseAvailable = true
     console.log('✅ Database connection successful')
   } catch (error) {
