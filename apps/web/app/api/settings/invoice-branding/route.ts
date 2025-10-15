@@ -1,164 +1,152 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
+import {
+  ensureTherapistAccount,
+  handleAuthErrors,
+  requireTherapist,
+} from '@/lib/shared-helpers'
 
 export const dynamic = 'force-dynamic'
 
-// Validation schema for branding settings
-const InvoiceBrandingSchema = z.object({
-  invoiceLogoUrl: z.string().url('Invalid logo URL format').nullable().optional(),
-  invoiceDisplayPreference: z
-    .enum(['NAME', 'LOGO', 'BOTH'], {
-      errorMap: () => ({ message: 'Invalid display preference. Must be NAME, LOGO, or BOTH' }),
-    })
-    .optional(),
-  invoiceThankYouMessage: z
-    .string()
-    .max(500, 'Thank you message must be 500 characters or less')
-    .nullable()
-    .optional(),
-})
+const BRANDING_SELECT = {
+  id: true,
+  invoiceLogoUrl: true,
+  invoiceDisplayPreference: true,
+  invoiceThankYouMessage: true,
+  brandColor: true,
+  settingsLastUpdated: true,
+  settingsVersion: true,
+} as const
 
-/**
- * GET /api/settings/invoice-branding
- *
- * Retrieve current invoice branding settings for authenticated therapist
- *
- * Returns:
- * - invoiceLogoUrl: URL to therapist's logo
- * - invoiceDisplayPreference: How to display branding (NAME | LOGO | BOTH)
- * - invoiceThankYouMessage: Custom message for invoice footer
- * - brandColor: Primary brand color (hex)
- */
-export async function GET(request: NextRequest) {
-  try {
-    // Authenticate user
-    const session = await auth()
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+const InvoiceBrandingSchema = z
+  .object({
+    invoiceLogoUrl: z
+      .string()
+      .trim()
+      .url('Invalid logo URL format')
+      .nullable()
+      .optional(),
+    invoiceDisplayPreference: z
+      .enum(['NAME', 'LOGO', 'BOTH'], {
+        errorMap: () => ({ message: 'Display preference must be NAME, LOGO, or BOTH' }),
+      })
+      .optional(),
+    invoiceThankYouMessage: z
+      .string()
+      .trim()
+      .max(500, 'Thank you message must be 500 characters or fewer')
+      .nullable()
+      .optional(),
+  })
+  .strict()
 
-    // Find therapist
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        Therapist: {
-          select: {
-            id: true,
-            invoiceLogoUrl: true,
-            invoiceDisplayPreference: true,
-            invoiceThankYouMessage: true,
-            brandColor: true,
-          },
-        },
-      },
-    })
+function normalizeNullableString(value: string | null | undefined) {
+  if (value === undefined) return undefined
+  if (value === null) return null
+  const trimmed = value.trim()
+  return trimmed.length === 0 ? null : trimmed
+}
 
-    if (!user || !user.Therapist) {
-      return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
-    }
-
-    return NextResponse.json(user.Therapist)
-  } catch (error) {
-    console.error('Error fetching invoice branding settings:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch branding settings' },
-      { status: 500 }
-    )
+function serializeBranding(branding: any) {
+  return {
+    id: branding.id,
+    invoiceLogoUrl: branding.invoiceLogoUrl ?? null,
+    invoiceDisplayPreference: branding.invoiceDisplayPreference ?? 'NAME',
+    invoiceThankYouMessage: branding.invoiceThankYouMessage ?? null,
+    brandColor: branding.brandColor ?? '#1F6FEB',
+    settingsLastUpdated: branding.settingsLastUpdated
+      ? branding.settingsLastUpdated.toISOString()
+      : null,
+    settingsVersion: branding.settingsVersion ?? 1,
   }
 }
 
-/**
- * PUT /api/settings/invoice-branding
- *
- * Update invoice branding settings for authenticated therapist
- *
- * Request body:
- * - invoiceLogoUrl?: string | null - URL to therapist logo
- * - invoiceDisplayPreference?: "NAME" | "LOGO" | "BOTH" - Display mode
- * - invoiceThankYouMessage?: string | null - Custom footer message (max 500 chars)
- *
- * Validation:
- * - Logo URL must be valid URL format
- * - Display preference must be one of: NAME, LOGO, BOTH
- * - Thank you message max 500 characters
- * - At least one field required
- */
-export async function PUT(request: NextRequest) {
-  try {
-    // Authenticate user
-    const session = await auth()
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export async function GET(request: NextRequest) {
+  return handleAuthErrors(async () => {
+    const { therapist } = await requireTherapist()
 
-    // Find therapist
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: {
-        Therapist: true,
-      },
+    const branding = await prisma.therapist.findUnique({
+      where: { id: therapist.id },
+      select: BRANDING_SELECT,
     })
 
-    if (!user || !user.Therapist) {
-      return NextResponse.json({ error: 'Therapist not found' }, { status: 404 })
-    }
-
-    // Parse and validate request body
-    const body = await request.json()
-
-    // Check if at least one field provided
-    const validFields = ['invoiceLogoUrl', 'invoiceDisplayPreference', 'invoiceThankYouMessage']
-    const hasValidField = validFields.some((field) => field in body)
-
-    if (!hasValidField) {
+    if (!branding) {
       return NextResponse.json(
-        { error: 'No fields to update. Provide at least one of: invoiceLogoUrl, invoiceDisplayPreference, invoiceThankYouMessage' },
-        { status: 400 }
+        { success: false, error: 'Therapist profile not found' },
+        { status: 404 },
       )
     }
 
-    // Filter out unknown fields
+    return NextResponse.json({
+      success: true,
+      data: serializeBranding(branding),
+    })
+  })
+}
+
+export async function PUT(request: NextRequest) {
+  return handleAuthErrors(async () => {
+    const { therapist } = await ensureTherapistAccount(request)
+    const payload = (await request.json()) as Record<string, unknown>
+
+    const validFields = ['invoiceLogoUrl', 'invoiceDisplayPreference', 'invoiceThankYouMessage']
+    const hasFields = validFields.some((field) => Object.prototype.hasOwnProperty.call(payload, field))
+
+    if (!hasFields) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'No fields to update. Provide at least one of: invoiceLogoUrl, invoiceDisplayPreference, invoiceThankYouMessage',
+        },
+        { status: 400 },
+      )
+    }
+
     const filteredBody = Object.fromEntries(
-      Object.entries(body).filter(([key]) => validFields.includes(key))
+      Object.entries(payload).filter(([key]) => validFields.includes(key)),
     )
 
-    // Validate with Zod
     const validation = InvoiceBrandingSchema.safeParse(filteredBody)
-
     if (!validation.success) {
       return NextResponse.json(
         {
+          success: false,
           error: 'Invalid branding settings',
           details: validation.error.issues.map((issue) => ({
             field: issue.path.join('.'),
             message: issue.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
-    // Update therapist settings
-    const updatedTherapist = await prisma.therapist.update({
-      where: { id: user.Therapist.id },
-      data: validation.data,
-      select: {
-        id: true,
-        invoiceLogoUrl: true,
-        invoiceDisplayPreference: true,
-        invoiceThankYouMessage: true,
-        brandColor: true,
+    const updates = {
+      invoiceLogoUrl: normalizeNullableString(validation.data.invoiceLogoUrl ?? undefined),
+      invoiceDisplayPreference: validation.data.invoiceDisplayPreference,
+      invoiceThankYouMessage: normalizeNullableString(
+        validation.data.invoiceThankYouMessage ?? undefined,
+      ),
+    }
+
+    const updatedBranding = await prisma.therapist.update({
+      where: { id: therapist.id },
+      data: {
+        ...Object.fromEntries(
+          Object.entries(updates).filter(([_key, value]) => value !== undefined),
+        ),
+        settingsLastUpdated: new Date(),
+        settingsVersion: { increment: 1 },
       },
+      select: BRANDING_SELECT,
     })
 
-    return NextResponse.json(updatedTherapist)
-  } catch (error) {
-    console.error('Error updating invoice branding settings:', error)
-    return NextResponse.json(
-      { error: 'Failed to update branding settings' },
-      { status: 500 }
-    )
-  }
+    return NextResponse.json({
+      success: true,
+      data: serializeBranding(updatedBranding),
+      message: 'Invoice branding updated successfully',
+    })
+  })
 }

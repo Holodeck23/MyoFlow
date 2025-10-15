@@ -53,7 +53,13 @@ export default function SettingsClient() {
       setIsDataLoading(true)
       const response = await fetch('/api/settings/overview')
       if (response.ok) {
-        const data = await response.json()
+        const json = await response.json()
+        if (json && json.success === false) {
+          console.error('Failed to fetch settings overview', json.error)
+          setStaticFallbackData()
+          return
+        }
+        const data = json && typeof json === 'object' && 'data' in json ? json.data : json
         setOverviewData(data)
 
         // Transform API data to match existing UI structure
@@ -76,14 +82,7 @@ export default function SettingsClient() {
           compliance: data.complianceStatus.kleinunternehmerStatus === 'active' ? 'konform' : 'prüfung'
         })
 
-        // Set static profile data (will be replaced when profile API is implemented)
-        setProfileData({
-          businessName: null,
-          businessAddress: null,
-          businessEmail: null,
-          vatStatus: 'KLEINUNTERNEHMER',
-          certificates: []
-        })
+        setProfileData(data?.profile ?? null)
       } else {
         console.error('Failed to fetch settings overview')
         // Fallback to static data
@@ -225,7 +224,7 @@ export default function SettingsClient() {
         <TabsContent value="profile" className="space-y-6">
           <ErrorBoundary fallback={SettingsErrorFallback}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <ProfileTab profileData={profileData} isActive={activeTab === 'profile'} />
+              <ProfileTab isActive={activeTab === 'profile'} />
             </Suspense>
           </ErrorBoundary>
         </TabsContent>
@@ -233,7 +232,7 @@ export default function SettingsClient() {
         <TabsContent value="travel" className="space-y-6">
           <ErrorBoundary fallback={SettingsErrorFallback}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <TravelTab profileData={profileData} isActive={activeTab === 'travel'} />
+              <TravelTab isActive={activeTab === 'travel'} />
             </Suspense>
           </ErrorBoundary>
         </TabsContent>
@@ -241,7 +240,7 @@ export default function SettingsClient() {
         <TabsContent value="pricing" className="space-y-6">
           <ErrorBoundary fallback={SettingsErrorFallback}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <PricingTab profileData={profileData} isActive={activeTab === 'pricing'} />
+              <PricingTab isActive={activeTab === 'pricing'} />
             </Suspense>
           </ErrorBoundary>
         </TabsContent>
@@ -249,7 +248,7 @@ export default function SettingsClient() {
         <TabsContent value="compliance" className="space-y-6">
           <ErrorBoundary fallback={SettingsErrorFallback}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <ComplianceTab profileData={profileData} overviewData={overviewData} isActive={activeTab === 'compliance'} />
+              <ComplianceTab isActive={activeTab === 'compliance'} />
             </Suspense>
           </ErrorBoundary>
         </TabsContent>
@@ -257,7 +256,7 @@ export default function SettingsClient() {
         <TabsContent value="system" className="space-y-6">
           <ErrorBoundary fallback={SettingsErrorFallback}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <SystemTab profileData={profileData} isActive={activeTab === 'system'} />
+              <SystemTab isActive={activeTab === 'system'} />
             </Suspense>
           </ErrorBoundary>
         </TabsContent>

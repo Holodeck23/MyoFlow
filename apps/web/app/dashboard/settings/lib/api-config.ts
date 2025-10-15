@@ -55,14 +55,16 @@ export const SETTINGS_ENDPOINTS: Record<string, SettingsEndpoint> = {
 export async function fetchSettingsEndpoint(
   endpointKey: string,
   options: RequestInit = {}
-): Promise<{ data: any; error: string | null; fromCache: boolean }> {
+): Promise<{ data: any; error: string | null; fromCache: boolean; message: string | null; success: boolean }> {
   const endpoint = SETTINGS_ENDPOINTS[endpointKey]
 
   if (!endpoint) {
     return {
       data: null,
       error: `Unknown endpoint: ${endpointKey}`,
-      fromCache: false
+      fromCache: false,
+      message: null,
+      success: false
     }
   }
 
@@ -70,7 +72,9 @@ export async function fetchSettingsEndpoint(
     return {
       data: null,
       error: `Endpoint ${endpointKey} is not yet implemented`,
-      fromCache: false
+      fromCache: false,
+      message: null,
+      success: false
     }
   }
 
@@ -85,32 +89,57 @@ export async function fetchSettingsEndpoint(
     })
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return {
-          data: null,
-          error: `Endpoint ${endpoint.path} not found (404)`,
-          fromCache: false
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      try {
+        const errorBody = await response.json()
+        if (errorBody && typeof errorBody.error === 'string') {
+          errorMessage = errorBody.error
         }
+      } catch {
+        // ignore parse failures and use default message
+      }
+
+      if (response.status === 404) {
+        errorMessage = `Endpoint ${endpoint.path} not found (404)`
       }
 
       return {
         data: null,
-        error: `HTTP ${response.status}: ${response.statusText}`,
-        fromCache: false
+        error: errorMessage,
+        fromCache: false,
+        message: null,
+        success: false
       }
     }
 
-    const data = await response.json()
+    const json = await response.json()
+    const payload =
+      json && typeof json === 'object' && 'data' in json ? (json as any).data : json
+    const success =
+      json && typeof json === 'object' && 'success' in json ? Boolean((json as any).success) : true
+    const message =
+      json && typeof json === 'object' && typeof (json as any).message === 'string'
+        ? (json as any).message
+        : null
+    const errorMessage =
+      !success && json && typeof json === 'object' && typeof (json as any).error === 'string'
+        ? (json as any).error
+        : null
+
     return {
-      data,
-      error: null,
-      fromCache: false
+      data: payload,
+      error: errorMessage,
+      fromCache: false,
+      message,
+      success
     }
   } catch (error) {
     return {
       data: null,
       error: error instanceof Error ? error.message : 'Network error',
-      fromCache: false
+      fromCache: false,
+      message: null,
+      success: false
     }
   }
 }
@@ -124,11 +153,15 @@ export function useSettingsEndpoint(endpointKey: string, enabled: boolean = true
     loading: boolean
     error: string | null
     fromCache: boolean
+    message: string | null
+    success: boolean
   }>({
     data: null,
     loading: false,
     error: null,
-    fromCache: false
+    fromCache: false,
+    message: null,
+    success: true
   })
 
   const fetchData = React.useCallback(async () => {
@@ -142,7 +175,9 @@ export function useSettingsEndpoint(endpointKey: string, enabled: boolean = true
       data: result.data,
       loading: false,
       error: result.error,
-      fromCache: result.fromCache
+      fromCache: result.fromCache,
+      message: result.message,
+      success: result.success
     })
   }, [endpointKey, enabled])
 

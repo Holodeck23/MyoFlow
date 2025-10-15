@@ -1,116 +1,172 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from '@myoflow/lib'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Button,
-  Label,
-  Input
-} from '@/components/ui'
-import { AlertCircle } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Label, Input } from '@/components/ui'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { InvoiceBrandingWidget } from './InvoiceBrandingWidget'
 
 interface ProfileTabProps {
-  profileData: any
   isActive?: boolean
 }
 
-export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
+interface FormValues {
+  businessName: string
+  businessEmail: string
+  businessPhone: string
+  businessWebsite: string
+  businessAddressLine1: string
+  businessAddressLine2: string
+  businessCity: string
+  businessPostalCode: string
+  businessCountry: string
+  designation: string
+  vatStatus: string
+  licenseNumber: string
+  uidNumber: string
+  iban: string
+  publicProfileSlug: string
+  publicProfileDescription: string
+}
+
+const DESIGNATION_OPTIONS = [
+  { value: 'HEILMASSEUR', label: 'Heilmasseur' },
+  { value: 'MEDIZINISCHER_MASSEUR', label: 'Medizinischer Masseur' },
+  { value: 'GEWERBLICHER_MASSEUR', label: 'Gewerblicher Masseur' },
+] as const
+
+const VAT_OPTIONS = [
+  { value: 'KLEINUNTERNEHMER', label: 'Kleinunternehmer (§6 Abs 1 Z 27 UStG)' },
+  { value: 'UST_10', label: 'USt 10%' },
+  { value: 'UST_13', label: 'USt 13%' },
+  { value: 'UST_20', label: 'USt 20%' },
+] as const
+
+const DEFAULT_FORM_VALUES: FormValues = {
+  businessName: '',
+  businessEmail: '',
+  businessPhone: '',
+  businessWebsite: '',
+  businessAddressLine1: '',
+  businessAddressLine2: '',
+  businessCity: '',
+  businessPostalCode: '',
+  businessCountry: 'Austria',
+  designation: 'HEILMASSEUR',
+  vatStatus: 'KLEINUNTERNEHMER',
+  licenseNumber: '',
+  uidNumber: '',
+  iban: '',
+  publicProfileSlug: '',
+  publicProfileDescription: '',
+}
+
+export function ProfileTab({ isActive = false }: ProfileTabProps) {
   const { t } = useTranslation()
-  const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    businessName: '',
-    businessAddressLine1: '',
-    businessAddressLine2: '',
-    businessCity: '',
-    businessPostalCode: '',
-    businessCountry: 'Austria',
-    businessEmail: '',
-    businessPhone: '',
-    designation: 'HEILMASSEUR',
-    licenseNumber: '',
-    vatStatus: 'KLEINUNTERNEHMER'
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const {
+    data: profileResponse,
+    loading: isLoading,
+    error: fetchError,
+    message: fetchMessage,
+    refetch,
+  } = useSettingsEndpoint('profile', isActive)
+
+  const profileData = useMemo(() => {
+    if (!profileResponse) {
+      return null
+    }
+    return profileResponse
+  }, [profileResponse])
+
+  const form = useForm<FormValues>({
+    defaultValues: DEFAULT_FORM_VALUES,
   })
 
-  // Only fetch when tab is active
-  const { data: profile, loading: isLoading, error, refetch } = useSettingsEndpoint('profile', isActive)
-
-  // Update form data when profile loads
   useEffect(() => {
-    if (profile?.profile) {
-      const profileData = profile.profile
-      setFormData({
-        businessName: profileData.businessName || '',
-        businessAddressLine1: profileData.businessAddress || '', // API uses businessAddress not businessAddressLine1
+    if (profileData) {
+      form.reset({
+        businessName: profileData.businessName ?? '',
+        businessEmail: profileData.businessEmail ?? '',
+        businessPhone: profileData.businessPhone ?? '',
+        businessWebsite: profileData.businessWebsite ?? '',
+        businessAddressLine1: profileData.businessAddress ?? '',
         businessAddressLine2: '',
         businessCity: '',
         businessPostalCode: '',
         businessCountry: 'Austria',
-        businessEmail: profileData.businessEmail || '',
-        businessPhone: profileData.businessPhone || '',
-        designation: profileData.designation || 'HEILMASSEUR',
-        licenseNumber: profileData.chamberRegistration || '', // API uses chamberRegistration
-        vatStatus: profileData.vatStatus || 'KLEINUNTERNEHMER'
+        designation: profileData.designation ?? 'HEILMASSEUR',
+        vatStatus: profileData.vatStatus ?? 'KLEINUNTERNEHMER',
+        licenseNumber: profileData.chamberRegistration ?? '',
+        uidNumber: profileData.uidNumber ?? '',
+        iban: profileData.iban ?? '',
+        publicProfileSlug: profileData.publicProfileSlug ?? '',
+        publicProfileDescription: profileData.publicProfileDescription ?? '',
       })
     }
-  }, [profile])
+  }, [profileData, form])
 
-  const handleSave = async () => {
+  const handleSubmit = form.handleSubmit(async (values: FormValues) => {
+    setSaveError(null)
+    setSaveSuccess(null)
+    setIsSaving(true)
+
     try {
-      setIsSaving(true)
-      setSaveError(null)
       const response = await fetch('/api/settings/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          businessName: formData.businessName,
-          businessAddress: formData.businessAddressLine1, // Map to API field
-          businessEmail: formData.businessEmail,
-          businessPhone: formData.businessPhone,
-          designation: formData.designation,
-          chamberRegistration: formData.licenseNumber, // Map to API field
-          vatStatus: formData.vatStatus
-        })
+          businessName: values.businessName || undefined,
+          businessAddress: values.businessAddressLine1 || undefined,
+          businessEmail: values.businessEmail || undefined,
+          businessPhone: values.businessPhone || undefined,
+          businessWebsite: values.businessWebsite || undefined,
+          designation: values.designation,
+          chamberRegistration: values.licenseNumber || null,
+          vatStatus: values.vatStatus,
+          uidNumber: values.uidNumber || null,
+          iban: values.iban || null,
+          publicProfileSlug: values.publicProfileSlug || null,
+          publicProfileDescription: values.publicProfileDescription || null,
+        }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        refetch() // Refresh the profile data
-        // Show success message (you could add a toast here)
-      } else {
-        const errorData = await response.json()
-        setSaveError(errorData.error || 'Failed to save profile')
+      const json = await response.json()
+
+      if (!response.ok || (json && json.success === false)) {
+        const errorMessage =
+          (json && typeof json.error === 'string' && json.error) ||
+          'Failed to save profile settings'
+        setSaveError(errorMessage)
+        return
       }
-    } catch (err) {
-      setSaveError('Network error saving profile')
+
+      setSaveSuccess('Profile updated successfully')
+      await refetch()
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Network error saving profile')
     } finally {
       setIsSaving(false)
     }
-  }
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+  })
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
           <p className="text-gray-500">Loading profile...</p>
         </div>
       </div>
     )
   }
 
-  if (error) {
+  if (fetchError) {
     return (
       <Card className="border-red-200 bg-red-50">
         <CardContent className="p-6">
@@ -118,7 +174,7 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
             <AlertCircle className="w-6 h-6 text-red-600" />
             <div>
               <h3 className="font-medium text-red-800">Failed to load profile</h3>
-              <p className="text-red-600 text-sm mt-1">{error}</p>
+              <p className="text-red-600 text-sm mt-1">{fetchError}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -134,171 +190,172 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
     )
   }
 
+  const currentProfile = profileData ?? DEFAULT_FORM_VALUES
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
+        <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
             <CardTitle>{t('settings.profile.title', 'Profil-Einstellungen')}</CardTitle>
             <CardDescription>
-              {t('settings.profile.description', 'Verwalten Sie Ihre Geschäftsdaten und professionellen Qualifikationen.')}
+              {t(
+                'settings.profile.description',
+                'Verwalten Sie Ihre Geschäftsdaten und professionellen Qualifikationen.',
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{error}</p>
+              {(saveError || fetchMessage) && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-red-400" />
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{saveError ?? fetchMessage}</p>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {saveSuccess && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-md p-4">
+                  <div className="flex">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    <div className="ml-3">
+                      <p className="text-sm text-emerald-700">{saveSuccess}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <section className="space-y-4">
+                <h3 className="text-lg font-medium">Business Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="business-name">Practice Name</Label>
+                    <Input id="business-name" {...form.register('businessName')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="business-email">Business Email</Label>
+                    <Input id="business-email" type="email" {...form.register('businessEmail')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="business-phone">Business Phone</Label>
+                    <Input id="business-phone" {...form.register('businessPhone')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="business-website">Business Website</Label>
+                    <Input id="business-website" {...form.register('businessWebsite')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="license-number">Chamber Registration</Label>
+                    <Input id="license-number" {...form.register('licenseNumber')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="uid-number">UID Number</Label>
+                    <Input
+                      id="uid-number"
+                      placeholder="ATU12345678"
+                      {...form.register('uidNumber')}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="iban">IBAN</Label>
+                    <Input id="iban" placeholder="AT61 1904 3002 3457 3201" {...form.register('iban')} />
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="text-lg font-medium">Business Address</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="address-line-1">Address Line 1</Label>
+                    <Input id="address-line-1" {...form.register('businessAddressLine1')} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="address-line-2">Address Line 2 (Optional)</Label>
+                    <Input id="address-line-2" {...form.register('businessAddressLine2')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input id="city" {...form.register('businessCity')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="postal-code">Postal Code</Label>
+                    <Input id="postal-code" {...form.register('businessPostalCode')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="country">Country</Label>
+                    <Input id="country" {...form.register('businessCountry')} />
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="text-lg font-medium">Professional Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="designation">Professional Title</Label>
+                    <select
+                      id="designation"
+                      {...form.register('designation')}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {DESIGNATION_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="vat-status">VAT Status</Label>
+                    <select
+                      id="vat-status"
+                      {...form.register('vatStatus')}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {VAT_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="public-profile-slug">Public Profile Slug</Label>
+                    <Input
+                      id="public-profile-slug"
+                      placeholder="praxis-mueller"
+                      {...form.register('publicProfileSlug')}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="public-profile-description">Public Profile Description</Label>
+                    <textarea
+                      id="public-profile-description"
+                      rows={4}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...form.register('publicProfileDescription')}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <div className="flex justify-end space-x-3">
+                <Button type="button" variant="outline" onClick={() => refetch()}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
-            )}
+            </CardContent>
+          </Card>
+        </form>
 
-            {/* Business Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Business Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="business-name">Practice Name</Label>
-                  <Input
-                    id="business-name"
-                    value={formData.businessName}
-                    onChange={(e) => handleChange('businessName', e.target.value)}
-                    placeholder="Dr. Sarah Müller Physiotherapie"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="business-email">Business Email</Label>
-                  <Input
-                    id="business-email"
-                    type="email"
-                    value={formData.businessEmail}
-                    onChange={(e) => handleChange('businessEmail', e.target.value)}
-                    placeholder="praxis@example.at"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="business-phone">Business Phone</Label>
-                  <Input
-                    id="business-phone"
-                    value={formData.businessPhone}
-                    onChange={(e) => handleChange('businessPhone', e.target.value)}
-                    placeholder="+43 732 123456"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="license-number">License Number</Label>
-                  <Input
-                    id="license-number"
-                    value={formData.licenseNumber}
-                    onChange={(e) => handleChange('licenseNumber', e.target.value)}
-                    placeholder="HM-2025-001234"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Address Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Business Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="address-line-1">Address Line 1</Label>
-                  <Input
-                    id="address-line-1"
-                    value={formData.businessAddressLine1}
-                    onChange={(e) => handleChange('businessAddressLine1', e.target.value)}
-                    placeholder="Landstraße 15"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="address-line-2">Address Line 2 (Optional)</Label>
-                  <Input
-                    id="address-line-2"
-                    value={formData.businessAddressLine2}
-                    onChange={(e) => handleChange('businessAddressLine2', e.target.value)}
-                    placeholder="Suite 201"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.businessCity}
-                    onChange={(e) => handleChange('businessCity', e.target.value)}
-                    placeholder="Linz"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="postal-code">Postal Code</Label>
-                  <Input
-                    id="postal-code"
-                    value={formData.businessPostalCode}
-                    onChange={(e) => handleChange('businessPostalCode', e.target.value)}
-                    placeholder="4020"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Professional Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Professional Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="designation">Professional Title</Label>
-                  <select
-                    id="designation"
-                    value={formData.designation}
-                    onChange={(e) => handleChange('designation', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="HEILMASSEUR">Heilmasseur</option>
-                    <option value="PHYSIOTHERAPEUT">Physiotherapeut</option>
-                    <option value="FITNESSTRAINER">Fitnesstrainer</option>
-                    <option value="OSTEOPATH">Osteopath</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="vat-status">VAT Status</Label>
-                  <select
-                    id="vat-status"
-                    value={formData.vatStatus}
-                    onChange={(e) => handleChange('vatStatus', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="KLEINUNTERNEHMER">Kleinunternehmer</option>
-                    <option value="VAT_REGISTERED">VAT Registered</option>
-                    <option value="VAT_EXEMPT">VAT Exempt</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {saveError && (
-              <div className="p-3 bg-red-100 border border-red-300 rounded-md">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                  <p className="text-red-800 text-sm">{saveError}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-3">
-              <Button variant="outline" onClick={() => refetch()}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Invoice Branding Settings */}
         <InvoiceBrandingWidget />
       </div>
 
@@ -313,44 +370,37 @@ export function ProfileTab({ profileData, isActive = false }: ProfileTabProps) {
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-gray-600">Practice Name</p>
-                <p className="font-medium">
-                  {profile?.businessName || 'Not configured'}
-                </p>
+                <p className="font-medium">{currentProfile.businessName || 'Not configured'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Business Address</p>
-                <p className="font-medium">
-                  {profile?.businessAddressLine1 && profile?.businessCity ?
-                    `${profile.businessAddressLine1}, ${profile.businessPostalCode} ${profile.businessCity}` :
-                    'Not configured'
-                  }
-                </p>
+                <p className="text-sm text-gray-600">Business Email</p>
+                <p className="font-medium">{currentProfile.businessEmail || 'Not configured'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">
-                  {profile?.businessEmail || 'Not configured'}
-                </p>
+                <p className="text-sm text-gray-600">Business Phone</p>
+                <p className="font-medium">{currentProfile.businessPhone || 'Not configured'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Professional Title</p>
                 <p className="font-medium">
-                  {profile?.designation || 'Not specified'}
+                  {DESIGNATION_OPTIONS.find((option) => option.value === currentProfile.designation)
+                    ?.label || 'Not specified'}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">VAT Status</p>
                 <p className="font-medium">
-                  {profile?.vatStatus === 'KLEINUNTERNEHMER' ? 'Small Business (Kleinunternehmer)' :
-                   profile?.vatStatus === 'VAT_REGISTERED' ? 'VAT Registered' :
-                   profile?.vatStatus === 'VAT_EXEMPT' ? 'VAT Exempt' : 'Not specified'}
+                  {VAT_OPTIONS.find((option) => option.value === currentProfile.vatStatus)?.label ||
+                    'Not specified'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">License Number</p>
-                <p className="font-medium">
-                  {profile?.licenseNumber || 'Not specified'}
-                </p>
+                <p className="text-sm text-gray-600">UID Number</p>
+                <p className="font-medium">{currentProfile.uidNumber || 'Not specified'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">IBAN</p>
+                <p className="font-medium">{currentProfile.iban || 'Not specified'}</p>
               </div>
             </div>
           </CardContent>
