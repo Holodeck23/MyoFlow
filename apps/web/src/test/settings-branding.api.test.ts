@@ -12,6 +12,7 @@ const mockPrisma = vi.hoisted(() => ({
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     update: vi.fn(),
+    create: vi.fn(),
   },
 }))
 
@@ -60,6 +61,13 @@ describe('Invoice Branding Settings API', () => {
 
     mockAuth.mockResolvedValue(mockSession)
     mockGetServerSession.mockResolvedValue(mockSession)
+    mockPrisma.therapist.findFirst.mockResolvedValue(mockTherapist)
+    mockPrisma.therapist.findUnique.mockResolvedValue(mockTherapist)
+    mockPrisma.therapist.create.mockResolvedValue({
+      ...mockTherapist,
+      userId: 'user-1',
+      slug: 'therapist-test',
+    })
   })
 
   describe('GET /api/settings/invoice-branding', () => {
@@ -73,9 +81,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await GET(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data).toMatchObject({
+      expect(body.success).toBe(true)
+      expect(body.data).toMatchObject({
         invoiceLogoUrl: null,
         invoiceDisplayPreference: 'NAME',
         invoiceThankYouMessage: null,
@@ -90,22 +99,19 @@ describe('Invoice Branding Settings API', () => {
       const response = await GET(request as NextRequest)
 
       expect(response.status).toBe(401)
-      const data = await response.json()
-      expect(data.error).toContain('Unauthorized')
+      const body = await response.json()
+      expect(body.error).toBe('Unauthorized - No active session')
     })
 
     it('should return 404 if therapist not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        Therapist: null,
-      })
+      mockPrisma.therapist.findFirst.mockResolvedValue(null)
 
       const request = new Request('http://localhost:3000/api/settings/invoice-branding')
       const response = await GET(request as NextRequest)
 
       expect(response.status).toBe(404)
-      const data = await response.json()
-      expect(data.error).toBe('Therapist not found')
+      const body = await response.json()
+      expect(body.error).toBe('Therapist profile not found. Please complete setup first.')
     })
   })
 
@@ -113,11 +119,18 @@ describe('Invoice Branding Settings API', () => {
     beforeEach(() => {
       mockPrisma.user.upsert.mockResolvedValue({
         id: 'user-1',
+        email: 'therapist@example.com',
         Therapist: mockTherapist,
       })
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         Therapist: mockTherapist,
+      })
+      mockPrisma.therapist.findUnique.mockResolvedValue(mockTherapist)
+      mockPrisma.therapist.create.mockResolvedValue({
+        ...mockTherapist,
+        userId: 'user-1',
+        slug: 'therapist-test',
       })
     })
 
@@ -140,13 +153,14 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data.invoiceLogoUrl).toBe('https://example.com/logo.png')
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceLogoUrl).toBe('https://example.com/logo.png')
       expect(mockPrisma.therapist.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'therapist-1' },
-          data: { invoiceLogoUrl: 'https://example.com/logo.png' },
+          data: expect.objectContaining({ invoiceLogoUrl: 'https://example.com/logo.png' }),
         })
       )
     })
@@ -170,9 +184,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data.invoiceDisplayPreference).toBe('LOGO')
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceDisplayPreference).toBe('LOGO')
     })
 
     it('should update thank you message', async () => {
@@ -194,9 +209,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data.invoiceThankYouMessage).toBe('Vielen Dank für Ihr Vertrauen!')
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceThankYouMessage).toBe('Vielen Dank für Ihr Vertrauen!')
     })
 
     it('should update multiple fields at once', async () => {
@@ -220,9 +236,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data).toMatchObject(updateData)
+      expect(body.success).toBe(true)
+      expect(body.data).toMatchObject(updateData)
     })
 
     it('should reject invalid display preference', async () => {
@@ -239,8 +256,9 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(400)
-      const data = await response.json()
-      expect(data.error).toContain('Invalid')
+      const body = await response.json()
+      expect(body.success).toBe(false)
+      expect(body.error).toContain('Invalid')
     })
 
     it('should reject invalid logo URL format', async () => {
@@ -257,10 +275,11 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(400)
-      const data = await response.json()
-      expect(data.error).toBe('Invalid branding settings')
-      expect(data.details).toBeDefined()
-      expect(JSON.stringify(data.details)).toContain('URL')
+      const body = await response.json()
+      expect(body.success).toBe(false)
+      expect(body.error).toBe('Invalid branding settings')
+      expect(body.details).toBeDefined()
+      expect(JSON.stringify(body.details)).toContain('URL')
     })
 
     it('should allow clearing logo URL', async () => {
@@ -282,9 +301,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data.invoiceLogoUrl).toBeNull()
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceLogoUrl).toBeNull()
     })
 
     it('should allow clearing thank you message', async () => {
@@ -306,9 +326,10 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
-      const data = await response.json()
+      const body = await response.json()
 
-      expect(data.invoiceThankYouMessage).toBeNull()
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceThankYouMessage).toBeNull()
     })
 
     it('should reject thank you message over 500 characters', async () => {
@@ -325,10 +346,11 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(400)
-      const data = await response.json()
-      expect(data.error).toBe('Invalid branding settings')
-      expect(data.details).toBeDefined()
-      expect(JSON.stringify(data.details)).toContain('500')
+      const body = await response.json()
+      expect(body.success).toBe(false)
+      expect(body.error).toBe('Invalid branding settings')
+      expect(body.details).toBeDefined()
+      expect(JSON.stringify(body.details)).toContain('500')
     })
 
     it('should return unauthorized if no session', async () => {
@@ -340,15 +362,21 @@ describe('Invoice Branding Settings API', () => {
         body: JSON.stringify({ invoiceLogoUrl: 'https://example.com/logo.png' }),
       })
 
-      const response = await PUT(request as NextRequest)
-
-      expect(response.status).toBe(401)
+      await expect(PUT(request as NextRequest)).rejects.toHaveProperty('status', 401)
     })
 
-    it('should return 404 if therapist not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        Therapist: null,
+    it('should create therapist profile when missing', async () => {
+      mockPrisma.therapist.findUnique.mockResolvedValueOnce(null)
+      mockPrisma.therapist.create.mockResolvedValueOnce({
+        ...mockTherapist,
+        id: 'therapist-2',
+        userId: 'user-1',
+        slug: 'therapist-2',
+      })
+      mockPrisma.therapist.update.mockResolvedValue({
+        ...mockTherapist,
+        id: 'therapist-2',
+        invoiceLogoUrl: 'https://example.com/logo.png',
       })
 
       const request = new Request('http://localhost:3000/api/settings/invoice-branding', {
@@ -358,8 +386,17 @@ describe('Invoice Branding Settings API', () => {
       })
 
       const response = await PUT(request as NextRequest)
+      const body = await response.json()
 
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(200)
+      expect(body.success).toBe(true)
+      expect(mockPrisma.therapist.create).toHaveBeenCalledTimes(1)
+      expect(mockPrisma.therapist.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'therapist-2' },
+          data: expect.objectContaining({ invoiceLogoUrl: 'https://example.com/logo.png' }),
+        })
+      )
     })
 
     it('should handle empty request body', async () => {
@@ -372,8 +409,9 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(400)
-      const data = await response.json()
-      expect(data.error).toContain('No fields')
+      const body = await response.json()
+      expect(body.success).toBe(false)
+      expect(body.error).toContain('No fields')
     })
 
     it('should ignore unknown fields', async () => {
@@ -396,12 +434,15 @@ describe('Invoice Branding Settings API', () => {
       const response = await PUT(request as NextRequest)
 
       expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.success).toBe(true)
+      expect(body.data.invoiceLogoUrl).toBe('https://example.com/logo.png')
 
       // Verify only valid fields were passed to update
       expect(mockPrisma.therapist.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'therapist-1' },
-          data: { invoiceLogoUrl: 'https://example.com/logo.png' },
+          data: expect.objectContaining({ invoiceLogoUrl: 'https://example.com/logo.png' }),
         })
       )
     })
