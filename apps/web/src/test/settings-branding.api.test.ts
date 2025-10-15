@@ -6,6 +6,7 @@ const mockGetServerSession = vi.hoisted(() => vi.fn())
 const mockPrisma = vi.hoisted(() => ({
   user: {
     findUnique: vi.fn(),
+    upsert: vi.fn(),
   },
   therapist: {
     findUnique: vi.fn(),
@@ -110,6 +111,10 @@ describe('Invoice Branding Settings API', () => {
 
   describe('PUT /api/settings/invoice-branding', () => {
     beforeEach(() => {
+      mockPrisma.user.upsert.mockResolvedValue({
+        id: 'user-1',
+        Therapist: mockTherapist,
+      })
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         Therapist: mockTherapist,
