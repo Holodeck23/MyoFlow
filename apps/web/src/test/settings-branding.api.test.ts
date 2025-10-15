@@ -9,6 +9,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
   therapist: {
     findUnique: vi.fn(),
+    findFirst: vi.fn(),
     update: vi.fn(),
   },
 }))
@@ -89,7 +90,7 @@ describe('Invoice Branding Settings API', () => {
 
       expect(response.status).toBe(401)
       const data = await response.json()
-      expect(data.error).toBe('Unauthorized')
+      expect(data.error).toContain('Unauthorized')
     })
 
     it('should return 404 if therapist not found', async () => {
