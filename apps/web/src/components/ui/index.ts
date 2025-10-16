@@ -34,6 +34,7 @@ export type { CalendarEvent, BlockedTimeSlot, CalendarAvailability } from './Cal
 export { TravelRouteMap } from './TravelRouteMap'
 export { VisualRouteMap } from './VisualRouteMap'
 export { LanguageToggle } from './LanguageToggle'
+export { AccountTypeBanner, AccountTypeBadge, getAccountTypeMeta } from './AccountTypeBanner'
 
 // Utility function for component class merging
 export { cn } from '@/lib/utils'
