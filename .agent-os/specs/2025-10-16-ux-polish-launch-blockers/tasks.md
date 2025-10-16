@@ -50,15 +50,15 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.10 Verify all validation and tooltip tests pass
 
 - [ ] 5. Profile Completion Widget & Account Conversion
-  - [ ] 5.1 Write tests for ProfileCompletionWidget calculation logic and percentage thresholds
-  - [ ] 5.2 Create ProfileCompletionWidget component for dashboard with progress bar
-  - [ ] 5.3 Implement completion percentage calculation from TherapistProfile and Settings (required/important/compliance fields)
-  - [ ] 5.4 Add progress bar with color coding (red 0-50%, yellow 51-79%, green 80-100%)
-  - [ ] 5.5 Display prioritized list of missing fields with quick-link navigation to settings tabs
-  - [ ] 5.6 Create /settings/account-upgrade page with confirmation modal and checklist
-  - [ ] 5.7 Write tests for account upgrade API endpoint validation and data archival
-  - [ ] 5.8 Create POST /api/settings/account/upgrade endpoint with checklist validation
-  - [ ] 5.9 Implement upgrade logic: validate checklist, archive test data to ArchivedData, update accountType TEST → PRODUCTION
-  - [ ] 5.10 Add "Upgrade to Production" button in Settings (TEST accounts only, visible in sidebar/banner)
-  - [ ] 5.11 Add email confirmation for successful production activation
-  - [ ] 5.12 Verify widget displays correctly, upgrade flow completes successfully, and all tests pass
+  - [x] 5.1 Write tests for ProfileCompletionWidget calculation logic and percentage thresholds
+  - [x] 5.2 Create ProfileCompletionWidget component for dashboard with progress bar
+  - [x] 5.3 Implement completion percentage calculation from TherapistProfile and Settings (required/important/compliance fields)
+  - [x] 5.4 Add progress bar with color coding (red 0-50%, yellow 51-79%, green 80-100%)
+  - [x] 5.5 Display prioritized list of missing fields with quick-link navigation to settings tabs
+  - [x] 5.6 Create /settings/account-upgrade page with confirmation modal and checklist
+  - [x] 5.7 Write tests for account upgrade API endpoint validation and data archival
+  - [x] 5.8 Create POST /api/settings/account/upgrade endpoint with checklist validation
+  - [x] 5.9 Implement upgrade logic: validate checklist, archive test data to ArchivedData, update accountType TEST → PRODUCTION
+  - [x] 5.10 Add "Upgrade to Production" button in Settings (TEST accounts only, visible in sidebar/banner)
+  - [x] 5.11 Add email confirmation for successful production activation
+  - [x] 5.12 Verify widget displays correctly, upgrade flow completes successfully, and all tests pass
