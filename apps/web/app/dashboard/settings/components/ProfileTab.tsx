@@ -3,8 +3,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from '@myoflow/lib'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Label, Input } from '@/components/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, FormField } from '@/components/ui'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import {
+  assertValidAustrianPostalCode,
+  assertValidAustrianIban,
+  assertValidVatNumber,
+  assertValidChamberId,
+} from '@myoflow/lib'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { InvoiceBrandingWidget } from './InvoiceBrandingWidget'
 
@@ -110,6 +116,64 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
       })
     }
   }, [profileData, form])
+
+  const toTrimmedString = (value: unknown) =>
+    typeof value === 'string' ? value.trim() : value == null ? '' : String(value).trim()
+
+  const validatePostalCode = (value: unknown) => {
+    const trimmed = toTrimmedString(value)
+    if (!trimmed) {
+      return 'Postal code is required'
+    }
+    try {
+      assertValidAustrianPostalCode(trimmed)
+      return null
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid Austrian postal code'
+    }
+  }
+
+  const validateChamberId = (value: unknown) => {
+    const trimmed = toTrimmedString(value)
+    if (!trimmed) {
+      return null
+    }
+    try {
+      assertValidChamberId(trimmed)
+      return null
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid chamber registration number'
+    }
+  }
+
+  const validateVatNumber = (value: unknown) => {
+    const trimmed = toTrimmedString(value)
+    if (!trimmed) {
+      if (form.getValues('vatStatus') === 'KLEINUNTERNEHMER') {
+        return null
+      }
+      return 'VAT / UID number is required for the selected VAT status'
+    }
+    try {
+      assertValidVatNumber(trimmed)
+      return null
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid VAT / UID number'
+    }
+  }
+
+  const validateIban = (value: unknown) => {
+    const trimmed = toTrimmedString(value)
+    if (!trimmed) {
+      return null
+    }
+    try {
+      assertValidAustrianIban(trimmed)
+      return null
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid Austrian IBAN'
+    }
+  }
 
   const handleSubmit = form.handleSubmit(async (values: FormValues) => {
     setSaveError(null)
@@ -232,115 +296,215 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
               <section className="space-y-4">
                 <h3 className="text-lg font-medium">Business Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="business-name">Practice Name</Label>
-                    <Input id="business-name" {...form.register('businessName')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="business-email">Business Email</Label>
-                    <Input id="business-email" type="email" {...form.register('businessEmail')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="business-phone">Business Phone</Label>
-                    <Input id="business-phone" {...form.register('businessPhone')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="business-website">Business Website</Label>
-                    <Input id="business-website" {...form.register('businessWebsite')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="license-number">Chamber Registration</Label>
-                    <Input id="license-number" {...form.register('licenseNumber')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="uid-number">UID Number</Label>
-                    <Input
-                      id="uid-number"
-                      placeholder="ATU12345678"
-                      {...form.register('uidNumber')}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="iban">IBAN</Label>
-                    <Input id="iban" placeholder="AT61 1904 3002 3457 3201" {...form.register('iban')} />
-                  </div>
+                  <FormField
+                    name="businessName"
+                    control={form.control}
+                    label="Practice Name"
+                    renderInput={({ field }) => (
+                      <Input id="business-name" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessEmail"
+                    control={form.control}
+                    label="Business Email"
+                    renderInput={({ field }) => (
+                      <Input id="business-email" type="email" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessPhone"
+                    control={form.control}
+                    label="Business Phone"
+                    renderInput={({ field }) => (
+                      <Input id="business-phone" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessWebsite"
+                    control={form.control}
+                    label="Business Website"
+                    hint="Example: https://www.praxis-mueller.at"
+                    renderInput={({ field }) => (
+                      <Input id="business-website" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="licenseNumber"
+                    control={form.control}
+                    label="Chamber Registration"
+                    hint="e.g. WKT1234"
+                    tooltip="chamberId"
+                    onBlurValidate={validateChamberId}
+                    renderInput={({ field }) => (
+                      <Input id="license-number" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    key={form.watch('vatStatus')}
+                    name="uidNumber"
+                    control={form.control}
+                    label="UID Number"
+                    hint="Required if VAT registered"
+                    tooltip="vatNumber"
+                    onBlurValidate={validateVatNumber}
+                    renderInput={({ field }) => (
+                      <Input
+                        id="uid-number"
+                        placeholder="ATU12345678"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
+                    )}
+                  />
+                  <FormField
+                    name="iban"
+                    control={form.control}
+                    label="IBAN"
+                    hint="Example: AT48 3200 0000 1234 5864"
+                    tooltip="iban"
+                    onBlurValidate={validateIban}
+                    renderInput={({ field }) => (
+                      <Input
+                        id="iban"
+                        placeholder="AT61 1904 3002 3457 3201"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
+                    )}
+                  />
                 </div>
               </section>
 
               <section className="space-y-4">
                 <h3 className="text-lg font-medium">Business Address</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="address-line-1">Address Line 1</Label>
-                    <Input id="address-line-1" {...form.register('businessAddressLine1')} />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="address-line-2">Address Line 2 (Optional)</Label>
-                    <Input id="address-line-2" {...form.register('businessAddressLine2')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" {...form.register('businessCity')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="postal-code">Postal Code</Label>
-                    <Input id="postal-code" {...form.register('businessPostalCode')} />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input id="country" {...form.register('businessCountry')} />
-                  </div>
+                  <FormField
+                    name="businessAddressLine1"
+                    control={form.control}
+                    label="Address Line 1"
+                    className="md:col-span-2"
+                    renderInput={({ field }) => (
+                      <Input id="address-line-1" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessAddressLine2"
+                    control={form.control}
+                    label="Address Line 2 (Optional)"
+                    className="md:col-span-2"
+                    renderInput={({ field }) => (
+                      <Input id="address-line-2" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessCity"
+                    control={form.control}
+                    label="City"
+                    renderInput={({ field }) => (
+                      <Input id="city" {...field} value={field.value ?? ''} />
+                    )}
+                  />
+                  <FormField
+                    name="businessPostalCode"
+                    control={form.control}
+                    label="Postal Code"
+                    hint="Austrian postal codes are four digits"
+                    tooltip="postalCode"
+                    onBlurValidate={validatePostalCode}
+                    renderInput={({ field }) => (
+                      <Input id="postal-code" {...field} value={field.value ?? ''} placeholder="4020" />
+                    )}
+                  />
+                  <FormField
+                    name="businessCountry"
+                    control={form.control}
+                    label="Country"
+                    renderInput={({ field }) => (
+                      <Input id="country" {...field} value={field.value ?? ''} />
+                    )}
+                  />
                 </div>
               </section>
 
               <section className="space-y-4">
                 <h3 className="text-lg font-medium">Professional Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="designation">Professional Title</Label>
-                    <select
-                      id="designation"
-                      {...form.register('designation')}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {DESIGNATION_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="vat-status">VAT Status</Label>
-                    <select
-                      id="vat-status"
-                      {...form.register('vatStatus')}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {VAT_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="public-profile-slug">Public Profile Slug</Label>
-                    <Input
-                      id="public-profile-slug"
-                      placeholder="praxis-mueller"
-                      {...form.register('publicProfileSlug')}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="public-profile-description">Public Profile Description</Label>
-                    <textarea
-                      id="public-profile-description"
-                      rows={4}
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      {...form.register('publicProfileDescription')}
-                    />
-                  </div>
+                  <FormField
+                    name="designation"
+                    control={form.control}
+                    label="Professional Title"
+                    renderInput={({ field }) => (
+                      <select
+                        id="designation"
+                        {...field}
+                        value={field.value ?? DESIGNATION_OPTIONS[0].value}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {DESIGNATION_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                  <FormField
+                    name="vatStatus"
+                    control={form.control}
+                    label="VAT Status"
+                    tooltip="kleinunternehmer"
+                    renderInput={({ field }) => (
+                      <select
+                        id="vat-status"
+                        {...field}
+                        value={field.value ?? VAT_OPTIONS[0].value}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(event) => {
+                          field.onChange(event)
+                          if (event.target.value === 'KLEINUNTERNEHMER') {
+                            form.setValue('uidNumber', '')
+                          }
+                        }}
+                      >
+                        {VAT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  />
+                  <FormField
+                    name="publicProfileSlug"
+                    control={form.control}
+                    label="Public Profile Slug"
+                    className="md:col-span-2"
+                    hint="Used for your public booking page URL"
+                    renderInput={({ field }) => (
+                      <Input
+                        id="public-profile-slug"
+                        placeholder="praxis-mueller"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
+                    )}
+                  />
+                  <FormField
+                    name="publicProfileDescription"
+                    control={form.control}
+                    label="Public Profile Description"
+                    className="md:col-span-2"
+                    renderInput={({ field }) => (
+                      <textarea
+                        id="public-profile-description"
+                        rows={4}
+                        {...field}
+                        value={field.value ?? ''}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
+                  />
                 </div>
               </section>
 

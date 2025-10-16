@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from '@myoflow/lib'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Label, Input } from '@/components/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Label, Input, FormField, InfoTooltip } from '@/components/ui'
 import { Shield, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { assertValidVatNumber } from '@myoflow/lib'
 import { useSettingsEndpoint } from '../lib/api-config'
 import { RevenueStatusWidget } from './RevenueStatusWidget'
 import { TaxValidationWidget } from './TaxValidationWidget'
@@ -76,6 +77,25 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
       })
     }
   }, [complianceResponse, form])
+
+  const toTrimmedString = (value: unknown) =>
+    typeof value === 'string' ? value.trim() : value == null ? '' : String(value).trim()
+
+  const validateComplianceVatNumber = (value: unknown) => {
+    if (!form.getValues('vatRegistered')) {
+      return null
+    }
+    const trimmed = toTrimmedString(value)
+    if (!trimmed) {
+      return 'VAT / UID number is required when VAT registered'
+    }
+    try {
+      assertValidVatNumber(trimmed)
+      return null
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid VAT / UID number'
+    }
+  }
 
   const handleSubmit = form.handleSubmit(async (values: FormValues) => {
     setSaveError(null)
@@ -199,11 +219,14 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="font-medium">VAT Registered</Label>
-                    <p className="text-sm text-gray-600">
-                      Toggle if you have registered for Austrian VAT (UID)
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <div>
+                      <Label className="font-medium">VAT Registered</Label>
+                      <p className="text-sm text-gray-600">
+                        Toggle if you have registered for Austrian VAT (UID)
+                      </p>
+                    </div>
+                    <InfoTooltip fieldKey="vatNumber" className="mt-1" />
                   </div>
                   <input
                     type="checkbox"
@@ -216,11 +239,14 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="font-medium">Kleinunternehmer</Label>
-                    <p className="text-sm text-gray-600">
-                      Applies to businesses under €55,000 annual revenue
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <div>
+                      <Label className="font-medium">Kleinunternehmer</Label>
+                      <p className="text-sm text-gray-600">
+                        Applies to businesses under €55,000 annual revenue
+                      </p>
+                    </div>
+                    <InfoTooltip fieldKey="kleinunternehmer" className="mt-1" />
                   </div>
                   <input
                     type="checkbox"
@@ -235,15 +261,25 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
                     }}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="vatNumber">VAT / UID Number</Label>
-                  <Input
-                    id="vatNumber"
-                    placeholder="ATU12345678"
-                    disabled={!form.watch('vatRegistered')}
-                    {...form.register('vatNumber')}
-                  />
-                </div>
+                <FormField
+                  key={form.watch('vatRegistered') ? 'vat-on' : 'vat-off'}
+                  name="vatNumber"
+                  control={form.control}
+                  label="VAT / UID Number"
+                  hint="Format: ATU12345678"
+                  tooltip="vatNumber"
+                  onBlurValidate={validateComplianceVatNumber}
+                  className="md:col-span-1"
+                  renderInput={({ field }) => (
+                    <Input
+                      id="vatNumber"
+                      placeholder="ATU12345678"
+                      {...field}
+                      value={field.value ?? ''}
+                      disabled={!form.watch('vatRegistered')}
+                    />
+                  )}
+                />
               </section>
 
               <section className="space-y-4">
@@ -270,11 +306,14 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="font-medium">RKSV Enabled</Label>
-                    <p className="text-sm text-gray-600">
-                      Track cash register compliance requirements and audits
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <div>
+                      <Label className="font-medium">RKSV Enabled</Label>
+                      <p className="text-sm text-gray-600">
+                        Track cash register compliance requirements and audits
+                      </p>
+                    </div>
+                    <InfoTooltip fieldKey="rksvThreshold" className="mt-1" />
                   </div>
                   <input
                     type="checkbox"

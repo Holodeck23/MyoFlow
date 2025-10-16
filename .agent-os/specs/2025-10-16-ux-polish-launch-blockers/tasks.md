@@ -38,16 +38,16 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.8 Verify banner displays correctly for all account types and tests pass
 
 - [ ] 4. Field Validation Framework & Tooltips
-  - [ ] 4.1 Write validator tests for Chamber ID and Logo URL validators
-  - [ ] 4.2 Create Chamber ID validator in packages/lib/src/validation/chamber.ts
-  - [ ] 4.3 Create Logo URL validator in packages/lib/src/validation/logo.ts (format/size checks)
-  - [ ] 4.4 Export new validators in packages/lib/src/validation/index.ts
-  - [ ] 4.5 Create InfoTooltip component using Radix UI with Austrian compliance content
-  - [ ] 4.6 Create reusable FormField component with inline validation and success indicators
-  - [ ] 4.7 Integrate existing IBAN/VAT/Postal validators into settings forms (Profile, Tax, Branding)
-  - [ ] 4.8 Add info icons and tooltips to all complex compliance fields (VAT, Chamber ID, Kleinunternehmer, RKSV, IBAN)
-  - [ ] 4.9 Verify validation fires on blur, shows errors, and displays format hints/examples
-  - [ ] 4.10 Verify all validation and tooltip tests pass
+  - [x] 4.1 Write validator tests for Chamber ID and Logo URL validators
+  - [x] 4.2 Create Chamber ID validator in packages/lib/src/validation/chamber.ts
+  - [x] 4.3 Create Logo URL validator in packages/lib/src/validation/logo.ts (format/size checks)
+  - [x] 4.4 Export new validators in packages/lib/src/validation/index.ts
+  - [x] 4.5 Create InfoTooltip component using Radix UI with Austrian compliance content
+  - [x] 4.6 Create reusable FormField component with inline validation and success indicators
+  - [x] 4.7 Integrate existing IBAN/VAT/Postal validators into settings forms (Profile, Tax, Branding)
+  - [x] 4.8 Add info icons and tooltips to all complex compliance fields (VAT, Chamber ID, Kleinunternehmer, RKSV, IBAN)
+  - [x] 4.9 Verify validation fires on blur, shows errors, and displays format hints/examples
+  - [x] 4.10 Verify all validation and tooltip tests pass
 
 - [ ] 5. Profile Completion Widget & Account Conversion
   - [ ] 5.1 Write tests for ProfileCompletionWidget calculation logic and percentage thresholds
