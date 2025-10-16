@@ -1,3 +1,5 @@
 export * from './postal'
 export * from './vat'
 export * from './iban'
+export * from './chamber'
+export * from './logo'
