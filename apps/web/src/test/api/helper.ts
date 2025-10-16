@@ -21,8 +21,15 @@ const mockPrisma = vi.hoisted(() => ({
     update: vi.fn(),
     create: vi.fn(),
   },
-  settings: {
+  travelSettings: {
     findUnique: vi.fn(),
+    upsert: vi.fn(),
+    update: vi.fn(),
+    create: vi.fn(),
+  },
+  taxComplianceSettings: {
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
     update: vi.fn(),
     create: vi.fn(),
   },
