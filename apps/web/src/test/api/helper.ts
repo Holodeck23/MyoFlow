@@ -6,6 +6,8 @@ const mockPrisma = vi.hoisted(() => ({
   user: {
     findUnique: vi.fn().mockResolvedValue({
         id: 'user-1',
+        role: 'OWNER',
+        accountType: 'TEST',
         Therapist: {
             id: 'therapist-1',
             settings: {
@@ -13,7 +15,12 @@ const mockPrisma = vi.hoisted(() => ({
             }
         }
     }),
-    upsert: vi.fn(),
+    upsert: vi.fn().mockResolvedValue({
+      id: 'user-1',
+      email: 'therapist@example.com',
+      role: 'OWNER',
+      accountType: 'TEST',
+    }),
   },
   therapist: {
     findUnique: vi.fn(),

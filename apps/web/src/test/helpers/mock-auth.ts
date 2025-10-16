@@ -9,6 +9,7 @@ export function setupEnsureTherapistAccountMock(
       email: 'therapist@example.com',
       name: 'Test Therapist',
       role: 'OWNER',
+      accountType: 'TEST',
     }
 
     // Mock auth() call
@@ -16,6 +17,9 @@ export function setupEnsureTherapistAccountMock(
       user: {
         email: mockUser.email,
         name: mockUser.name,
+        accountType: 'TEST',
+        isTestAccount: true,
+        isAdmin: false,
       },
     })
 
