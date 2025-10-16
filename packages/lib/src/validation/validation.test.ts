@@ -6,7 +6,13 @@ import {
   normalizeAustrianIban,
   assertValidAustrianIban,
   isValidAustrianIban,
-} from './';
+  assertValidChamberId,
+  isValidChamberId,
+  normalizeChamberId,
+  assertValidLogoUrl,
+  isValidLogoUrl,
+  normalizeLogoUrl,
+} from './'
 
 describe('Validation Library', () => {
   describe('Austrian Postal Code', () => {
@@ -48,6 +54,44 @@ describe('Validation Library', () => {
 
     it('should throw an error for invalid IBANs with assert', () => {
         expect(() => assertValidAustrianIban('AT611904400234573200')).toThrow('Invalid Austrian IBAN');
+    });
+  });
+
+  describe('Austrian Chamber ID', () => {
+    it('normalizes chamber IDs', () => {
+      expect(normalizeChamberId('  wkt1234  ')).toBe('WKT1234');
+    });
+
+    it('validates chamber IDs with provincial prefix and digits', () => {
+      expect(isValidChamberId('WKT1234')).toBe(true);
+      expect(isValidChamberId('NÖG98765')).toBe(true);
+    });
+
+    it('rejects invalid chamber IDs', () => {
+      expect(isValidChamberId('12345')).toBe(false);
+      expect(isValidChamberId('W@1234')).toBe(false);
+      expect(() => assertValidChamberId('invalid')).toThrow('Invalid Chamber ID');
+    });
+  });
+
+  describe('Logo URL', () => {
+    it('normalizes logo URLs', () => {
+      expect(normalizeLogoUrl('  https://example.com/logo.png  ')).toBe('https://example.com/logo.png');
+    });
+
+    it('accepts http(s) URLs with image extensions', () => {
+      expect(isValidLogoUrl('https://example.com/logo.png')).toBe(true);
+      expect(isValidLogoUrl('http://cdn.example.com/brand.svg')).toBe(true);
+    });
+
+    it('accepts base64 data URLs', () => {
+      expect(isValidLogoUrl('data:image/png;base64,abcdef')).toBe(true);
+    });
+
+    it('rejects invalid URLs', () => {
+      expect(isValidLogoUrl('ftp://example.com/logo.png')).toBe(false);
+      expect(isValidLogoUrl('https://example.com/file.pdf')).toBe(false);
+      expect(() => assertValidLogoUrl('not-a-url')).toThrow('Invalid logo URL');
     });
   });
 });

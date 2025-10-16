@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useTranslation } from '@myoflow/lib'
+import { useTranslation, assertValidLogoUrl } from '@myoflow/lib'
 import {
   Card,
   CardContent,
@@ -11,6 +11,7 @@ import {
   Button,
   Label,
   Input,
+  InfoTooltip,
 } from '@/components/ui'
 import { AlertCircle, Image as ImageIcon, FileText, CheckCircle } from 'lucide-react'
 
@@ -151,12 +152,35 @@ export function InvoiceBrandingWidget() {
 
         {/* Logo URL */}
         <div className="space-y-2">
-          <Label htmlFor="logo-url">Invoice Logo URL (Optional)</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="logo-url">Invoice Logo URL (Optional)</Label>
+            <InfoTooltip fieldKey="logoUrl" />
+          </div>
           <Input
             id="logo-url"
             type="url"
             value={formData.invoiceLogoUrl || ''}
-            onChange={(e) => handleChange('invoiceLogoUrl', e.target.value || null)}
+            onChange={(event) => {
+              setError(null)
+              handleChange('invoiceLogoUrl', event.target.value || null)
+            }}
+            onBlur={() => {
+              const value = formData.invoiceLogoUrl?.trim()
+              if (!value) {
+                setError(null)
+                return
+              }
+              try {
+                assertValidLogoUrl(value)
+                setError(null)
+              } catch (validationError) {
+                setError(
+                  validationError instanceof Error
+                    ? validationError.message
+                    : 'Invalid logo URL (use https:// or data URL)'
+                )
+              }
+            }}
             placeholder="https://example.com/logo.png"
           />
           <p className="text-xs text-gray-500">
