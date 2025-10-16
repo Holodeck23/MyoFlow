@@ -6,7 +6,7 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
-    exclude: ['**/node_modules/**', '**/e2e/**', '**/*.config.*'],
+    exclude: ['**/node_modules/**', '**/e2e/**', '**/tests/**', '**/*.config.*'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -17,6 +17,7 @@ export default defineConfig({
         '**/*.d.ts',
         'src/test/**',
         'e2e/**',
+        'tests/**',
         'playwright.config.ts',
       ],
       thresholds: {
