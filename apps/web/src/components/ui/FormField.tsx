@@ -5,7 +5,8 @@ import { Controller, type ControllerProps, type FieldValues } from 'react-hook-f
 import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Label } from './Label'
-import { InfoTooltip, type InfoTooltipProps } from './InfoTooltip'
+import { InfoTooltip } from './InfoTooltip'
+import type { InfoTooltipProps } from './InfoTooltip'
 
 type ValidationResult = string | null | undefined
 
@@ -61,7 +62,9 @@ export function FormField<TFieldValues extends FieldValues>({
             setManualError(validationResult ? String(validationResult) : null)
           }
           field.onBlur() // preserve react-hook-form onBlur
-          containerOnBlur?.(event)
+          if (containerOnBlur) {
+            containerOnBlur(event as unknown as React.FocusEvent<HTMLDivElement>)
+          }
         }
 
         const tooltipProps = (() => {
@@ -86,7 +89,7 @@ export function FormField<TFieldValues extends FieldValues>({
             {renderInput({
               field: {
                 ...field,
-                onBlur: handleBlur,
+                onBlur: handleBlur as unknown as typeof field.onBlur,
               },
               fieldState,
               formState,

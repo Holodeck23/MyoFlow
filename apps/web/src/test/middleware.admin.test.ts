@@ -4,7 +4,7 @@ vi.mock('@/lib/auth', () => ({
   default: (handler: any) => handler,
 }))
 import { NextResponse } from 'next/server'
-import { middlewareLogic } from '~/middleware'
+import { middlewareLogic } from '../../middleware'
 import { AccountType } from '@prisma/client'
 import type { MyoFlowSession } from '@/lib/auth'
 

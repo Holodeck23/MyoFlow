@@ -120,9 +120,9 @@ async function archiveTestData(userId: string, therapistId: string) {
     const [clients, appointments, appointmentReminders, invoices, payments, notes, services, serviceRateTemplates, products, orders, vouchers, locations, consents] = await Promise.all([
       tx.client.findMany({ where: { therapistId } }),
       tx.appointment.findMany({ where: { therapistId } }),
-      tx.appointmentReminder.findMany({ where: { appointment: { therapistId } } }),
+      tx.appointmentReminder.findMany({ where: { Appointment: { therapistId } } }),
       tx.invoice.findMany({ where: { therapistId } }),
-      tx.payment.findMany({ where: { invoice: { therapistId } } }),
+      tx.payment.findMany({ where: { Invoice: { therapistId } } }),
       tx.note.findMany({ where: { therapistId } }),
       tx.service.findMany({ where: { therapistId } }),
       tx.serviceRateTemplate.findMany({ where: { therapistId } }),
@@ -159,8 +159,8 @@ async function archiveTestData(userId: string, therapistId: string) {
       },
     })
 
-    await tx.appointmentReminder.deleteMany({ where: { appointment: { therapistId } } })
-    await tx.payment.deleteMany({ where: { invoice: { therapistId } } })
+    await tx.appointmentReminder.deleteMany({ where: { Appointment: { therapistId } } })
+    await tx.payment.deleteMany({ where: { Invoice: { therapistId } } })
     await tx.invoice.deleteMany({ where: { therapistId } })
     await tx.note.deleteMany({ where: { therapistId } })
     await tx.order.deleteMany({ where: { therapistId } })

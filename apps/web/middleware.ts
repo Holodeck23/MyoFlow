@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import auth from '@/lib/auth'
 import { AccountType } from '@prisma/client'
+import type { MyoFlowSession } from '@/lib/auth'
 
 export function middlewareLogic(req: NextRequest) {
   const pathname = req.nextUrl.pathname
-  const session = req.auth
+  const { auth: session } = req as NextRequest & { auth?: MyoFlowSession | null }
 
   if (!session?.user) {
     return NextResponse.next()

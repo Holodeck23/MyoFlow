@@ -12,6 +12,7 @@ import {
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { ProfileCompletionWidget } from './components/ProfileCompletionWidget'
+import type { MyoFlowSession } from '@/lib/auth'
 
 interface TodayAppointment {
   id: string
@@ -40,7 +41,8 @@ interface TodayAppointment {
 
 export default function Dashboard() {
   const { t } = useTranslation()
-  const { data: session } = useSession()
+  const { data: rawSession } = useSession()
+  const session = rawSession as MyoFlowSession | null
   const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([])
 
   useEffect(() => {

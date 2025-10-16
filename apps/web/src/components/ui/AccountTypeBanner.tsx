@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { AlertTriangle, Shield, Code, Info, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { MyoFlowSession } from '@/lib/auth'
 
 type AccountTypeValue = 'TEST' | 'PRODUCTION' | 'ADMIN' | 'DEV'
 
@@ -99,7 +100,8 @@ export function AccountTypeBadge({ accountType, className }: AccountTypeBadgePro
 }
 
 export function AccountTypeBanner() {
-  const { data: session, status } = useSession()
+  const { data: rawSession, status } = useSession()
+  const session = rawSession as MyoFlowSession | null
   const accountType = useMemo(
     () => (session?.user?.accountType as AccountTypeValue | undefined) ?? undefined,
     [session?.user?.accountType]

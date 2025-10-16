@@ -301,7 +301,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     control={form.control}
                     label="Practice Name"
                     renderInput={({ field }) => (
-                      <Input id="business-name" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="business-name"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -309,7 +313,12 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     control={form.control}
                     label="Business Email"
                     renderInput={({ field }) => (
-                      <Input id="business-email" type="email" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="business-email"
+                        type="email"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -317,7 +326,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     control={form.control}
                     label="Business Phone"
                     renderInput={({ field }) => (
-                      <Input id="business-phone" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="business-phone"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -326,7 +339,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     label="Business Website"
                     hint="Example: https://www.praxis-mueller.at"
                     renderInput={({ field }) => (
-                      <Input id="business-website" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="business-website"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -337,7 +354,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     tooltip="chamberId"
                     onBlurValidate={validateChamberId}
                     renderInput={({ field }) => (
-                      <Input id="license-number" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="license-number"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -353,7 +374,7 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                         id="uid-number"
                         placeholder="ATU12345678"
                         {...field}
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'string' ? field.value : ''}
                       />
                     )}
                   />
@@ -369,7 +390,7 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                         id="iban"
                         placeholder="AT61 1904 3002 3457 3201"
                         {...field}
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'string' ? field.value : ''}
                       />
                     )}
                   />
@@ -385,7 +406,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     label="Address Line 1"
                     className="md:col-span-2"
                     renderInput={({ field }) => (
-                      <Input id="address-line-1" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="address-line-1"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -394,7 +419,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     label="Address Line 2 (Optional)"
                     className="md:col-span-2"
                     renderInput={({ field }) => (
-                      <Input id="address-line-2" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="address-line-2"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -402,7 +431,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     control={form.control}
                     label="City"
                     renderInput={({ field }) => (
-                      <Input id="city" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="city"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                   <FormField
@@ -413,7 +446,12 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     tooltip="postalCode"
                     onBlurValidate={validatePostalCode}
                     renderInput={({ field }) => (
-                      <Input id="postal-code" {...field} value={field.value ?? ''} placeholder="4020" />
+                      <Input
+                        id="postal-code"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                        placeholder="4020"
+                      />
                     )}
                   />
                   <FormField
@@ -421,7 +459,11 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                     control={form.control}
                     label="Country"
                     renderInput={({ field }) => (
-                      <Input id="country" {...field} value={field.value ?? ''} />
+                      <Input
+                        id="country"
+                        {...field}
+                        value={typeof field.value === 'string' ? field.value : ''}
+                      />
                     )}
                   />
                 </div>
@@ -486,7 +528,7 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                         id="public-profile-slug"
                         placeholder="praxis-mueller"
                         {...field}
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'string' ? field.value : ''}
                       />
                     )}
                   />
@@ -500,7 +542,7 @@ export function ProfileTab({ isActive = false }: ProfileTabProps) {
                         id="public-profile-description"
                         rows={4}
                         {...field}
-                        value={field.value ?? ''}
+                        value={typeof field.value === 'string' ? field.value : ''}
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     )}
