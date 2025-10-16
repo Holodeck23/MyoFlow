@@ -1,16 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import auth from '@/lib/auth'
+import { AccountType } from '@prisma/client'
 
-export default auth(async function middleware(req: NextRequest) {
-  // Add your middleware logic here
-  // For example, redirect if not authenticated
-  // if (!req.auth) {
-  //   return NextResponse.redirect(new URL('/auth/sign-in', req.url))
-  // }
+export function middlewareLogic(req: NextRequest) {
+  const pathname = req.nextUrl.pathname
+  const session = req.auth
+
+  if (!session?.user) {
+    return NextResponse.next()
+  }
+
+  const accountType = session.user.accountType
+  const isAdminAccount = accountType === AccountType.ADMIN
+  const isAdminRoute = pathname.startsWith('/admin')
+
+  if (isAdminAccount && !isAdminRoute) {
+    const redirectUrl = new URL('/admin', req.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  if (!isAdminAccount && isAdminRoute) {
+    const redirectUrl = new URL('/dashboard', req.url)
+    redirectUrl.searchParams.set('error', 'unauthorized')
+    return NextResponse.redirect(redirectUrl)
+  }
+
   return NextResponse.next()
-})
+}
 
-// See "Matching Paths" below to learn more
+export default auth(middlewareLogic)
+
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth/sign-in'],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
 }

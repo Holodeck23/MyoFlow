@@ -12,6 +12,7 @@ model User {
   email                  String     @unique
   name                   String?
   role                   Role       @default(OWNER)
+  accountType            AccountType @default(TEST)
   createdAt              DateTime   @default(now())
   password               String?
   emailVerified          DateTime?  @map("emailVerified") @db.Timestamp(6)
@@ -24,11 +25,13 @@ model User {
   stripeCustomerId       String?    @map("stripeCustomerId")
   stripeSubscriptionId   String?    @map("stripeSubscriptionId")
   Therapist              Therapist?
+  ArchivedData           ArchivedData[]
 
   @@index([emailVerificationToken], map: "idx_user_email_verification")
   @@index([passwordResetToken], map: "idx_user_password_reset")
   @@index([subscriptionStatus], map: "idx_user_subscription_status")
   @@index([trialEndsAt], map: "idx_user_trial_ends")
+  @@index([accountType], map: "idx_user_account_type")
 }
 
 model Therapist {
@@ -562,6 +565,18 @@ model RateLimit {
   @@index([key, createdAt])
 }
 
+model ArchivedData {
+  id         String   @id @default(cuid())
+  userId     String
+  data       Json
+  note       String?
+  archivedAt DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_archived_data_user")
+  @@index([archivedAt], map: "idx_archived_data_archived_at")
+}
+
 enum Role {
   OWNER
   STAFF
@@ -570,6 +585,13 @@ enum Role {
   SUPER_ADMIN
   SUPPORT
   FINANCE
+}
+
+enum AccountType {
+  TEST
+  PRODUCTION
+  ADMIN
+  DEV
 }
 
 enum SubscriptionStatus {
