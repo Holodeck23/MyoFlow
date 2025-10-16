@@ -113,14 +113,11 @@ export function ProfileCompletionWidget() {
   }, [])
 
   const shouldRender = useMemo(() => {
-    if (loading) {
-      return true
-    }
     if (isDismissed) {
       return false
     }
     return score < 100
-  }, [loading, isDismissed, score])
+  }, [isDismissed, score])
 
   const progressClasses = useMemo(() => getProgressClasses(score), [score])
 
@@ -134,6 +131,17 @@ export function ProfileCompletionWidget() {
   const handleNavigate = (category: string) => {
     const tab = resolveSettingsTab(category)
     router.push(`/dashboard/settings?tab=${tab}`)
+  }
+
+  if (loading) {
+    return (
+      <Card className="border border-blue-100 bg-white">
+        <CardContent className="flex items-center gap-3 p-4 text-sm text-blue-800">
+          <AlertTriangle className="h-4 w-4 animate-pulse text-blue-500" />
+          <span>Evaluating your profile completion…</span>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (!shouldRender || score === 100) {
