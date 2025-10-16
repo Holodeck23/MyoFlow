@@ -54,7 +54,7 @@ vi.mock('../../lib/auth', () => ({
 }));
 
 vi.mock('@myoflow/db', async (importOriginal) => {
-    const actual = await importOriginal();
+    const actual = await importOriginal() as any;
     return {
         ...actual,
         prisma: mockPrisma,
