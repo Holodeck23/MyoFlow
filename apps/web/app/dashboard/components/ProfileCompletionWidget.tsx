@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AlertTriangle, CheckCircle2, X, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/components/ui'
+import type { MyoFlowSession } from '@/lib/auth'
 
 interface CompletionResponse {
   profileCompletion: {
@@ -56,7 +57,8 @@ function resolveSettingsTab(category: string) {
 
 export function ProfileCompletionWidget() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: rawSession } = useSession()
+  const session = rawSession as MyoFlowSession | null
   const [loading, setLoading] = useState(true)
   const [score, setScore] = useState(0)
   const [missingItems, setMissingItems] = useState<MissingItem[]>([])

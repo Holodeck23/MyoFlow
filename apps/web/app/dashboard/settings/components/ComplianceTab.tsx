@@ -275,7 +275,7 @@ export function ComplianceTab({ isActive = false }: ComplianceTabProps) {
                       id="vatNumber"
                       placeholder="ATU12345678"
                       {...field}
-                      value={field.value ?? ''}
+                      value={typeof field.value === 'string' ? field.value : ''}
                       disabled={!form.watch('vatRegistered')}
                     />
                   )}

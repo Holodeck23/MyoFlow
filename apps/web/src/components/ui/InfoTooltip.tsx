@@ -47,7 +47,7 @@ export const TOOLTIP_CONTENT: TooltipContentMap = {
   },
 }
 
-interface InfoTooltipProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface InfoTooltipProps extends React.HTMLAttributes<HTMLDivElement> {
   fieldKey?: keyof typeof TOOLTIP_CONTENT | string
   content?: string
   example?: string

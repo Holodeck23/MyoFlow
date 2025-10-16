@@ -46,7 +46,7 @@ describe('auth callbacks', () => {
       const token = await authConfig.callbacks?.jwt?.({
         token: { sub: 'user-1' } as unknown as MyoFlowToken,
         user: { id: 'user-1' } as any,
-      })
+      } as any)
 
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
@@ -63,7 +63,7 @@ describe('auth callbacks', () => {
 
       const token = await authConfig.callbacks?.jwt?.({
         token: { sub: 'missing-user' } as unknown as MyoFlowToken,
-      })
+      } as any)
 
       expect(token?.accountType).toBe(AccountType.TEST)
       expect(token?.isTestAccount).toBe(true)
@@ -73,26 +73,28 @@ describe('auth callbacks', () => {
 
   describe('session callback', () => {
     it('exposes account type flags on the session user', async () => {
-      const session = await authConfig.callbacks?.session?.({
+      const session = (await authConfig.callbacks?.session?.({
         session: {
           user: {
+            id: 'user-1',
             email: 'therapist@example.com',
             name: 'Therapist Example',
             image: null,
+            role: 'OWNER',
           },
-        } as unknown as MyoFlowSession,
+        },
         token: {
           sub: 'user-1',
           accountType: AccountType.TEST,
           isTestAccount: true,
           isAdmin: false,
           role: 'OWNER',
-        } as unknown as MyoFlowToken,
-      })
+        },
+      } as any)) as MyoFlowSession
 
-      expect(session?.user.accountType).toBe(AccountType.TEST)
-      expect(session?.user.isTestAccount).toBe(true)
-      expect(session?.user.isAdmin).toBe(false)
+      expect(session.user.accountType).toBe(AccountType.TEST)
+      expect(session.user.isTestAccount).toBe(true)
+      expect(session.user.isAdmin).toBe(false)
     })
   })
 })

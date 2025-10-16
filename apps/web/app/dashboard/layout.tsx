@@ -6,6 +6,7 @@ import { Sidebar } from '@/app/components/Sidebar'
 import { Button } from '@/components/ui/Button'
 import { LanguageToggle } from '@/components/ui/LanguageToggle'
 import { AccountTypeBadge } from '@/components/ui'
+import type { MyoFlowSession } from '@/lib/auth'
 import { Facebook, Twitter, Instagram, Linkedin, Mail, LogOut } from 'lucide-react'
 import { useTranslation } from '@myoflow/lib'
 
@@ -14,7 +15,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { data: session } = useSession()
+  const { data: rawSession } = useSession()
+  const session = rawSession as MyoFlowSession | null
   const { t, isLoading: translationLoading } = useTranslation()
 
   return (
