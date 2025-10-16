@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
 import { LocaleProvider } from '@myoflow/lib'
 import { RootContent } from '@/app/components/RootContent'
+import { AccountTypeBanner } from '@/components/ui'
 import './globals.css'
 
 // Load Inter font for MyoFlow branding
@@ -29,6 +30,7 @@ export default function RootLayout({
         <SessionProvider>
           <LocaleProvider initialLocale="en">
             <RootContent>
+              <AccountTypeBanner />
               {children}
             </RootContent>
           </LocaleProvider>

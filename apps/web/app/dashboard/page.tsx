@@ -1,7 +1,7 @@
 'use client'
 
 import { formatAustrianCurrency, useTranslation } from '@myoflow/lib'
-import { Card, CardContent } from '@/components/ui'
+import { Card, CardContent, Button } from '@/components/ui'
 import {
   Calendar,
   Euro,
@@ -11,6 +11,8 @@ import {
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { ProfileCompletionWidget } from './components/ProfileCompletionWidget'
+import type { MyoFlowSession } from '@/lib/auth'
 
 interface TodayAppointment {
   id: string
@@ -39,7 +41,8 @@ interface TodayAppointment {
 
 export default function Dashboard() {
   const { t } = useTranslation()
-  const { data: session } = useSession()
+  const { data: rawSession } = useSession()
+  const session = rawSession as MyoFlowSession | null
   const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([])
 
   useEffect(() => {
@@ -92,6 +95,31 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <ProfileCompletionWidget />
+
+      {session?.user?.accountType === 'TEST' && (
+        <Card className="border border-yellow-200 bg-yellow-50">
+          <CardContent className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-yellow-900">Ready to go live?</h3>
+              <p className="text-sm text-yellow-800">
+                Upgrade to a production account to remove test data and start working with real clients.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                onClick={() => {
+                  window.location.href = '/settings/account-upgrade'
+                }}
+              >
+                Upgrade to Production
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Kleinunternehmer Status - Most Important */}
       <div className="bg-gradient-to-br from-medical-blue via-blue-600 to-medical-blue-800 rounded-lg p-6 text-white shadow-xl">
         <div className="flex items-center justify-between mb-4">
