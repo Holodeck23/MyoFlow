@@ -28,14 +28,14 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.8 Verify all authentication and routing tests pass
 
 - [ ] 3. Visual Account Type Indicators
-  - [ ] 3.1 Write component tests for AccountTypeBanner with all account types
-  - [ ] 3.2 Create AccountTypeBanner component with color-coded styling (yellow/blue/red/none)
-  - [ ] 3.3 Implement banner for TEST (yellow), DEV (blue), ADMIN (red), PRODUCTION (none)
-  - [ ] 3.4 Add dismiss functionality with sessionStorage persistence per account type
-  - [ ] 3.5 Add tooltip explaining test account with "Upgrade when ready" message and icon
-  - [ ] 3.6 Integrate banner into root layout (apps/web/app/layout.tsx) above all pages
-  - [ ] 3.7 Add account type badge to user menu dropdown with visual indicator
-  - [ ] 3.8 Verify banner displays correctly for all account types and tests pass
+  - [x] 3.1 Write component tests for AccountTypeBanner with all account types
+  - [x] 3.2 Create AccountTypeBanner component with color-coded styling (yellow/blue/red/none)
+  - [x] 3.3 Implement banner for TEST (yellow), DEV (blue), ADMIN (red), PRODUCTION (none)
+  - [x] 3.4 Add dismiss functionality with sessionStorage persistence per account type
+  - [x] 3.5 Add tooltip explaining test account with "Upgrade when ready" message and icon
+  - [x] 3.6 Integrate banner into root layout (apps/web/app/layout.tsx) above all pages
+  - [x] 3.7 Add account type badge to user menu dropdown with visual indicator
+  - [x] 3.8 Verify banner displays correctly for all account types and tests pass
 
 - [ ] 4. Field Validation Framework & Tooltips
   - [ ] 4.1 Write validator tests for Chamber ID and Logo URL validators
