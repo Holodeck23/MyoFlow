@@ -184,12 +184,18 @@ export const authConfig: NextAuthConfig = {
 
       const userId = user?.id || typedToken.sub
 
-      if (userId) {
+      const isEdgeRuntime = typeof process !== 'undefined' && process.env.NEXT_RUNTIME === 'edge'
+
+      if (userId && !isEdgeRuntime) {
         const context = await resolveAccountContext(userId)
 
         accountType = context.accountType ?? DEFAULT_ACCOUNT_TYPE
         role = context.role || 'OWNER'
         therapistId = context.therapistId ?? therapistId
+      }
+
+      if (isEdgeRuntime && typedToken?.accountType) {
+        accountType = typedToken.accountType
       }
 
       if (user && (user as any).organizationId) {
