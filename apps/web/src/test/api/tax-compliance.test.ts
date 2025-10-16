@@ -22,22 +22,21 @@ describe('Settings API - Tax Compliance', () => {
     const request = new Request('http://localhost:3000/api/settings/tax-compliance', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uidNumber: '12345678' }),
+        body: JSON.stringify({ vatNumber: '12345678' }),
     });
 
     const response = await PUT(request as NextRequest);
 
-
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toContain('Invalid Austrian VAT number');
+    expect(body.error).toContain('Invalid VAT/UID number');
   });
 
   it('should return 400 if VAT and Kleinunternehmer are both true', async () => {
     const request = new Request('http://localhost:3000/api/settings/tax-compliance', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vatStatus: 'VAT_REGISTERED', kleinunternehmer: true }),
+        body: JSON.stringify({ vatRegistered: true, kleinunternehmerActive: true }),
     });
 
     const response = await PUT(request as NextRequest);

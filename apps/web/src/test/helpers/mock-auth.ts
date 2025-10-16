@@ -28,5 +28,20 @@ export function setupEnsureTherapistAccountMock(
     // Mock therapist.findFirst (used by requireTherapist in GET)
     mockPrisma.therapist.findFirst.mockResolvedValue(therapist)
 
+    // Mock therapist.update (for settings version increment)
+    mockPrisma.therapist.update.mockResolvedValue({ ...therapist, settingsVersion: (therapist.settings?.settingsVersion || 0) + 1 })
+
+    // Mock travelSettings.upsert (used in travel route)
+    if (mockPrisma.travelSettings) {
+      mockPrisma.travelSettings.upsert.mockResolvedValue({ id: 'travel-1', therapistId: therapist.id })
+      mockPrisma.travelSettings.update.mockResolvedValue({ id: 'travel-1', therapistId: therapist.id })
+    }
+
+    // Mock taxComplianceSettings.upsert (used in tax-compliance route)
+    if (mockPrisma.taxComplianceSettings) {
+      mockPrisma.taxComplianceSettings.upsert.mockResolvedValue({ id: 'tax-1', therapistId: therapist.id })
+      mockPrisma.taxComplianceSettings.update.mockResolvedValue({ id: 'tax-1', therapistId: therapist.id })
+    }
+
     return { mockUser, mockTherapist: therapist }
   }
