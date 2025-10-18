@@ -7,7 +7,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Database Foundation - Account Type System
+- [x] 1. Database Foundation - Account Type System
   - [x] 1.1 Write migration tests for AccountType enum and ArchivedData model
   - [x] 1.2 Add AccountType enum to Prisma schema (TEST, PRODUCTION, ADMIN, DEV)
   - [x] 1.3 Add accountType field to User model with TEST default
@@ -17,7 +17,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.7 Add database indexes for performance (accountType, userId, archivedAt)
   - [x] 1.8 Verify migration applied successfully and all tests pass
 
-- [ ] 2. Authentication & Session Extension
+- [x] 2. Authentication & Session Extension
   - [x] 2.1 Write tests for session callbacks with accountType, isTestAccount, isAdmin
   - [x] 2.2 Extend MyoFlowSession interface in auth.ts to include accountType and isTestAccount
   - [x] 2.3 Update NextAuth session callback to populate accountType from database User model
@@ -27,7 +27,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.7 Test admin access restrictions and redirects with different account types
   - [x] 2.8 Verify all authentication and routing tests pass
 
-- [ ] 3. Visual Account Type Indicators
+- [x] 3. Visual Account Type Indicators
   - [x] 3.1 Write component tests for AccountTypeBanner with all account types
   - [x] 3.2 Create AccountTypeBanner component with color-coded styling (yellow/blue/red/none)
   - [x] 3.3 Implement banner for TEST (yellow), DEV (blue), ADMIN (red), PRODUCTION (none)
@@ -37,7 +37,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.7 Add account type badge to user menu dropdown with visual indicator
   - [x] 3.8 Verify banner displays correctly for all account types and tests pass
 
-- [ ] 4. Field Validation Framework & Tooltips
+- [x] 4. Field Validation Framework & Tooltips
   - [x] 4.1 Write validator tests for Chamber ID and Logo URL validators
   - [x] 4.2 Create Chamber ID validator in packages/lib/src/validation/chamber.ts
   - [x] 4.3 Create Logo URL validator in packages/lib/src/validation/logo.ts (format/size checks)
@@ -49,7 +49,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.9 Verify validation fires on blur, shows errors, and displays format hints/examples
   - [x] 4.10 Verify all validation and tooltip tests pass
 
-- [ ] 5. Profile Completion Widget & Account Conversion
+- [x] 5. Profile Completion Widget & Account Conversion
   - [x] 5.1 Write tests for ProfileCompletionWidget calculation logic and percentage thresholds
   - [x] 5.2 Create ProfileCompletionWidget component for dashboard with progress bar
   - [x] 5.3 Implement completion percentage calculation from TherapistProfile and Settings (required/important/compliance fields)

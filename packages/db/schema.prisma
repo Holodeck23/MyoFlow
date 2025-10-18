@@ -94,6 +94,7 @@ model Therapist {
   Clients                    Client[]
   Consents                   Consent[]
   ExportConfigurations       ExportConfiguration[]
+  ExportLogs                 ExportLog[]
   Invoices                   Invoice[]
   Locations                  Location[]
   Notes                      Note[]
@@ -362,10 +363,34 @@ model ExportConfiguration {
   createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt         DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
   Therapist         Therapist          @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ExportLogs        ExportLog[]
 
   @@unique([therapistId, targetSystem, configurationName], map: "ExportConfiguration_unique_name")
   @@index([therapistId, isDefault], map: "idx_export_configuration_default")
   @@index([therapistId, targetSystem], map: "idx_export_configuration_target")
+}
+
+model ExportLog {
+  id                String             @id @default(cuid())
+  therapistId       String             @map("therapist_id")
+  configurationId   String?            @map("configuration_id")
+  exportType        ExportType         @map("export_type")
+  targetSystem      ExportTargetSystem @map("target_system")
+  dateRangeStart    DateTime           @map("date_range_start") @db.Timestamp(6)
+  dateRangeEnd      DateTime           @map("date_range_end") @db.Timestamp(6)
+  invoiceCount      Int                @map("invoice_count")
+  totalRevenueCents Int                @map("total_revenue_cents")
+  exportedAt        DateTime           @default(now()) @map("exported_at") @db.Timestamp(6)
+  fileSize          Int                @map("file_size")
+  fileName          String             @map("file_name")
+  downloadCount     Int                @default(0) @map("download_count")
+  lastDownloadAt    DateTime?          @map("last_download_at") @db.Timestamp(6)
+
+  Therapist      Therapist            @relation(fields: [therapistId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Configuration  ExportConfiguration? @relation(fields: [configurationId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([therapistId, exportedAt], map: "idx_export_log_therapist_date")
+  @@index([exportedAt], map: "idx_export_log_date")
 }
 
 model BusinessHours {
