@@ -16,8 +16,8 @@ describe('ExportConfigurationForm', () => {
 
     expect(markup).toContain('BMD (Austria)')
     expect(markup).toContain('RZL (Austria)')
-    expect(markup).toContain('name="dateRangeStart"')
-    expect(markup).toContain('name="dateRangeEnd"')
+    expect(markup).toContain('id="dateRangeStart"')
+    expect(markup).toContain('id="dateRangeEnd"')
     expect(markup).toContain('Preview Export')
     expect(markup).toContain('Generate &amp; Download')
   })

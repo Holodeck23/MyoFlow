@@ -18,7 +18,7 @@ const formSchema = accountingExportRequestSchema.superRefine((data, ctx) => {
     ctx.addIssue({
       code: 'custom',
       path: ['statusFilter'],
-      message: 'Select at least one invoice status'
+      message: 'Please select at least one invoice status (SENT or PAID)'
     })
   }
 
@@ -150,14 +150,38 @@ export function ExportConfigurationForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor="dateRangeStart">Start Date</Label>
-            <Input id="dateRangeStart" type="date" {...register('dateRangeStart')} />
+            <Controller
+              control={control}
+              name="dateRangeStart"
+              render={({ field }) => (
+                <Input
+                  id="dateRangeStart"
+                  type="date"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
             {errors.dateRangeStart && (
               <p className="text-xs text-red-600">{errors.dateRangeStart.message}</p>
             )}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="dateRangeEnd">End Date</Label>
-            <Input id="dateRangeEnd" type="date" {...register('dateRangeEnd')} />
+            <Controller
+              control={control}
+              name="dateRangeEnd"
+              render={({ field }) => (
+                <Input
+                  id="dateRangeEnd"
+                  type="date"
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
             {errors.dateRangeEnd && (
               <p className="text-xs text-red-600">{errors.dateRangeEnd.message}</p>
             )}

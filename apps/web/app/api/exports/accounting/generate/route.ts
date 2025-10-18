@@ -6,7 +6,10 @@ import {
   accountingExportRequestSchema,
   buildCsvResponsePayload,
   buildExportFilename,
+  buildNoInvoicesMessage,
   fetchInvoicesForAccountingExport,
+  formatDateRangeForMessage,
+  formatStatusList,
   generateCSVForTarget,
   prepareInvoicesForExport,
   resolveDateRange,
@@ -37,7 +40,22 @@ export async function POST(request: NextRequest) {
 
     const requestPayload = parseResult.data
     const statusFilter = resolveStatusFilter(requestPayload)
-    const { start, end } = resolveDateRange(requestPayload)
+
+    let start: Date
+    let end: Date
+    try {
+      ;({ start, end } = resolveDateRange(requestPayload))
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Invalid date range supplied'
+      return NextResponse.json(
+        {
+          success: false,
+          error: message
+        },
+        { status: 400 }
+      )
+    }
 
     const invoices = await fetchInvoicesForAccountingExport(
       prisma,
@@ -65,15 +83,30 @@ export async function POST(request: NextRequest) {
     }
 
     if (preparation.invoices.length === 0) {
+      const totalInvoices = await prisma.invoice.count({
+        where: { therapistId: therapist.id }
+      })
+      const message = buildNoInvoicesMessage({
+        start,
+        end,
+        statuses: statusFilter,
+        totalInvoices
+      })
+
       return NextResponse.json(
         {
-          success: true,
-          message: 'No invoices found in date range',
-          invoiceCount: 0,
-          warningCount: preparation.validationWarnings.length,
-          excludedDraftCount: preparation.excludedDraftCount
+          success: false,
+          error: message,
+          details: {
+            invoiceCount: 0,
+            totalInvoices,
+            warningCount: preparation.validationWarnings.length,
+            excludedDraftCount: preparation.excludedDraftCount,
+            dateRange: formatDateRangeForMessage(start, end),
+            statusFilter: formatStatusList(statusFilter)
+          }
         },
-        { status: 200 }
+        { status: 404 }
       )
     }
 

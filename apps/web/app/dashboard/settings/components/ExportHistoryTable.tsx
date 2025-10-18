@@ -51,7 +51,8 @@ export function ExportHistoryTable({ refreshKey }: ExportHistoryTableProps) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       })
 
       if (!response.ok) {
@@ -63,9 +64,16 @@ export function ExportHistoryTable({ refreshKey }: ExportHistoryTableProps) {
         if (json.success && Array.isArray(json.data)) {
           setHistory(json.data)
           setError(null)
+        } else if (json.success && json.data == null) {
+          setHistory([])
+          setError(null)
         } else {
           setHistory([])
-          setError('No export history found.')
+          setError(
+            typeof json.error === 'string'
+              ? json.error
+              : 'Unable to load export history'
+          )
         }
       }
     } catch (err) {
@@ -124,7 +132,7 @@ export function ExportHistoryTable({ refreshKey }: ExportHistoryTableProps) {
       )
     }
 
-    if (history.length === 0) {
+    if (history.length === 0 && !error) {
       return (
         <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
           <span>No past exports yet. Generate your first CSV to see it appear here.</span>
