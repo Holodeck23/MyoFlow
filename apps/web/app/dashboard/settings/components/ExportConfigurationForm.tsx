@@ -154,12 +154,13 @@ export function ExportConfigurationForm({
               control={control}
               name="dateRangeStart"
               render={({ field }) => (
-                <Input
+                <input
                   id="dateRangeStart"
                   type="date"
                   value={field.value ?? ''}
                   onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
+                  className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               )}
             />
@@ -173,12 +174,13 @@ export function ExportConfigurationForm({
               control={control}
               name="dateRangeEnd"
               render={({ field }) => (
-                <Input
+                <input
                   id="dateRangeEnd"
                   type="date"
                   value={field.value ?? ''}
                   onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
+                  className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               )}
             />
