@@ -3,7 +3,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@myoflow/db'
 import {
   accountingExportRequestSchema,
+  buildNoInvoicesMessage,
   fetchInvoicesForAccountingExport,
+  formatDateRangeForMessage,
+  formatStatusList,
   generatePreviewRows,
   prepareInvoicesForExport,
   resolveDateRange,
@@ -34,7 +37,22 @@ export async function POST(request: NextRequest) {
 
     const requestPayload = parseResult.data
     const statusFilter = resolveStatusFilter(requestPayload)
-    const { start, end } = resolveDateRange(requestPayload)
+
+    let start: Date
+    let end: Date
+    try {
+      ;({ start, end } = resolveDateRange(requestPayload))
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Invalid date range supplied'
+      return NextResponse.json(
+        {
+          success: false,
+          error: message
+        },
+        { status: 400 }
+      )
+    }
 
     const invoices = await fetchInvoicesForAccountingExport(
       prisma,
@@ -45,6 +63,34 @@ export async function POST(request: NextRequest) {
     )
 
     const preparation = prepareInvoicesForExport(invoices)
+
+    if (preparation.invoices.length === 0) {
+      const totalInvoices = await prisma.invoice.count({
+        where: { therapistId: therapist.id }
+      })
+      const message = buildNoInvoicesMessage({
+        start,
+        end,
+        statuses: statusFilter,
+        totalInvoices
+      })
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: message,
+          details: {
+            invoiceCount: 0,
+            totalInvoices,
+            warningCount: preparation.validationWarnings.length,
+            excludedDraftCount: preparation.excludedDraftCount,
+            dateRange: formatDateRangeForMessage(start, end),
+            statusFilter: formatStatusList(statusFilter)
+          }
+        },
+        { status: 404 }
+      )
+    }
     const previewRows = generatePreviewRows(
       requestPayload.targetSystem,
       preparation.invoices,

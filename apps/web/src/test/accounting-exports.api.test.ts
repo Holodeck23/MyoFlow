@@ -7,7 +7,8 @@ const mockHandleAuthErrors = vi.hoisted(() =>
 )
 const mockPrisma = vi.hoisted(() => ({
   invoice: {
-    findMany: vi.fn()
+    findMany: vi.fn(),
+    count: vi.fn()
   },
   exportLog: {
     create: vi.fn(),
@@ -76,6 +77,7 @@ describe('Accounting export API routes', () => {
       user: { id: 'user-1' }
     })
     mockPrisma.invoice.findMany.mockResolvedValue([baseInvoice])
+    mockPrisma.invoice.count.mockResolvedValue(1)
     mockPrisma.exportLog.create.mockResolvedValue(undefined)
     mockPrisma.exportLog.findMany.mockResolvedValue([])
     mockPrisma.exportLog.findFirst.mockResolvedValue(null)
@@ -136,6 +138,7 @@ describe('Accounting export API routes', () => {
 
     it('returns informational response when no invoices found', async () => {
       mockPrisma.invoice.findMany.mockResolvedValue([])
+      mockPrisma.invoice.count.mockResolvedValue(0)
 
       const request = new Request('http://localhost/api/exports/accounting/generate', {
         method: 'POST',
@@ -148,10 +151,13 @@ describe('Accounting export API routes', () => {
       })
 
       const response = await generateExport(request as unknown as NextRequest)
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(404)
       const data = await response.json()
-      expect(data.invoiceCount).toBe(0)
+      expect(data.success).toBe(false)
+      expect(String(data.error)).toContain('No invoices found')
+      expect(String(data.error)).toContain('Sent')
       expect(mockPrisma.exportLog.create).not.toHaveBeenCalled()
+      expect(mockPrisma.invoice.count).toHaveBeenCalled()
     })
   })
 
