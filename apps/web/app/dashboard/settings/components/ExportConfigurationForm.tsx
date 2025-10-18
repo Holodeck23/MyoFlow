@@ -73,6 +73,8 @@ export function ExportConfigurationForm({
     setError,
     clearErrors
   } = useForm<ExportConfigurationFormData>({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       targetSystem: 'BMD',
       dateRangeStart: defaultRange.start,
