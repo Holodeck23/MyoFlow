@@ -158,7 +158,7 @@ export function ExportConfigurationForm({
                   id="dateRangeStart"
                   type="date"
                   value={field.value ?? ''}
-                  onChange={field.onChange}
+                  onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
                 />
               )}
@@ -177,7 +177,7 @@ export function ExportConfigurationForm({
                   id="dateRangeEnd"
                   type="date"
                   value={field.value ?? ''}
-                  onChange={field.onChange}
+                  onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
                 />
               )}
