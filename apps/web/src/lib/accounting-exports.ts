@@ -224,7 +224,7 @@ export function prepareInvoicesForExport(invoices: InvoiceWithRelations[]): Acco
   const validationErrors: InvoiceValidationIssue[] = []
   const validationWarnings: InvoiceValidationWarning[] = []
 
-  mappedInvoices.forEach(invoice => {
+  exportInvoices.forEach(invoice => {
     const result = validateInvoiceForExport(invoice)
 
     if (result.errors.length > 0) {
