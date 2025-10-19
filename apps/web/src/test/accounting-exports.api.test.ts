@@ -114,8 +114,9 @@ describe('Accounting export API routes', () => {
       )
     })
 
-    it('returns validation errors when invoices invalid', async () => {
+    it('silently excludes DRAFT invoices and returns 404 when none exportable', async () => {
       mockPrisma.invoice.findMany.mockResolvedValue([draftInvoice])
+      mockPrisma.invoice.count.mockResolvedValue(1)
 
       const request = new Request('http://localhost/api/exports/accounting/generate', {
         method: 'POST',
@@ -129,10 +130,11 @@ describe('Accounting export API routes', () => {
 
       const response = await generateExport(request as unknown as NextRequest)
 
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(404)
       const data = await response.json()
-      expect(data.error).toBe('Validation failed')
-      expect(data.details.invoiceValidationErrors).toHaveLength(1)
+      expect(String(data.error)).toContain('No invoices found')
+      expect(data.details.excludedDraftCount).toBe(1)
+      expect(data.details.totalInvoices).toBe(1)
       expect(mockPrisma.exportLog.create).not.toHaveBeenCalled()
     })
 
