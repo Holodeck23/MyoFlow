@@ -56,7 +56,9 @@ export function ExportHistoryTable({ refreshKey }: ExportHistoryTableProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Unable to load export history')
+        const errorData = await response.json().catch(() => null)
+        const errorMsg = errorData?.error || `Unable to load export history (${response.status})`
+        throw new Error(errorMsg)
       }
 
       const json = await response.json()
