@@ -147,11 +147,10 @@ export const SETTINGS_TABS: SettingsTabConfig[] = [
     available: true
   },
   {
-    id: 'export',
-    label: 'Export',
+    id: 'accounting',
+    label: 'Accounting Exports',
     icon: Download,
-    description: 'Data export and accounting integration',
-    available: false,
-    comingSoon: 'v1.8'
+    description: 'CSV exports for BMD, RZL, DATEV, and generic formats',
+    available: true
   }
 ]

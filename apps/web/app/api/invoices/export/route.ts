@@ -116,10 +116,16 @@ export async function GET(request: NextRequest) {
 
     // Validate invoices
     const validationErrors: string[] = [];
+    const validationWarnings: string[] = [];
     invoicesForExport.forEach((invoice) => {
-      const errors = validateInvoiceForExport(invoice);
-      if (errors.length > 0) {
-        validationErrors.push(`Invoice ${invoice.number}: ${errors.join(', ')}`);
+      const result = validateInvoiceForExport(invoice);
+      if (result.errors.length > 0) {
+        validationErrors.push(`Invoice ${invoice.number}: ${result.errors.join(', ')}`);
+      }
+      if (result.warnings.length > 0) {
+        validationWarnings.push(
+          `Invoice ${invoice.number}: ${result.warnings.join(', ')}`
+        );
       }
     });
 
@@ -127,7 +133,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Validation errors found',
-          details: validationErrors
+          details: validationErrors,
+          warnings: validationWarnings
         },
         { status: 400 }
       );

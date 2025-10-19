@@ -9,7 +9,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui'
-import { ChevronRight, Home, Download } from 'lucide-react'
+import { ChevronRight, Home } from 'lucide-react'
 import { SETTINGS_TABS } from './lib/icons'
 
 // Lazy load all tab components for code splitting
@@ -19,6 +19,7 @@ const TravelTab = lazy(() => import('./components/TravelTab').then(m => ({ defau
 const PricingTab = lazy(() => import('./components/PricingTab').then(m => ({ default: m.PricingTab })))
 const ComplianceTab = lazy(() => import('./components/ComplianceTab').then(m => ({ default: m.ComplianceTab })))
 const SystemTab = lazy(() => import('./components/SystemTab').then(m => ({ default: m.SystemTab })))
+const AccountingExportsTab = lazy(() => import('./components/AccountingExportsTab').then(m => ({ default: m.AccountingExportsTab })))
 
 // Error boundary for settings tabs
 import ErrorBoundary, { SettingsErrorFallback } from './components/ErrorBoundary'
@@ -36,8 +37,13 @@ export default function SettingsClient() {
   const searchParams = useSearchParams()
   const { t } = useTranslation()
 
-  // Get initial tab from URL params or default to overview
-  const initialTab = searchParams?.get('tab') || 'overview'
+  const settingsTabs = SETTINGS_TABS
+  const firstAvailableTab = settingsTabs.find(tab => tab.available)?.id ?? 'overview'
+  const requestedTab = searchParams?.get('tab') || undefined
+  const initialTab = requestedTab && settingsTabs.some(tab => tab.id === requestedTab && tab.available)
+    ? requestedTab
+    : firstAvailableTab
+
   const [activeTab, setActiveTab] = useState(initialTab)
 
   // State for profile data - only load when needed
@@ -139,9 +145,6 @@ export default function SettingsClient() {
 
     setProfileCompletion(completionItems)
   }
-
-  // Use centralized tab configuration
-  const settingsTabs = SETTINGS_TABS
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
@@ -261,14 +264,12 @@ export default function SettingsClient() {
           </ErrorBoundary>
         </TabsContent>
 
-        <TabsContent value="export" className="space-y-6">
-          <div className="text-center py-12">
-            <Download className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Export Features</h3>
-            <p className="text-gray-600 mb-4">
-              Data export and accounting integration will be available in version 1.8.
-            </p>
-          </div>
+        <TabsContent value="accounting" className="space-y-6">
+          <ErrorBoundary fallback={SettingsErrorFallback}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <AccountingExportsTab />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>
