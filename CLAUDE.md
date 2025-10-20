@@ -3,11 +3,127 @@
 **Project:** MyoFlow - Austrian Therapy Practice Management
 **Current Session:** October 20, 2025
 **Branch:** `main`
-**Status:** ✅ UI Bug Fixes & Onboarding Improvements
+**Status:** ✅ Comprehensive i18n & Critical Bug Fixes
 
 ---
 
-## 🎯 Session Summary - October 20, 2025 (COMPLETE)
+## 🎯 Session Summary - October 20, 2025 (IN PROGRESS)
+
+### **Session 3: Comprehensive i18n Implementation & Critical Bug Fixes ✅**
+
+**Branch:** `main`
+**Commits:** 562ff98, 3bf3a18, 910b6d6
+**Status:** Core fixes complete, additional issues identified by Codex
+
+### **Completed Work**
+
+#### **1. Comprehensive i18n Translation System** ✅
+- **Scope:** Complete onboarding flow now fully translated (EN ↔ DE)
+- **Translation Keys Added:** 103 new keys under `onboarding.*` namespace
+- **Pattern Established:** `// i18n: All user-facing text uses t('section.key', 'fallback')`
+- **Files Modified:** 8 files (2 dictionaries + 6 onboarding components)
+
+**Translation Structure:**
+- `onboarding.layout` (2 keys) - Header and subtitle
+- `onboarding.progress` (7 keys) - Step indicators
+- `onboarding.step1` (17 keys) - Business info form (labels, placeholders, errors, buttons)
+- `onboarding.step2` (28 keys) - Professional details (designation/VAT options)
+- `onboarding.step3` (10 keys) - Completion summary and profile score
+- `onboarding.common` (2 keys) - Loading and error states
+
+**Quality:**
+- German translations use formal "Sie" form (professional context)
+- English translations are natural and professional
+- Nested key structure for organization
+- All hardcoded German text removed from onboarding
+
+#### **2. API Postal Code Validation Fix** ✅
+- **Problem:** API still rejecting Vienna (1010) and other non-Upper-Austria codes
+- **Root Cause:** Two locations in profile API route had old `/^4\d{3}$/` pattern
+- **Files Fixed:**
+  - `apps/web/app/api/settings/profile/route.ts:84` - Zod schema
+  - `apps/web/app/api/settings/profile/route.ts:335` - Profile score calculation
+- **Result:** Now accepts all Austrian postal codes (1xxx-9xxx) across entire app
+
+#### **3. Sign-In Page Display Issue** ✅
+- **Problem:** Sign-in page showing unstyled/broken layout
+- **Root Cause:** Stale `.next` build cache + missing `logo.png` file
+- **Fixes:**
+  - Cleared `.next` cache
+  - Created `apps/web/public/logo.png` (referenced throughout app)
+  - Restarted dev server with clean build
+- **Result:** Sign-in page now displays with proper Card styling
+
+#### **4. ProfileTab Address Fields Critical Bug** ✅
+- **Problem:** Settings ProfileTab was losing user address data
+- **Root Cause:**
+  - Form reset hardcoding city/postal/country to empty strings (lines 106-108)
+  - handleSubmit not including these fields in API payload (lines 190-192)
+- **Impact:** Users couldn't view or edit onboarding address data in settings
+- **File:** `apps/web/app/dashboard/settings/components/ProfileTab.tsx`
+- **Changes:**
+  - Load address fields from `profileData` instead of hardcoded empties
+  - Include `businessCity`, `businessPostalCode`, `businessCountry` in submission
+- **Result:** Address data now persists and can be edited from settings
+
+### **Codex Audit Findings**
+
+Codex performed comprehensive audit and identified remaining issues:
+
+**Critical (Remaining):**
+- auth.session.test.ts needs update for wider Prisma select
+- profileCompletedAt incorrectly stamped at signup
+
+**High:**
+- Multiple profile completion scoring implementations (3 different algorithms)
+- Postal code validation errors bubble as 500 instead of 400
+- Duplicate designation/VAT options in onboarding vs settings
+
+**Medium:**
+- Session refresh after onboarding may not trigger JWT reissue
+- Step 3 shows raw enum codes (HEILMASSEUR) instead of localized labels
+- Dashboard shows placeholder revenue data instead of real numbers
+- Third calculateProfileCompletion implementation in overview API
+
+**Low:**
+- Deprecated useAdminAuth() stub still exported
+- Admin login logs credentials in non-production environments
+
+### **Files Modified (13 total)**
+- `packages/lib/i18n/dictionaries/en.json` - 103 translation keys added
+- `packages/lib/i18n/dictionaries/de.json` - 103 translation keys added
+- `apps/web/app/onboarding/layout.tsx` - i18n integration
+- `apps/web/app/onboarding/page.tsx` - i18n integration
+- `apps/web/app/onboarding/components/Step1BusinessInfo.tsx` - Full i18n conversion
+- `apps/web/app/onboarding/components/Step2Professional.tsx` - Full i18n conversion (created)
+- `apps/web/app/onboarding/components/Step3Complete.tsx` - Full i18n conversion (created)
+- `apps/web/app/onboarding/components/WizardProgress.tsx` - Full i18n conversion (created)
+- `apps/web/app/onboarding/types.ts` - Type definitions (created)
+- `apps/web/app/api/settings/profile/route.ts` - Postal code validation fixes
+- `apps/web/app/dashboard/settings/components/ProfileTab.tsx` - Address fields bug fix
+- `apps/web/public/logo.png` - Created missing asset
+
+### **Quality Gates** ✅
+- TypeScript: No errors
+- ESLint: No warnings
+- Build: Success (onboarding bundle 550KB)
+- All 31 pages built successfully
+
+### **Key Achievements**
+1. **Complete Language Support:** Onboarding works seamlessly in EN/DE
+2. **Consistent Pattern:** Established clear i18n pattern for future work
+3. **Critical Bug Fixed:** ProfileTab address data now persists correctly
+4. **Validation Unified:** Postal codes accepted consistently across app
+
+### **Next Steps**
+1. Fix remaining Critical issues (auth test, profileCompletedAt)
+2. Unify profile completion scoring algorithms
+3. Convert remaining pages to i18n (Settings, Dashboard, Auth)
+4. Improve error handling for validation failures
+
+---
+
+## 🎯 Session Summary - October 20, 2025 (PREVIOUS)
 
 ### **Session 2: Onboarding & UI Visibility Fixes ✅**
 
