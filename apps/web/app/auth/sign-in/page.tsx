@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/Label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { UserPlus, KeyRound } from 'lucide-react'
 import Link from 'next/link'
+import { LanguageToggle } from '@/components/ui/LanguageToggle'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -63,6 +64,9 @@ export default function SignIn() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="max-w-md w-full bg-white shadow-xl border border-gray-200 rounded-lg">
         <CardHeader className="text-center space-y-4 pb-8">
+          <div className="flex justify-end mb-2">
+            <LanguageToggle />
+          </div>
           <div className="mx-auto h-48 w-48 flex items-center justify-center">
             <Image src="/myoflow-logo-full.png" alt="MyoFlow" width={192} height={192} className="h-48 w-48 object-contain drop-shadow-xl" priority />
           </div>

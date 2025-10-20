@@ -87,8 +87,7 @@ export async function POST(request: NextRequest) {
           vatStatus: 'KLEINUNTERNEHMER', // Default for Austria
           businessName: practice || `${firstName} ${lastName} - Therapie`,
           profileCompletionScore: 20, // Basic info provided
-          // Set 30-day trial
-          profileCompletedAt: new Date(),
+          // profileCompletedAt is null initially - will be set when profile reaches 70%+ completion
         }
       })
 
