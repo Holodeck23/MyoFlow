@@ -429,5 +429,108 @@
       "documentation": "Dokumentation",
       "support": "Support kontaktieren"
     }
+  },
+  "onboarding": {
+    "layout": {
+      "header": "Onboarding-Assistent",
+      "subtitle": "Praxisverwaltung für Therapeuten"
+    },
+    "progress": {
+      "stepOf": "Schritt {current} von {total}",
+      "step1Title": "Geschäft",
+      "step1Description": "Adresse festlegen",
+      "step2Title": "Beruf",
+      "step2Description": "Angaben bestätigen",
+      "step3Title": "Fertig",
+      "step3Description": "Loslegen"
+    },
+    "step1": {
+      "title": "Geschäftliche Informationen",
+      "description": "Bitte bestätigen Sie Ihre Praxisadresse. Diese Angaben erscheinen auf Rechnungen und Dokumenten.",
+      "labels": {
+        "businessName": "Praxisname",
+        "businessAddress": "Straße und Hausnummer",
+        "businessPostalCode": "Postleitzahl",
+        "businessCity": "Stadt",
+        "businessCountry": "Land"
+      },
+      "placeholders": {
+        "businessAddress": "Beispiel: Hauptstraße 12",
+        "businessPostalCode": "1010",
+        "businessCity": "Ort"
+      },
+      "errors": {
+        "businessNameRequired": "Praxisname ist erforderlich",
+        "addressRequired": "Adresse ist erforderlich",
+        "addressPlaceholder": "Bitte geben Sie Ihre tatsächliche Praxisadresse ein",
+        "postalCodeRequired": "Postleitzahl ist erforderlich",
+        "postalCodeInvalid": "Postleitzahl muss eine gültige österreichische PLZ sein (z.B. 1010, 4020)",
+        "cityRequired": "Ort ist erforderlich",
+        "countryRequired": "Land ist erforderlich",
+        "saveFailed": "Geschäftsdaten konnten nicht gespeichert werden",
+        "unknownError": "Unbekannter Fehler beim Speichern"
+      },
+      "buttons": {
+        "next": "Weiter",
+        "saving": "Speichern..."
+      }
+    },
+    "step2": {
+      "title": "Professionelle Details",
+      "description": "Wählen Sie Ihre Berufsbezeichnung und Ihre umsatzsteuerliche Einstufung.",
+      "labels": {
+        "designation": "Berufsbezeichnung",
+        "vatStatus": "Umsatzsteuerstatus",
+        "chamberRegistration": "Kammerregistrierung (optional)",
+        "chamberHint": "Wird auf Rechnungen angezeigt, falls angegeben.",
+        "certificates": "Zertifikate (optional)",
+        "certificatesPlaceholder": "Trennen Sie mehrere Zertifikate durch Zeilenumbrüche"
+      },
+      "designations": {
+        "heilmasseur": "Heilmasseur:in",
+        "medizinischerMasseur": "Medizinische:r Masseur:in",
+        "gewerblicherMasseur": "Gewerbliche:r Masseur:in"
+      },
+      "vatOptions": {
+        "kleinunternehmer": "Kleinunternehmer (§ 6 Abs. 1 Z 27 UStG)",
+        "ust10": "USt 10 % (z. B. Heilmassage)",
+        "ust13": "USt 13 % (z. B. Therapien)",
+        "ust20": "USt 20 % (Standard)"
+      },
+      "errors": {
+        "designationRequired": "Bitte wählen Sie eine Berufsbezeichnung",
+        "vatStatusRequired": "Bitte wählen Sie einen Umsatzsteuerstatus",
+        "saveFailed": "Profildaten konnten nicht gespeichert werden",
+        "unknownError": "Unbekannter Fehler beim Speichern"
+      },
+      "buttons": {
+        "back": "Zurück",
+        "next": "Weiter",
+        "saving": "Speichern..."
+      }
+    },
+    "step3": {
+      "title": "Ihr Profil ist vorbereitet!",
+      "description": "Vielen Dank. Wir haben alle wichtigen Informationen gespeichert. Sie können jetzt das Dashboard nutzen und später weitere Einstellungen vornehmen.",
+      "profileScore": "Profil-Score: {score}",
+      "summary": {
+        "title": "Zusammenfassung",
+        "businessName": "Praxisname",
+        "address": "Adresse",
+        "designation": "Berufsbezeichnung",
+        "vatStatus": "Umsatzsteuerstatus",
+        "chamberRegistration": "Kammerregistrierung",
+        "certificates": "Zertifikate",
+        "noValue": "—"
+      },
+      "buttons": {
+        "back": "Zurück",
+        "finish": "Zum Dashboard"
+      }
+    },
+    "common": {
+      "loading": "Onboarding wird geladen...",
+      "loadError": "Profil konnte nicht geladen werden"
+    }
   }
 }

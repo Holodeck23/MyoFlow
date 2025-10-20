@@ -429,5 +429,108 @@
       "documentation": "Documentation",
       "support": "Contact Support"
     }
+  },
+  "onboarding": {
+    "layout": {
+      "header": "Onboarding Assistant",
+      "subtitle": "Practice management for therapists"
+    },
+    "progress": {
+      "stepOf": "Step {current} of {total}",
+      "step1Title": "Business",
+      "step1Description": "Set address",
+      "step2Title": "Profession",
+      "step2Description": "Confirm details",
+      "step3Title": "Done",
+      "step3Description": "Get started"
+    },
+    "step1": {
+      "title": "Business Information",
+      "description": "Please confirm your practice address. This information will appear on invoices and documents.",
+      "labels": {
+        "businessName": "Practice Name",
+        "businessAddress": "Street and Number",
+        "businessPostalCode": "Postal Code",
+        "businessCity": "City",
+        "businessCountry": "Country"
+      },
+      "placeholders": {
+        "businessAddress": "Example: Main Street 12",
+        "businessPostalCode": "1010",
+        "businessCity": "City"
+      },
+      "errors": {
+        "businessNameRequired": "Practice name is required",
+        "addressRequired": "Address is required",
+        "addressPlaceholder": "Please enter your actual practice address",
+        "postalCodeRequired": "Postal code is required",
+        "postalCodeInvalid": "Postal code must be a valid Austrian postal code (e.g. 1010, 4020)",
+        "cityRequired": "City is required",
+        "countryRequired": "Country is required",
+        "saveFailed": "Business data could not be saved",
+        "unknownError": "Unknown error while saving"
+      },
+      "buttons": {
+        "next": "Next",
+        "saving": "Saving..."
+      }
+    },
+    "step2": {
+      "title": "Professional Details",
+      "description": "Select your professional designation and VAT classification.",
+      "labels": {
+        "designation": "Professional Designation",
+        "vatStatus": "VAT Status",
+        "chamberRegistration": "Chamber Registration (optional)",
+        "chamberHint": "Will be displayed on invoices if provided.",
+        "certificates": "Certificates (optional)",
+        "certificatesPlaceholder": "Separate multiple certificates with line breaks"
+      },
+      "designations": {
+        "heilmasseur": "Remedial Masseur",
+        "medizinischerMasseur": "Medical Masseur",
+        "gewerblicherMasseur": "Commercial Masseur"
+      },
+      "vatOptions": {
+        "kleinunternehmer": "Small Business (§ 6 Abs. 1 Z 27 UStG)",
+        "ust10": "VAT 10% (e.g. remedial massage)",
+        "ust13": "VAT 13% (e.g. therapies)",
+        "ust20": "VAT 20% (standard)"
+      },
+      "errors": {
+        "designationRequired": "Please select a professional designation",
+        "vatStatusRequired": "Please select a VAT status",
+        "saveFailed": "Profile data could not be saved",
+        "unknownError": "Unknown error while saving"
+      },
+      "buttons": {
+        "back": "Back",
+        "next": "Next",
+        "saving": "Saving..."
+      }
+    },
+    "step3": {
+      "title": "Your profile is ready!",
+      "description": "Thank you. We have saved all important information. You can now use the dashboard and adjust further settings later.",
+      "profileScore": "Profile Score: {score}",
+      "summary": {
+        "title": "Summary",
+        "businessName": "Practice Name",
+        "address": "Address",
+        "designation": "Professional Designation",
+        "vatStatus": "VAT Status",
+        "chamberRegistration": "Chamber Registration",
+        "certificates": "Certificates",
+        "noValue": "—"
+      },
+      "buttons": {
+        "back": "Back",
+        "finish": "To Dashboard"
+      }
+    },
+    "common": {
+      "loading": "Loading onboarding...",
+      "loadError": "Could not load profile"
+    }
   }
 }

@@ -1,3 +1,4 @@
+// i18n: All user-facing text uses t('section.key', 'fallback')
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
@@ -5,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useSession } from 'next-auth/react'
+import { useTranslation } from '@myoflow/lib'
 import { Step1BusinessInfo } from './components/Step1BusinessInfo'
 import { Step2Professional } from './components/Step2Professional'
 import { Step3Complete } from './components/Step3Complete'
@@ -90,6 +92,7 @@ function determineInitialStep(snapshot: ProfileSnapshot): number {
 export default function OnboardingPage() {
   const router = useRouter()
   const { update: refreshSession } = useSession()
+  const { t } = useTranslation()
   const form = useForm<WizardFormValues>({
     defaultValues: DEFAULT_VALUES,
     mode: 'onBlur',
@@ -146,7 +149,7 @@ export default function OnboardingPage() {
         goToStep(determineInitialStep(snapshot))
       } catch (error) {
         if (!active) return
-        setLoadError(error instanceof Error ? error.message : 'Profil konnte nicht geladen werden')
+        setLoadError(error instanceof Error ? error.message : t('onboarding.common.loadError', 'Could not load profile'))
       } finally {
         if (active) {
           setInitialLoading(false)
@@ -158,7 +161,7 @@ export default function OnboardingPage() {
     return () => {
       active = false
     }
-  }, [form, goToStep])
+  }, [form, goToStep, t])
 
   const handleStep1Next = useCallback(
     async () => {
@@ -186,7 +189,7 @@ export default function OnboardingPage() {
         if (!response.ok || (json && json.success === false)) {
           const message =
             (json && typeof json.error === 'string' && json.error) ||
-            'Geschäftsdaten konnten nicht gespeichert werden'
+            t('onboarding.step1.errors.saveFailed', 'Business data could not be saved')
           throw new Error(message)
         }
 
@@ -198,13 +201,13 @@ export default function OnboardingPage() {
         goToStep(2)
       } catch (error) {
         setSubmitError(
-          error instanceof Error ? error.message : 'Unbekannter Fehler beim Speichern',
+          error instanceof Error ? error.message : t('onboarding.step1.errors.unknownError', 'Unknown error while saving'),
         )
       } finally {
         setIsSubmitting(false)
       }
     },
-    [form, goToStep, refreshSession],
+    [form, goToStep, refreshSession, t],
   )
 
   const handleStep2Next = useCallback(
@@ -240,7 +243,7 @@ export default function OnboardingPage() {
         if (!response.ok || (json && json.success === false)) {
           const message =
             (json && typeof json.error === 'string' && json.error) ||
-            'Profildaten konnten nicht gespeichert werden'
+            t('onboarding.step2.errors.saveFailed', 'Profile data could not be saved')
           throw new Error(message)
         }
 
@@ -252,13 +255,13 @@ export default function OnboardingPage() {
         goToStep(3)
       } catch (error) {
         setSubmitError(
-          error instanceof Error ? error.message : 'Unbekannter Fehler beim Speichern',
+          error instanceof Error ? error.message : t('onboarding.step2.errors.unknownError', 'Unknown error while saving'),
         )
       } finally {
         setIsSubmitting(false)
       }
     },
-    [form, goToStep, refreshSession],
+    [form, goToStep, refreshSession, t],
   )
 
   const handleFinish = () => {
@@ -269,7 +272,7 @@ export default function OnboardingPage() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" aria-hidden="true" />
-        <p className="text-sm text-slate-500">Onboarding wird geladen...</p>
+        <p className="text-sm text-slate-500">{t('onboarding.common.loading', 'Loading onboarding...')}</p>
       </div>
     )
   }
