@@ -8,6 +8,7 @@ import {
 } from '@/lib/shared-helpers'
 import {
   assertValidAustrianIban,
+  assertValidAustrianPostalCode,
   isValidAustrianVatNumber,
   normalizeAustrianIban,
   normalizeVatNumber,
@@ -36,8 +37,25 @@ const PROFILE_SELECT = {
   taxValidatedAt: true,
   settingsLastUpdated: true,
   settingsVersion: true,
+  profileCompletionScore: true,
+  travelSettingsDetail: {
+    select: {
+      baseAddressLine1: true,
+      baseAddressLine2: true,
+      baseCity: true,
+      basePostalCode: true,
+      baseCountry: true,
+    },
+  },
   createdAt: true,
   updatedAt: true,
+} as const
+
+const DEFAULT_TRAVEL_BASE = {
+  address: 'Hauptstraße 1',
+  postalCode: '4020',
+  city: 'Linz',
+  country: 'Austria',
 } as const
 
 const updateSchema = z
@@ -53,6 +71,23 @@ const updateSchema = z
       .trim()
       .max(500, 'Business address must be 500 characters or fewer')
       .nullable()
+      .optional(),
+    businessCity: z
+      .string()
+      .trim()
+      .min(1, 'Business city is required')
+      .max(120, 'Business city must be 120 characters or fewer')
+      .optional(),
+    businessPostalCode: z
+      .string()
+      .trim()
+      .regex(/^[1-9]\d{3}$/, 'Postal code must be a valid Austrian postal code (1xxx-9xxx)')
+      .optional(),
+    businessCountry: z
+      .string()
+      .trim()
+      .min(2, 'Business country is required')
+      .max(120, 'Business country must be 120 characters or fewer')
       .optional(),
     businessEmail: z
       .string()
@@ -134,6 +169,10 @@ const updateSchema = z
   .strict()
 
 type UpdatePayload = z.infer<typeof updateSchema>
+type CoreUpdatePayload = Omit<
+  UpdatePayload,
+  'businessCity' | 'businessPostalCode' | 'businessCountry'
+>
 
 function normalizeNullableString(value: string | null | undefined) {
   if (value === undefined) {
@@ -151,6 +190,9 @@ function serializeProfile(profile: any) {
     id: profile.id,
     businessName: profile.businessName ?? null,
     businessAddress: profile.businessAddress ?? null,
+    businessCity: profile.travelSettingsDetail?.baseCity ?? null,
+    businessPostalCode: profile.travelSettingsDetail?.basePostalCode ?? null,
+    businessCountry: profile.travelSettingsDetail?.baseCountry ?? null,
     businessEmail: profile.businessEmail ?? null,
     businessPhone: profile.businessPhone ?? null,
     businessWebsite: profile.businessWebsite ?? null,
@@ -170,12 +212,22 @@ function serializeProfile(profile: any) {
       ? profile.settingsLastUpdated.toISOString()
       : null,
     settingsVersion: profile.settingsVersion ?? 1,
+    profileCompletionScore: profile.profileCompletionScore ?? 0,
+    travelSettings: profile.travelSettingsDetail
+      ? {
+          baseAddressLine1: profile.travelSettingsDetail.baseAddressLine1 ?? null,
+          baseAddressLine2: profile.travelSettingsDetail.baseAddressLine2 ?? null,
+          baseCity: profile.travelSettingsDetail.baseCity ?? null,
+          basePostalCode: profile.travelSettingsDetail.basePostalCode ?? null,
+          baseCountry: profile.travelSettingsDetail.baseCountry ?? null,
+        }
+      : null,
     createdAt: profile.createdAt?.toISOString?.() ?? null,
     updatedAt: profile.updatedAt?.toISOString?.() ?? null,
   }
 }
 
-function buildUpdateData(payload: UpdatePayload) {
+function buildUpdateData(payload: CoreUpdatePayload) {
   const data: Record<string, unknown> = {}
 
   if (payload.businessName !== undefined) {
@@ -207,7 +259,9 @@ function buildUpdateData(payload: UpdatePayload) {
   }
 
   if (payload.certificates !== undefined) {
-    data.certificates = payload.certificates.map((entry) => entry.trim())
+    data.certificates = payload.certificates
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0)
   }
 
   if (payload.vatStatus !== undefined) {
@@ -240,6 +294,67 @@ function buildUpdateData(payload: UpdatePayload) {
   }
 
   return data
+}
+
+function isMeaningfulString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function calculateProfileScore(profile: {
+  businessAddress?: string | null
+  designation?: string | null
+  vatStatus?: string | null
+  chamberRegistration?: string | null
+  certificates?: string[] | null
+  iban?: string | null
+  travelSettingsDetail?: {
+    baseAddressLine1?: string | null
+    baseCity?: string | null
+    basePostalCode?: string | null
+    baseCountry?: string | null
+  } | null
+}) {
+  let score = 20
+
+  const addressLine =
+    profile.travelSettingsDetail?.baseAddressLine1 ??
+    profile.businessAddress ??
+    DEFAULT_TRAVEL_BASE.address
+  const city = profile.travelSettingsDetail?.baseCity ?? DEFAULT_TRAVEL_BASE.city
+  const postalCode =
+    profile.travelSettingsDetail?.basePostalCode ?? DEFAULT_TRAVEL_BASE.postalCode
+  const country =
+    profile.travelSettingsDetail?.baseCountry ?? DEFAULT_TRAVEL_BASE.country
+
+  const hasCustomAddress =
+    isMeaningfulString(addressLine) &&
+    addressLine.trim() !== DEFAULT_TRAVEL_BASE.address &&
+    isMeaningfulString(city) &&
+    isMeaningfulString(country)
+
+  const postalValid = isMeaningfulString(postalCode) && /^[1-9]\d{3}$/.test(postalCode.trim())
+
+  if (hasCustomAddress && postalValid) {
+    score += 30
+  }
+
+  if (isMeaningfulString(profile.designation) && isMeaningfulString(profile.vatStatus)) {
+    score += 20
+  }
+
+  if (isMeaningfulString(profile.chamberRegistration)) {
+    score += 10
+  }
+
+  if (Array.isArray(profile.certificates) && profile.certificates.length > 0) {
+    score += 10
+  }
+
+  if (isMeaningfulString(profile.iban)) {
+    score += 10
+  }
+
+  return Math.min(score, 100)
 }
 
 export async function GET(request: NextRequest) {
@@ -300,9 +415,33 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const updateData = buildUpdateData(parsed)
+    const normalizedCity =
+      typeof parsed.businessCity === 'string' ? parsed.businessCity.trim() : undefined
+    const normalizedPostalCode =
+      typeof parsed.businessPostalCode === 'string'
+        ? parsed.businessPostalCode.trim()
+        : undefined
+    const normalizedCountry =
+      typeof parsed.businessCountry === 'string' ? parsed.businessCountry.trim() : undefined
 
-    if (Object.keys(updateData).length === 0) {
+    if (normalizedPostalCode !== undefined) {
+      assertValidAustrianPostalCode(normalizedPostalCode)
+    }
+
+    const corePayload = { ...parsed } as Record<string, unknown>
+    delete corePayload.businessCity
+    delete corePayload.businessPostalCode
+    delete corePayload.businessCountry
+
+    const updateData = buildUpdateData(corePayload as CoreUpdatePayload)
+    const businessAddressValue = updateData['businessAddress']
+    const hasTravelUpdates =
+      normalizedCity !== undefined ||
+      normalizedPostalCode !== undefined ||
+      normalizedCountry !== undefined ||
+      typeof businessAddressValue === 'string'
+
+    if (Object.keys(updateData).length === 0 && !hasTravelUpdates) {
       return NextResponse.json(
         {
           success: false,
@@ -313,10 +452,87 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedProfile = await prisma.$transaction(async (tx) => {
+      const currentProfile = await tx.therapist.findUnique({
+        where: { id: therapist.id },
+        select: PROFILE_SELECT,
+      })
+
+      if (!currentProfile) {
+        throw new Error('Therapist profile not found')
+      }
+
+      const travelSettingsUpdate: Record<string, string> = {}
+
+      if (typeof businessAddressValue === 'string') {
+        travelSettingsUpdate.baseAddressLine1 = businessAddressValue
+      }
+
+      if (normalizedCity !== undefined) {
+        travelSettingsUpdate.baseCity = normalizedCity
+      }
+
+      if (normalizedPostalCode !== undefined) {
+        travelSettingsUpdate.basePostalCode = normalizedPostalCode
+      }
+
+      if (normalizedCountry !== undefined) {
+        travelSettingsUpdate.baseCountry = normalizedCountry
+      }
+
+      const mergedTravel = {
+        baseAddressLine1:
+          travelSettingsUpdate.baseAddressLine1 ??
+          currentProfile.travelSettingsDetail?.baseAddressLine1 ??
+          (typeof businessAddressValue === 'string'
+            ? businessAddressValue
+            : currentProfile.businessAddress ?? DEFAULT_TRAVEL_BASE.address),
+        baseCity:
+          travelSettingsUpdate.baseCity ??
+          currentProfile.travelSettingsDetail?.baseCity ??
+          DEFAULT_TRAVEL_BASE.city,
+        basePostalCode:
+          travelSettingsUpdate.basePostalCode ??
+          currentProfile.travelSettingsDetail?.basePostalCode ??
+          DEFAULT_TRAVEL_BASE.postalCode,
+        baseCountry:
+          travelSettingsUpdate.baseCountry ??
+          currentProfile.travelSettingsDetail?.baseCountry ??
+          DEFAULT_TRAVEL_BASE.country,
+      }
+
+      const mergedProfileForScore = {
+        ...currentProfile,
+        ...updateData,
+        travelSettingsDetail: {
+          ...currentProfile.travelSettingsDetail,
+          ...mergedTravel,
+        },
+      }
+
+      const score = calculateProfileScore(mergedProfileForScore)
+
+      if (Object.keys(travelSettingsUpdate).length > 0) {
+        await tx.travelSettings.upsert({
+          where: { therapistId: therapist.id },
+          update: {
+            ...travelSettingsUpdate,
+            updatedAt: new Date(),
+          },
+          create: {
+            therapistId: therapist.id,
+            baseAddressLine1: mergedTravel.baseAddressLine1,
+            baseCity: mergedTravel.baseCity,
+            basePostalCode: mergedTravel.basePostalCode,
+            baseCountry: mergedTravel.baseCountry,
+          },
+        })
+      }
+
       const record = await tx.therapist.update({
         where: { id: therapist.id },
         data: {
           ...updateData,
+          profileCompletionScore: score,
           settingsLastUpdated: new Date(),
           settingsVersion: { increment: 1 },
         },
@@ -344,6 +560,13 @@ export async function PUT(request: NextRequest) {
           details: error.flatten(),
         },
         { status: 400 },
+      )
+    }
+
+    if (error instanceof Error && error.message === 'Therapist profile not found') {
+      return NextResponse.json(
+        { success: false, error: 'Therapist profile not found' },
+        { status: 404 },
       )
     }
 
