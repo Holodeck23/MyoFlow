@@ -22,6 +22,11 @@ export interface MyoFlowSession extends Session {
     accountType: AccountType
     isTestAccount: boolean
     isAdmin: boolean
+    therapist?: {
+      id: string
+      businessName?: string | null
+      profileCompletionScore?: number | null
+    }
   }
 }
 
@@ -36,6 +41,8 @@ export interface MyoFlowToken extends JWT {
   accountType: AccountType
   isTestAccount: boolean
   isAdmin: boolean
+  therapistProfileCompletionScore?: number | null
+  therapistBusinessName?: string | null
 }
 
 const DEFAULT_ACCOUNT_TYPE = AccountType.TEST
@@ -44,7 +51,15 @@ async function resolveAccountContext(userId: string) {
   try {
     const userRecord = await prisma.user.findUnique({
       where: { id: userId },
-      include: { Therapist: { select: { id: true } } },
+      include: {
+        Therapist: {
+          select: {
+            id: true,
+            businessName: true,
+            profileCompletionScore: true,
+          },
+        },
+      },
     })
 
     if (!userRecord) {
@@ -59,6 +74,13 @@ async function resolveAccountContext(userId: string) {
       accountType: userRecord.accountType ?? DEFAULT_ACCOUNT_TYPE,
       role: (userRecord.role as MyoFlowToken['role']) || 'OWNER',
       therapistId: userRecord.Therapist?.id,
+      therapistProfile: userRecord.Therapist
+        ? {
+            id: userRecord.Therapist.id,
+            businessName: userRecord.Therapist.businessName ?? null,
+            profileCompletionScore: userRecord.Therapist.profileCompletionScore ?? 0,
+          }
+        : undefined,
     } as const
   } catch (error) {
     console.error('Failed to resolve account context', error)
@@ -66,6 +88,7 @@ async function resolveAccountContext(userId: string) {
       accountType: DEFAULT_ACCOUNT_TYPE,
       role: 'OWNER' as const,
       therapistId: undefined,
+      therapistProfile: undefined,
     } as const
   }
 }
@@ -171,6 +194,16 @@ export const authConfig: NextAuthConfig = {
           accountType: typedToken.accountType ?? DEFAULT_ACCOUNT_TYPE,
           isTestAccount: typedToken.isTestAccount ?? (typedToken.accountType === AccountType.TEST),
           isAdmin: typedToken.isAdmin ?? (typedToken.accountType === AccountType.ADMIN),
+          therapist: typedToken.therapistId
+            ? {
+                id: typedToken.therapistId,
+                businessName: typedToken.therapistBusinessName ?? null,
+                profileCompletionScore:
+                  typeof typedToken.therapistProfileCompletionScore === 'number'
+                    ? typedToken.therapistProfileCompletionScore
+                    : null,
+              }
+            : undefined,
         },
       }
     },
@@ -181,6 +214,9 @@ export const authConfig: NextAuthConfig = {
       let role = typedToken?.role || 'OWNER'
       let therapistId = typedToken?.therapistId
       let organizationId = typedToken?.organizationId
+      let therapistProfileCompletionScore =
+        typedToken?.therapistProfileCompletionScore ?? null
+      let therapistBusinessName = typedToken?.therapistBusinessName ?? null
 
       const userId = user?.id || typedToken.sub
 
@@ -192,6 +228,12 @@ export const authConfig: NextAuthConfig = {
         accountType = context.accountType ?? DEFAULT_ACCOUNT_TYPE
         role = context.role || 'OWNER'
         therapistId = context.therapistId ?? therapistId
+        if (context.therapistProfile) {
+          therapistProfileCompletionScore =
+            context.therapistProfile.profileCompletionScore ?? therapistProfileCompletionScore
+          therapistBusinessName =
+            context.therapistProfile.businessName ?? therapistBusinessName
+        }
       }
 
       if (isEdgeRuntime && typedToken?.accountType) {
@@ -220,6 +262,8 @@ export const authConfig: NextAuthConfig = {
         accountType,
         isTestAccount: accountType === AccountType.TEST,
         isAdmin: accountType === AccountType.ADMIN,
+        therapistProfileCompletionScore,
+        therapistBusinessName,
       }
     },
   },

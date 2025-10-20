@@ -26,11 +26,23 @@ export function middlewareLogic(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
+  if (!isAdminAccount) {
+    const profileScore = session.user.therapist?.profileCompletionScore ?? null
+    const hasTherapistContext = Boolean(session.user.therapistId)
+    const needsOnboarding = hasTherapistContext && (profileScore === null || profileScore < 70)
+    const isOnboardingRoute = pathname.startsWith('/onboarding')
+
+    if (needsOnboarding && !isOnboardingRoute) {
+      const redirectUrl = new URL('/onboarding', req.url)
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
+
   return NextResponse.next()
 }
 
 export default auth(middlewareLogic)
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/onboarding/:path*'],
 }
