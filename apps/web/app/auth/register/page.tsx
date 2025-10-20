@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { ArrowLeft, UserPlus } from 'lucide-react'
+import { ArrowLeft, UserPlus, CheckCircle2, XCircle } from 'lucide-react'
 import Link from 'next/link'
+import { validatePassword } from '../../../lib/validation'
+import { LanguageToggle } from '@/components/ui/LanguageToggle'
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ export default function Register() {
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,9 +37,11 @@ export default function Register() {
       return
     }
 
-    // Strong password validation
-    if (formData.password.length < 12) {
-      setMessage('Password must be at least 12 characters long with uppercase, lowercase, number, and special character')
+    // Strong password validation using shared validation function
+    const passwordValidation = validatePassword(formData.password)
+    if (!passwordValidation.isValid) {
+      setMessage(passwordValidation.errors.join('. '))
+      setPasswordErrors(passwordValidation.errors)
       setIsLoading(false)
       return
     }
@@ -68,16 +73,26 @@ export default function Register() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }))
+
+    // Real-time password validation
+    if (name === 'password') {
+      const validation = validatePassword(value)
+      setPasswordErrors(validation.errors)
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="max-w-lg w-full bg-white shadow-xl border border-gray-200 rounded-lg">
         <CardHeader className="text-center space-y-4 pb-8">
+          <div className="flex justify-end mb-2">
+            <LanguageToggle />
+          </div>
           <div className="mx-auto h-16 w-16 rounded-xl bg-gradient-to-br from-austrian-red-500 to-austrian-red-700 flex items-center justify-center shadow-lg">
             <UserPlus className="h-8 w-8 text-white" />
           </div>
@@ -183,6 +198,37 @@ export default function Register() {
                   )}
                 </button>
               </div>
+              {formData.password && (
+                <div className="mt-2 space-y-1">
+                  <div className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</div>
+                  <div className="space-y-1">
+                    <div className={`flex items-center gap-2 text-xs ${formData.password.length >= 12 ? 'text-green-600' : 'text-gray-500'}`}>
+                      {formData.password.length >= 12 ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      <span>At least 12 characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                      {/[A-Z]/.test(formData.password) ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      <span>One uppercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                      {/[a-z]/.test(formData.password) ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      <span>One lowercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                      {/[0-9]/.test(formData.password) ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      <span>One number</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-600' : 'text-gray-500'}`}>
+                      {/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      <span>One special character (!@#$%^&* etc.)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordErrors.find(e => e.includes('common patterns')) ? 'text-red-600' : 'text-green-600'}`}>
+                      {passwordErrors.find(e => e.includes('common patterns')) ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                      <span>No common patterns (password, 123456, etc.)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
