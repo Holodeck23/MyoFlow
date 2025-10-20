@@ -52,7 +52,7 @@ export default function DashboardLayout({
               variant="outline"
               size="sm"
               title={t('auth.signOut', 'Sign Out')}
-              className="[&>span]:hover:text-white"
+              className="hover:bg-red-50 hover:border-red-200 hover:text-red-700"
             >
               <LogOut size={16} />
               <span className="font-medium">{t('auth.signOut', 'Sign Out')}</span>
