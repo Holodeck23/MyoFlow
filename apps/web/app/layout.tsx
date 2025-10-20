@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="de-AT" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <title>MyoFlow - Praxisverwaltung für Therapeuten</title>
         <meta name="description" content="Professionelle Praxisverwaltungssoftware für österreichische Therapeuten" />
