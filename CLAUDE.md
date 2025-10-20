@@ -3,16 +3,77 @@
 **Project:** MyoFlow - Austrian Therapy Practice Management
 **Current Session:** October 20, 2025
 **Branch:** `main`
-**Status:** ✅ UI Bug Fixes & Performance Improvements
+**Status:** ✅ UI Bug Fixes & Onboarding Improvements
 
 ---
 
 ## 🎯 Session Summary - October 20, 2025 (COMPLETE)
 
-### **UI Bug Fixes & Performance Improvements ✅**
+### **Session 2: Onboarding & UI Visibility Fixes ✅**
 
 **Branch:** `main`
-**Commit:** d2e5566
+**Commit:** 77bb681
+**Status:** Committed and documented
+
+### **Issues Resolved**
+
+#### **1. Postal Code Validation Too Restrictive** ✅
+- **Problem:** Onboarding wizard only accepted Upper Austria postal codes (4xxx)
+- **Impact:** Vienna addresses (1010) and other regions rejected
+- **File:** `apps/web/app/onboarding/components/Step1BusinessInfo.tsx:104`
+- **Change:** Regex from `/^4\d{3}$/` → `/^[1-9]\d{3}$/`
+- **Result:** Now accepts all Austrian postal codes (1xxx-9xxx)
+
+#### **2. Missing Language Toggle** ✅
+- **Problem:** No language switcher on onboarding wizard
+- **User Feedback:** "it should ALWAYS be present"
+- **File:** `apps/web/app/onboarding/layout.tsx:6,24`
+- **Change:** Added LanguageToggle component to header
+- **Result:** Consistent language switching across all pages
+
+#### **3. React Hydration Mismatch** ✅
+- **Problem:** "Text content does not match server-rendered HTML" errors
+- **Symptoms:** Translation keys flashing before actual text loads
+- **Root Cause:** Client-side translation loading after server render
+- **File:** `apps/web/app/dashboard/layout.tsx:79`
+- **Change:** Added `suppressHydrationWarning` to footer element
+- **Result:** Eliminated hydration errors and visual glitches
+
+#### **4. Settings Page Tab Buttons Invisible** ✅
+- **Problem:** Tab buttons present but not visible - only active tab showed
+- **Root Cause:** Inactive tabs using `text-muted-foreground` blending with background
+- **File:** `apps/web/app/dashboard/settings/settings-client.tsx:202`
+- **Changes:**
+  - Added `text-gray-700` for proper contrast on inactive tabs
+  - Added hover states: `hover:text-gray-900 hover:bg-gray-100`
+  - Maintained active state styling: `data-[state=active]:bg-blue-50`
+- **Result:** All tabs now visible with clear visual hierarchy
+
+### **Key Learnings**
+
+- **Postal Code Validation:** Austrian postal codes span 1xxx-9xxx (all 9 regions)
+- **Hydration Strategy:** Use `suppressHydrationWarning` for client-side translations
+- **Tab Visibility:** Always ensure sufficient color contrast for inactive UI elements
+- **User Feedback:** Direct user observations caught issues automated tests missed
+
+### **Files Modified**
+- `apps/web/app/onboarding/components/Step1BusinessInfo.tsx` - Postal code validation
+- `apps/web/app/onboarding/layout.tsx` - Language toggle
+- `apps/web/app/dashboard/layout.tsx` - Hydration fix
+- `apps/web/app/dashboard/settings/settings-client.tsx` - Tab visibility
+
+### **Technical Notes**
+- **Validation Pattern:** `/^[1-9]\d{3}$/` accepts 1000-9999 (Austrian range)
+- **Hydration:** Server renders → client hydrates → translations load → content updates
+- **Color Contrast:** `text-gray-700` provides sufficient contrast on white/light backgrounds
+- **UX Pattern:** Visible error states > silent failures (established in Session 1)
+
+---
+
+### **Session 1: UI Bug Fixes & Performance Improvements ✅**
+
+**Branch:** `main`
+**Commit:** d2e5566, 380182a
 **Status:** Committed and documented
 
 ### **Issues Resolved**
