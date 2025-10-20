@@ -1,9 +1,78 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** October 15, 2025
-**Branch:** `sprint4/codex/api-enhancements`
-**Status:** 🚧 Sprint 4 Settings Completion - API Phase In Progress
+**Current Session:** October 20, 2025
+**Branch:** `main`
+**Status:** ✅ UI Bug Fixes & Performance Improvements
+
+---
+
+## 🎯 Session Summary - October 20, 2025 (COMPLETE)
+
+### **UI Bug Fixes & Performance Improvements ✅**
+
+**Branch:** `main`
+**Commit:** d2e5566
+**Status:** Committed and documented
+
+### **Issues Resolved**
+
+#### **1. Server 404 Issues** ✅
+- **Problem:** All routes returning 404 on localhost:3003
+- **Root Cause:** Next.js dev server in corrupted state
+- **Fix:** Cleared `.next` cache and restarted fresh dev server
+- **Result:** Server operational on http://localhost:3000
+
+#### **2. Sign Out Button Invisible on Hover** ✅
+- **Problem:** Button text disappeared when hovering (white text with no background)
+- **File:** `apps/web/app/dashboard/layout.tsx:55`
+- **Change:** `className="[&>span]:hover:text-white"` → `className="hover:bg-red-50 hover:border-red-200 hover:text-red-700"`
+- **Result:** Proper red hover state with visible text
+
+#### **3. Profile Widget Contradictory Message** ✅
+- **Problem:** Widget showing "0% completed" but also "All steps complete"
+- **File:** `apps/web/app/dashboard/components/ProfileCompletionWidget.tsx:211`
+- **Change:** Badge logic now checks `score >= 100` before showing "All steps complete"
+- **Result:** Shows "Calculating..." while loading, "All steps complete" only at 100%
+
+#### **4. Profile Widget Error Handling (UX Improvement)** ✅
+- **Problem:** Widget disappeared when API failed, hiding errors from user
+- **User Feedback:** "but if the profile is NOT setup fully then why is the widget hidden?"
+- **Fix:** Added visible amber warning card with actionable "Go to settings" button
+- **File:** `apps/web/app/dashboard/components/ProfileCompletionWidget.tsx:153-175`
+- **Result:** Errors are visible and actionable instead of silently hidden
+
+#### **5. Upgrade Requirements Button Hover** ✅
+- **Problem:** Same hover issue as Sign Out button
+- **File:** `apps/web/app/dashboard/components/ProfileCompletionWidget.tsx:252-256`
+- **Change:** Added `className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"`
+- **Result:** Proper blue hover state
+
+#### **6. Performance Issues** ✅
+- **Problem:** Site running slowly due to multiple zombie processes
+- **Root Cause:** 4 Next.js dev servers running simultaneously (2GB+ RAM)
+- **Fix:** Killed old processes (PIDs 20154, 75969, 21118, 20024, 20917)
+- **Result:** Single server using 644MB RAM, site responsive
+
+#### **7. Sign Out Redirect Failure** ✅
+- **Problem:** Clicking Sign Out resulted in "This site can't be reached"
+- **Root Cause:** `.env` had `NEXTAUTH_URL=http://localhost:3001` but server on port 3000
+- **Fix:** Updated `.env` to `NEXTAUTH_URL=http://localhost:3000`
+- **Result:** Sign out properly redirects to sign-in page
+
+### **Key Learning**
+User correctly identified that hiding errors is poor UX - showing visible error states with action buttons is better than silent failures.
+
+### **Files Modified**
+- `apps/web/app/dashboard/layout.tsx` - Sign Out button hover fix
+- `apps/web/app/dashboard/components/ProfileCompletionWidget.tsx` - Badge logic, error handling, button hover
+- `apps/web/.env` - NEXTAUTH_URL port correction (not committed, in .gitignore)
+
+### **Technical Notes**
+- **Server:** Running cleanly on http://localhost:3000
+- **Environment:** `NEXTAUTH_URL` now matches actual server port
+- **Performance:** Eliminated 3 zombie dev servers, improved responsiveness
+- **UX Pattern:** Visible error states > silent failures
 
 ---
 
