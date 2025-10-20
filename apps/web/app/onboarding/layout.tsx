@@ -1,11 +1,15 @@
+// i18n: All user-facing text uses t('section.key', 'fallback')
 'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
 import { LanguageToggle } from '@/components/ui/LanguageToggle'
+import { useTranslation } from '@myoflow/lib'
 
 export default function OnboardingLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="border-b border-slate-200 bg-white" suppressHydrationWarning>
@@ -15,12 +19,14 @@ export default function OnboardingLayout({ children }: { children: ReactNode }) 
             <div className="flex flex-col leading-tight">
               <span className="text-lg font-semibold text-slate-900">MyoFlow</span>
               <span className="text-xs uppercase tracking-wide text-slate-500">
-                Onboarding-Assistent
+                {t('onboarding.layout.header', 'Onboarding Assistant')}
               </span>
             </div>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-sm text-slate-500">Praxisverwaltung für Therapeuten</span>
+            <span className="hidden sm:inline text-sm text-slate-500">
+              {t('onboarding.layout.subtitle', 'Practice management for therapists')}
+            </span>
             <LanguageToggle />
           </div>
         </div>
