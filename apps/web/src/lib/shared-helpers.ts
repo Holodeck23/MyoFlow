@@ -29,8 +29,11 @@ export async function requireTherapist() {
     throw new AuthError('Unauthorized - No active session', 401, 'NO_SESSION')
   }
 
+  // Normalize email for consistent lookups
+  const normalizedEmail = session.user.email.trim().toLowerCase()
+
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { email: normalizedEmail },
   })
 
   if (!user) {
@@ -88,7 +91,7 @@ export async function ensureTherapistAccount(emailOrRequest: string | NextReques
   let userName: string | undefined
 
   if (typeof emailOrRequest === 'string') {
-    email = emailOrRequest
+    email = emailOrRequest.trim().toLowerCase()
     userName = name
   } else {
     // Handle NextRequest - extract from session
@@ -96,7 +99,7 @@ export async function ensureTherapistAccount(emailOrRequest: string | NextReques
     if (!session?.user?.email) {
       throw new Response('Unauthorized', { status: 401 })
     }
-    email = session.user.email
+    email = session.user.email.trim().toLowerCase()
     userName = session.user.name || session.user.email || 'Therapist'
   }
 
