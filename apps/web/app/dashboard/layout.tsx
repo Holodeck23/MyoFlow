@@ -76,14 +76,16 @@ function Footer() {
   const { t } = useTranslation()
 
   return (
-    <footer className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-blue-200 px-8 py-6">
+    <footer className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-blue-200 px-8 py-6" suppressHydrationWarning>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div className="flex flex-col space-y-3">
           <div className="flex items-center space-x-2">
             <Image src="/logo.png" alt="MyoFlow" width={24} height={24} className="h-6 w-6" />
             <span className="font-semibold text-gray-900">MyoFlow</span>
           </div>
-          <p className="text-sm text-gray-600 max-w-xs truncate">{t('dashboardLayout.footer.tagline')}</p>
+          <p className="text-sm text-gray-600 max-w-xs truncate">
+            {t('dashboardLayout.footer.tagline', 'Practice management for therapists')}
+          </p>
 
           {/* Social Links */}
           <div className="flex items-center space-x-3">
