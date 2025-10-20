@@ -196,7 +196,10 @@ export default function OnboardingPage() {
         const snapshot = extractProfileSnapshot(json?.data ?? null)
         setProfileScore(snapshot.profileCompletionScore)
         if (typeof refreshSession === 'function') {
-          await refreshSession()
+          // Pass updated score to JWT to prevent middleware redirect loop
+          await refreshSession({
+            therapistProfileCompletionScore: snapshot.profileCompletionScore
+          })
         }
         goToStep(2)
       } catch (error) {
@@ -250,7 +253,10 @@ export default function OnboardingPage() {
         const snapshot = extractProfileSnapshot(json?.data ?? null)
         setProfileScore(snapshot.profileCompletionScore)
         if (typeof refreshSession === 'function') {
-          await refreshSession()
+          // Pass updated score to JWT to prevent middleware redirect loop
+          await refreshSession({
+            therapistProfileCompletionScore: snapshot.profileCompletionScore
+          })
         }
         goToStep(3)
       } catch (error) {

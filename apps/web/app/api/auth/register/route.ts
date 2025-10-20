@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { prisma } from '@myoflow/db'
-import { validateEmail, validatePassword } from '../../../../lib/validation'
+import { validateEmail, validatePassword, normalizeEmail } from '../../../../lib/validation'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, confirmPassword, firstName, lastName, practice } = body
+    let { email, password, confirmPassword, firstName, lastName, practice } = body
+
+    // Normalize email to prevent case-sensitivity issues
+    email = normalizeEmail(email)
 
     // Validation
     if (!email || !password || !confirmPassword || !firstName || !lastName) {

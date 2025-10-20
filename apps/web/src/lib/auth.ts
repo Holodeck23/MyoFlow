@@ -115,7 +115,8 @@ export const authConfig: NextAuthConfig = {
           return null
         }
 
-        const email = credentials.email as string
+        // Normalize email to prevent case-sensitivity issues
+        const email = (credentials.email as string).trim().toLowerCase()
         const password = credentials.password as string
 
         // Check for database user
@@ -142,7 +143,7 @@ export const authConfig: NextAuthConfig = {
         // 3. Optional demo password fallback (dev only)
         if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
           if (password === 'demo') {
-            // Find user by email to link to the correct account
+            // Find user by email to link to the correct account (email already normalized above)
             const demoUser = await prisma.user.findUnique({
               where: { email: email },
               include: { Therapist: true },
@@ -207,7 +208,7 @@ export const authConfig: NextAuthConfig = {
         },
       }
     },
-    async jwt({ token, user }: { token: JWT; user?: User }): Promise<MyoFlowToken> {
+    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: 'signIn' | 'signUp' | 'update'; session?: any }): Promise<MyoFlowToken> {
       const typedToken = token as MyoFlowToken
 
       let accountType = typedToken?.accountType ?? DEFAULT_ACCOUNT_TYPE
@@ -217,6 +218,11 @@ export const authConfig: NextAuthConfig = {
       let therapistProfileCompletionScore =
         typedToken?.therapistProfileCompletionScore ?? null
       let therapistBusinessName = typedToken?.therapistBusinessName ?? null
+
+      // Handle session updates from client (e.g. onboarding wizard)
+      if (trigger === 'update' && session?.therapistProfileCompletionScore !== undefined) {
+        therapistProfileCompletionScore = session.therapistProfileCompletionScore
+      }
 
       const userId = user?.id || typedToken.sub
 

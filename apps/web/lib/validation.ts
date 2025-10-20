@@ -68,3 +68,11 @@ export function validatePhoneNumber(phone: string): boolean {
 export function sanitizeInput(input: string): string {
   return input.trim().replace(/[<>]/g, '')
 }
+
+/**
+ * Normalize email address to prevent case-sensitivity issues
+ * Trims whitespace and converts to lowercase
+ */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
