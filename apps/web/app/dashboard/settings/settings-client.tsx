@@ -199,7 +199,7 @@ export default function SettingsClient() {
                 key={tab.id}
                 value={tab.id}
                 disabled={!tab.available}
-                className="flex flex-col items-center space-y-1 p-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
+                className="flex flex-col items-center space-y-1 p-4 text-gray-700 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600"
               >
                 <IconComponent className="w-5 h-5" />
                 <span className="text-xs font-medium">{tab.label}</span>
