@@ -64,6 +64,7 @@ export function ProfileCompletionWidget() {
   const [missingItems, setMissingItems] = useState<MissingItem[]>([])
   const [isDismissed, setIsDismissed] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
+  const [hasError, setHasError] = useState(false)
 
   useEffect(() => {
     const fetchCompletion = async () => {
@@ -104,6 +105,7 @@ export function ProfileCompletionWidget() {
         }
       } catch (error) {
         console.error('[ProfileCompletionWidget] Failed to fetch completion status', error)
+        setHasError(true)
       } finally {
         setLoading(false)
       }
@@ -148,6 +150,30 @@ export function ProfileCompletionWidget() {
     return null
   }
 
+  if (hasError) {
+    return (
+      <Card className="border border-amber-200 bg-amber-50">
+        <CardContent className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div>
+              <p className="text-sm font-medium text-amber-900">Unable to load profile status</p>
+              <p className="text-xs text-amber-700">Your account may need to be set up properly.</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => router.push('/dashboard/settings')}
+            variant="outline"
+            size="sm"
+            className="hover:bg-amber-100 hover:border-amber-300"
+          >
+            Go to settings
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const title = score >= 80 ? 'Profile 100% complete' : 'Complete your practice profile'
   const description =
     score >= 80
@@ -182,7 +208,7 @@ export function ProfileCompletionWidget() {
           <div className="flex items-center justify-between mb-2 text-sm font-medium text-blue-900">
             <span>{score}% completed</span>
             <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${progressClasses.badge}`}>
-              {missingItems.length === 0 ? 'All steps complete' : `${missingItems.length} steps remaining`}
+              {score >= 100 ? 'All steps complete' : missingItems.length === 0 ? 'Calculating...' : `${missingItems.length} steps remaining`}
             </span>
           </div>
           <div className="h-2 w-full rounded-full bg-blue-100">
@@ -223,7 +249,11 @@ export function ProfileCompletionWidget() {
               Go to settings
             </Button>
             {session?.user?.accountType === 'TEST' && (
-              <Button variant="outline" onClick={() => router.push('/settings/account-upgrade')}>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/settings/account-upgrade')}
+                className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
+              >
                 Upgrade requirements
               </Button>
             )}
