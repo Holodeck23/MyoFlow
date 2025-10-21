@@ -1,13 +1,46 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** October 20, 2025
+**Current Session:** October 21, 2025
 **Branch:** `main`
-**Status:** ✅ Comprehensive i18n & Critical Bug Fixes
+**Status:** ✅ Critical Authentication Fixes Complete
 
 ---
 
-## 🎯 Session Summary - October 20, 2025 (IN PROGRESS)
+## 🎯 Session Summary - October 21, 2025 ✅
+
+### **Critical Authentication & Onboarding Fixes**
+
+**Branch:** `main`
+**Commits:** de48b5d, 4515d1f, bd0c931 (3 commits pushed)
+**Status:** Complete - all critical auth issues resolved
+
+### **Issues Resolved**
+
+1. **Password Validation Mismatch** ✅ (de48b5d)
+   - Added real-time password strength indicator
+   - Frontend now validates same requirements as backend
+
+2. **Language Toggle Missing** ✅ (de48b5d)
+   - Added to sign-in and register pages
+
+3. **React Hydration Mismatch** ✅ (4515d1f)
+   - Fixed lang="de-AT" → lang="en" to match defaultLocale
+
+4. **Case-Sensitive Email Bug** ✅ (bd0c931)
+   - Implemented normalizeEmail() across all auth boundaries
+   - Prevents duplicate accounts from Test@Email.com vs test@email.com
+
+5. **Onboarding Redirect Loop** ✅ (bd0c931)
+   - Fixed JWT refresh to pass profileCompletionScore
+   - Middleware now recognizes completion properly
+
+**Files Modified:** 7 files across auth system
+**Impact:** Complete signup → login → onboarding flow now works without getting stuck
+
+---
+
+## 🎯 Session Summary - October 20, 2025
 
 ### **Session 3: Comprehensive i18n Implementation & Critical Bug Fixes ✅**
 
