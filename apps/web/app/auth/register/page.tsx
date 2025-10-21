@@ -47,12 +47,24 @@ export default function Register() {
     }
 
     try {
+      const trimmedFirstName = formData.firstName.trim()
+      const trimmedLastName = formData.lastName.trim()
+      const trimmedEmail = formData.email.trim()
+      const payload = {
+        email: trimmedEmail,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        practice: formData.practice.trim() || undefined,
+      }
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       })
 
       const data = await response.json()

@@ -238,7 +238,7 @@ export default function OnboardingPage() {
             chamberRegistration: values.chamberRegistration
               ? values.chamberRegistration.trim()
               : null,
-            certificates: certificates.length > 0 ? certificates : undefined,
+            certificates,
           }),
         })
 

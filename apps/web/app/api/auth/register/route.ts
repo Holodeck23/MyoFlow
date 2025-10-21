@@ -1,35 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { prisma } from '@myoflow/db'
+import { z } from 'zod'
 import { validateEmail, validatePassword, normalizeEmail } from '../../../../lib/validation'
+
+const registerSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email('Invalid email format')
+    .transform((value) => normalizeEmail(value)),
+  password: z.string().min(1, 'Password is required'),
+  confirmPassword: z.string().min(1, 'Password confirmation is required'),
+  firstName: z.string().min(1, 'First name is required').transform((value) => value.trim()),
+  lastName: z.string().min(1, 'Last name is required').transform((value) => value.trim()),
+  practice: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (typeof value !== 'string') {
+        return undefined
+      }
+      const trimmed = value.trim()
+      return trimmed.length > 0 ? trimmed : undefined
+    }),
+})
+
+function createSlug(firstName: string, lastName: string) {
+  const baseValue = `${firstName} ${lastName}`.trim()
+  const normalized = baseValue
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .toLowerCase()
+
+  return normalized.length > 0 ? normalized : 'therapist'
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    let { email, password, confirmPassword, firstName, lastName, practice } = body
+    const parsed = registerSchema.safeParse(body)
 
-    // Normalize email to prevent case-sensitivity issues
-    email = normalizeEmail(email)
-
-    // Validation
-    if (!email || !password || !confirmPassword || !firstName || !lastName) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
+    if (!parsed.success) {
+      const message =
+        parsed.error.issues[0]?.message || 'Invalid registration data supplied'
+      return NextResponse.json({ error: message }, { status: 400 })
     }
+
+    const { email, password, confirmPassword, firstName, lastName, practice } = parsed.data
 
     if (!validateEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email format' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     if (password !== confirmPassword) {
       return NextResponse.json(
         { error: 'Passwords do not match' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -37,64 +70,61 @@ export async function POST(request: NextRequest) {
     if (!passwordValidation.isValid) {
       return NextResponse.json(
         { error: 'Password requirements not met', details: passwordValidation.errors },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     })
 
     if (existingUser) {
       return NextResponse.json(
         { error: 'User already exists with this email' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     // Hash password
     const hashedPassword = await hash(password, 12)
+    const fullName = `${firstName} ${lastName}`.trim()
+    const baseSlug = createSlug(firstName, lastName)
 
     // Create user and therapist profile in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create user
       const user = await tx.user.create({
         data: {
           email,
           password: hashedPassword,
-          name: `${firstName} ${lastName}`,
+          name: fullName,
           role: 'OWNER', // Default role for new signups
           trialStarted: new Date(),
           trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           subscriptionStatus: 'TRIAL',
-        }
+        },
       })
 
-      // Generate unique slug for therapist
-      const baseSlug = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`
-      let slug = baseSlug
+      let slugCandidate = baseSlug
       let counter = 1
 
-      while (await tx.therapist.findUnique({ where: { slug } })) {
-        slug = `${baseSlug}-${counter}`
-        counter++
+      while (await tx.therapist.findUnique({ where: { slug: slugCandidate } })) {
+        slugCandidate = `${baseSlug}-${counter}`
+        counter += 1
       }
 
-      // Create therapist profile
       const therapist = await tx.therapist.create({
         data: {
           userId: user.id,
-          slug,
+          slug: slugCandidate,
           designation: 'HEILMASSEUR', // Default designation
           vatStatus: 'KLEINUNTERNEHMER', // Default for Austria
-          businessName: practice || `${firstName} ${lastName} - Therapie`,
+          businessName: practice ?? `${fullName} - Therapie`,
           profileCompletionScore: 20, // Basic info provided
           // profileCompletedAt is null initially - will be set when profile reaches 70%+ completion
-        }
+        },
       })
 
-      // Create default settings
       await Promise.all([
         // Tax compliance settings
         tx.taxComplianceSettings.create({
@@ -103,7 +133,7 @@ export async function POST(request: NextRequest) {
             kleinunternehmerActive: true,
             kleinunternehmerStart: new Date(),
             currentYearRevenueCents: 0,
-          }
+          },
         }),
         // Travel settings with default Austrian location (Linz)
         tx.travelSettings.create({
@@ -116,7 +146,7 @@ export async function POST(request: NextRequest) {
             longitude: 14.2858,
             serviceRadiusKm: 20,
             ratePerKmCents: 42, // Austrian standard rate
-          }
+          },
         }),
         // User preferences
         tx.userPreferences.create({
@@ -125,7 +155,7 @@ export async function POST(request: NextRequest) {
             language: 'DE',
             timezone: 'Europe/Vienna',
             currency: 'EUR',
-          }
+          },
         }),
         // Default export configuration
         tx.exportConfiguration.create({
@@ -135,8 +165,8 @@ export async function POST(request: NextRequest) {
             targetSystem: 'CSV_GENERIC',
             configurationName: 'Standard Export',
             isDefault: true,
-          }
-        })
+          },
+        }),
       ])
 
       return { user, therapist }
@@ -154,14 +184,13 @@ export async function POST(request: NextRequest) {
         id: result.therapist.id,
         slug: result.therapist.slug,
         trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      }
+      },
     })
-
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(
       { error: 'Internal server error during registration' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
