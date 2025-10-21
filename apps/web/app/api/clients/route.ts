@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma, Role } from '@myoflow/db'
 import { z } from 'zod'
-import { encryptString, decryptString, requireRole } from '@myoflow/lib'
+import { encryptString, decryptString, requireRole } from '@myoflow/lib/security'
 import { logAudit } from '@myoflow/db'
 import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 

@@ -59,10 +59,7 @@ export * from './i18n/config'
 export * from './i18n/context'
 export * from './i18n/hooks'
 
-// Security utilities (includes encryption)
-export * from './security/crypto'
-export * from './security/permissions'
-export * from './security/intakeToken'
+// Security utilities are server-only; import from '@myoflow/lib/security' when needed
 
 // Audit logging
 export * from './audit/log'

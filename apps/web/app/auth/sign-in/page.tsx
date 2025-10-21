@@ -18,6 +18,7 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [providers, setProviders] = useState<any>(null)
+  const demoEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLE_DEMO === 'true'
 
   // Reset loading state on component mount to fix stuck states
   useEffect(() => {
@@ -160,9 +161,11 @@ export default function SignIn() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Demo: use &quot;demo123&quot; for test@myoflow.at or &quot;demo&quot; for other emails
-              </p>
+              {demoEnabled && (
+                <p className="text-xs text-muted-foreground">
+                  Demo mode enabled for development: use password &quot;demo&quot; (or &quot;demo123&quot; for seeded test users).
+                </p>
+              )}
             </div>
 
             <Button

@@ -1,9 +1,28 @@
-import sodium from 'libsodium-wrappers'
+type SodiumModule = typeof import('libsodium-wrappers')
 
+let sodiumInstance: SodiumModule | null = null
+let sodiumInitPromise: Promise<SodiumModule> | null = null
 let key: Uint8Array | null = null
 
+async function getSodium(): Promise<SodiumModule> {
+  if (sodiumInstance) {
+    return sodiumInstance
+  }
+
+  if (!sodiumInitPromise) {
+    sodiumInitPromise = import('libsodium-wrappers').then(async (module) => {
+      const sodium = module.default ?? module
+      await sodium.ready
+      sodiumInstance = sodium
+      return sodium
+    })
+  }
+
+  return sodiumInitPromise
+}
+
 async function getKey(): Promise<Uint8Array> {
-  await sodium.ready
+  const sodium = await getSodium()
   if (!key) {
     const keyB64 = process.env.ENCRYPTION_KEY_B64
     if (!keyB64) {
@@ -15,6 +34,7 @@ async function getKey(): Promise<Uint8Array> {
 }
 
 export async function encryptString(plainText: string): Promise<string> {
+  const sodium = await getSodium()
   const k = await getKey()
   const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
   // libsodium requires Uint8Array input; convert string to bytes explicitly
@@ -27,6 +47,7 @@ export async function encryptString(plainText: string): Promise<string> {
 }
 
 export async function decryptString(payload: string): Promise<string> {
+  const sodium = await getSodium()
   const k = await getKey()
   const [nonceB64, cipherB64] = payload.split(':')
   const nonce = sodium.from_base64(nonceB64, sodium.base64_variants.ORIGINAL)

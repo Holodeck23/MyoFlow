@@ -142,7 +142,7 @@ export const authConfig: NextAuthConfig = {
 
         // 3. Optional demo password fallback (dev only)
         if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
-          if (password === 'demo') {
+          if (password === 'demo' || password === 'demo123') {
             // Find user by email to link to the correct account (email already normalized above)
             const demoUser = await prisma.user.findUnique({
               where: { email: email },

@@ -81,9 +81,6 @@ export function Step1BusinessInfo({
                   if (!trimmed) {
                     return t('onboarding.step1.errors.addressRequired', 'Address is required')
                   }
-                  if (trimmed === 'Hauptstraße 1') {
-                    return t('onboarding.step1.errors.addressPlaceholder', 'Please enter your actual practice address')
-                  }
                   return true
                 },
               })}
