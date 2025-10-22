@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@myoflow/db'
 import { z } from 'zod'
-import { verifyIntakeToken } from '@myoflow/lib/security'
-import { encryptJson } from '@myoflow/lib'
+import { verifyIntakeToken, encryptJson } from '@myoflow/lib/security'
 
 const schema = z.object({
   token: z.string(),
