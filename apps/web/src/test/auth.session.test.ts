@@ -6,6 +6,9 @@ vi.mock('@myoflow/db', () => ({
     user: {
       findUnique: mockFindUnique,
     },
+    therapist: {
+      findUnique: mockFindUnique,
+    }
   },
 }))
 
