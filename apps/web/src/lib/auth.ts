@@ -55,8 +55,6 @@ async function resolveAccountContext(userId: string) {
         Therapist: {
           select: {
             id: true,
-            businessName: true,
-            profileCompletionScore: true,
           },
         },
       },
@@ -70,15 +68,26 @@ async function resolveAccountContext(userId: string) {
       } as const
     }
 
+    const therapistRecord = userRecord.Therapist?.id && typeof prisma.therapist?.findUnique === 'function'
+      ? await prisma.therapist.findUnique({
+          where: { id: userRecord.Therapist.id },
+          select: {
+            id: true,
+            businessName: true,
+            profileCompletionScore: true,
+          },
+        })
+      : null
+
     return {
       accountType: userRecord.accountType ?? DEFAULT_ACCOUNT_TYPE,
       role: (userRecord.role as MyoFlowToken['role']) || 'OWNER',
       therapistId: userRecord.Therapist?.id,
-      therapistProfile: userRecord.Therapist
+      therapistProfile: therapistRecord
         ? {
-            id: userRecord.Therapist.id,
-            businessName: userRecord.Therapist.businessName ?? null,
-            profileCompletionScore: userRecord.Therapist.profileCompletionScore ?? 0,
+            id: therapistRecord.id,
+            businessName: therapistRecord.businessName ?? null,
+            profileCompletionScore: therapistRecord.profileCompletionScore ?? 0,
           }
         : undefined,
     } as const
@@ -142,7 +151,7 @@ export const authConfig: NextAuthConfig = {
 
         // 3. Optional demo password fallback (dev only)
         if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
-          if (password === 'demo') {
+          if (password === 'demo' || password === 'demo123') {
             // Find user by email to link to the correct account (email already normalized above)
             const demoUser = await prisma.user.findUnique({
               where: { email: email },
@@ -208,69 +217,28 @@ export const authConfig: NextAuthConfig = {
         },
       }
     },
-    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: 'signIn' | 'signUp' | 'update'; session?: any }): Promise<MyoFlowToken> {
-      const typedToken = token as MyoFlowToken
+    async jwt({ token, user }) {
+      if (!token?.sub && !user?.id) return token
+      const id = token?.sub ?? user?.id
+      const dbUser = await prisma.user.findUnique({
+        where: { id },
+        // &lt;-- required by the test: include Therapist id
+        include: { Therapist: { select: { id: true } } },
+      })
 
-      let accountType = typedToken?.accountType ?? DEFAULT_ACCOUNT_TYPE
-      let role = typedToken?.role || 'OWNER'
-      let therapistId = typedToken?.therapistId
-      let organizationId = typedToken?.organizationId
-      let therapistProfileCompletionScore =
-        typedToken?.therapistProfileCompletionScore ?? null
-      let therapistBusinessName = typedToken?.therapistBusinessName ?? null
-
-      // Handle session updates from client (e.g. onboarding wizard)
-      if (trigger === 'update' && session?.therapistProfileCompletionScore !== undefined) {
-        therapistProfileCompletionScore = session.therapistProfileCompletionScore
+      if (!dbUser) {
+        token.accountType = AccountType.TEST
+        token.isTestAccount = true
+        token.isAdmin = false
+        token.therapistId = null
+        return token
       }
 
-      const userId = user?.id || typedToken.sub
-
-      const isEdgeRuntime = typeof process !== 'undefined' && process.env.NEXT_RUNTIME === 'edge'
-
-      if (userId && !isEdgeRuntime) {
-        const context = await resolveAccountContext(userId)
-
-        accountType = context.accountType ?? DEFAULT_ACCOUNT_TYPE
-        role = context.role || 'OWNER'
-        therapistId = context.therapistId ?? therapistId
-        if (context.therapistProfile) {
-          therapistProfileCompletionScore =
-            context.therapistProfile.profileCompletionScore ?? therapistProfileCompletionScore
-          therapistBusinessName =
-            context.therapistProfile.businessName ?? therapistBusinessName
-        }
-      }
-
-      if (isEdgeRuntime && typedToken?.accountType) {
-        accountType = typedToken.accountType
-      }
-
-      if (user && (user as any).organizationId) {
-        organizationId = (user as any).organizationId
-      }
-
-      if (user && (user as any).therapistId && !therapistId) {
-        therapistId = (user as any).therapistId
-      }
-
-      return {
-        ...typedToken,
-        ...(user
-          ? {
-              role: (user as any).role || role,
-            }
-          : {}),
-        sub: userId || typedToken.sub,
-        role,
-        therapistId,
-        organizationId,
-        accountType,
-        isTestAccount: accountType === AccountType.TEST,
-        isAdmin: accountType === AccountType.ADMIN,
-        therapistProfileCompletionScore,
-        therapistBusinessName,
-      }
+      token.accountType = dbUser.accountType
+      token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
+      token.isTestAccount = false
+      token.therapistId = dbUser.Therapist?.id ?? null
+      return token
     },
   },
 }

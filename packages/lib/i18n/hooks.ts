@@ -1,10 +1,11 @@
+import { useCallback, useMemo } from 'react'
 import { useLocale } from './context'
 import { Dictionary } from './config'
 
 export function useTranslation() {
   const { dictionary, locale, isLoading } = useLocale()
 
-  const t = (key: string, fallback?: string): string => {
+  const t = useCallback((key: string, fallback?: string): string => {
     // If loading, return a better fallback based on the key
     if (isLoading) {
       if (fallback) return fallback
@@ -44,13 +45,13 @@ export function useTranslation() {
     }
 
     return typeof value === 'string' ? value : fallback || key
-  }
+  }, [dictionary, isLoading])
 
-  return {
+  return useMemo(() => ({
     t,
     locale,
     isLoading
-  }
+  }), [t, locale, isLoading])
 }
 
 // Utility function for translations outside of components
