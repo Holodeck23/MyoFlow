@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 
 interface Note {
   id: string
-  bodyEnc: string
+  body: string | null
   createdAt: string
 }
 
@@ -50,6 +50,8 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
   const [error, setError] = useState<string | null>(null)
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
+  const [noteSuccess, setNoteSuccess] = useState<string | null>(null)
+  const [noteError, setNoteError] = useState<string | null>(null)
 
   const fetchClient = useCallback(async () => {
     try {
@@ -105,6 +107,8 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
     if (!newNote.trim() || !client) return
 
     setAddingNote(true)
+    setNoteError(null)
+    setNoteSuccess(null)
     try {
       const response = await fetch(`/api/clients/${client.id}/notes`, {
         method: 'POST',
@@ -112,20 +116,36 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          bodyEnc: newNote.trim()
+          body: newNote.trim()
         })
       })
 
-      if (!response.ok) throw new Error('Failed to add note')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const message =
+          errorData?.details?.[0]?.message ??
+          errorData?.error ??
+          'Failed to add note'
+        throw new Error(message)
+      }
 
       const note = await response.json()
-      setClient({
-        ...client,
-        Notes: [note, ...client.Notes]
+      setClient((prev) => {
+        if (!prev) return prev
+        const normalizedNote: Note = {
+          id: note.id,
+          body: typeof note.body === 'string' ? note.body : newNote.trim(),
+          createdAt: note.createdAt
+        }
+        return {
+          ...prev,
+          Notes: [normalizedNote, ...prev.Notes]
+        }
       })
       setNewNote('')
+      setNoteSuccess('Note saved successfully.')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to add note')
+      setNoteError(err instanceof Error ? err.message : 'Failed to add note')
     } finally {
       setAddingNote(false)
     }
@@ -322,6 +342,16 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
               <h2 className="text-lg font-medium text-gray-900 mb-4">Notes</h2>
               
               <form onSubmit={handleAddNote} className="mb-6">
+                {noteSuccess && (
+                  <div className="mb-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                    {noteSuccess}
+                  </div>
+                )}
+                {noteError && (
+                  <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {noteError}
+                  </div>
+                )}
                 <textarea
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
@@ -351,7 +381,9 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                 <div className="space-y-3">
                   {client.Notes.map(note => (
                     <div key={note.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{note.bodyEnc}</p>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                        {note.body || <span className="text-gray-400 italic">Note content unavailable</span>}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(note.createdAt).toLocaleString()}
                       </p>
