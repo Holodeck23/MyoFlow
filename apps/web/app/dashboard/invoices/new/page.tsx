@@ -40,6 +40,17 @@ type InvoiceFormData = {
   serviceDate: string | null
 }
 
+type LineFieldName = 'description' | 'quantity' | 'unitPriceCents' | 'vatRate'
+
+type LineErrors = Partial<Record<LineFieldName | '_root', string>>
+
+interface InvoiceFieldErrors {
+  clientId?: string
+  appointmentId?: string
+  lines: Record<number, LineErrors>
+  general: string[]
+}
+
 export default function NewInvoicePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -50,6 +61,10 @@ export default function NewInvoicePage() {
   const [error, setError] = useState<string | null>(null)
 
   const [dateError, setDateError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<InvoiceFieldErrors>({
+    lines: {},
+    general: []
+  })
   const [formData, setFormData] = useState<InvoiceFormData>(() => ({
     clientId: '',
     appointmentId: '',
@@ -115,6 +130,8 @@ export default function NewInvoicePage() {
     e.preventDefault()
     setCreating(true)
     setError(null)
+    setFieldErrors({ lines: {}, general: [] })
+    setDateError(null)
 
     if (!formData.serviceDate || dateError) {
       setCreating(false)
@@ -137,7 +154,8 @@ export default function NewInvoicePage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create invoice')
+        handleInvoiceError(errorData)
+        return
       }
 
       const data = await response.json()
@@ -147,6 +165,106 @@ export default function NewInvoicePage() {
     } finally {
       setCreating(false)
     }
+  }
+
+  const handleInvoiceError = (errorData: any) => {
+    const nextFieldErrors: InvoiceFieldErrors = { lines: {}, general: [] }
+    let nextDateError: string | null = null
+
+    const fallbackMessage =
+      typeof errorData?.error === 'string'
+        ? errorData.error
+        : 'Failed to create invoice'
+
+    const pushGeneral = (message: string | undefined | null) => {
+      if (!message) return
+      if (!nextFieldErrors.general.includes(message)) {
+        nextFieldErrors.general.push(message)
+      }
+    }
+
+    const recordLineError = (index: number, field: keyof LineErrors, message: string) => {
+      if (!nextFieldErrors.lines[index]) {
+        nextFieldErrors.lines[index] = {}
+      }
+      nextFieldErrors.lines[index][field] = message
+    }
+
+    if (Array.isArray(errorData?.details)) {
+      if (errorData.details.every((detail: unknown) => typeof detail === 'string')) {
+        (errorData.details as string[]).forEach((message) => pushGeneral(message))
+      } else {
+        for (const detail of errorData.details) {
+          const message =
+            typeof detail?.message === 'string'
+              ? detail.message
+              : fallbackMessage
+          const path = Array.isArray(detail?.path) ? detail.path : []
+
+          if (path[0] === 'clientId') {
+            nextFieldErrors.clientId = message
+            continue
+          }
+
+          if (path[0] === 'appointmentId') {
+            nextFieldErrors.appointmentId = message
+            continue
+          }
+
+          if (path[0] === 'serviceDate') {
+            nextDateError = message
+            continue
+          }
+
+          if (path[0] === 'lines') {
+            const indexRaw = path[1]
+            const index =
+              typeof indexRaw === 'number'
+                ? indexRaw
+                : Number.parseInt(indexRaw, 10)
+
+            if (!Number.isNaN(index)) {
+              const field = path[2]
+              if (typeof field === 'string' && field.length > 0) {
+                recordLineError(index, field as LineFieldName, message)
+              } else {
+                recordLineError(index, '_root', message)
+              }
+            } else {
+              pushGeneral(message)
+            }
+            continue
+          }
+
+          pushGeneral(message)
+        }
+      }
+    }
+
+    if (fallbackMessage) {
+      if (fallbackMessage === 'Client not found or access denied') {
+        nextFieldErrors.clientId = fallbackMessage
+      } else if (
+        fallbackMessage === 'Appointment not found or access denied' ||
+        fallbackMessage === 'Appointment already has an invoice'
+      ) {
+        nextFieldErrors.appointmentId = fallbackMessage
+      } else if (fallbackMessage.toLowerCase().includes('service date')) {
+        nextDateError = fallbackMessage
+      } else if (nextFieldErrors.general.length === 0) {
+        pushGeneral(fallbackMessage)
+      }
+    }
+
+    if (nextFieldErrors.general.length === 0 && fallbackMessage) {
+      pushGeneral(fallbackMessage)
+    }
+
+    const bannerMessage = nextFieldErrors.general[0] ?? fallbackMessage ?? 'Failed to create invoice'
+
+    setFieldErrors(nextFieldErrors)
+    setDateError(nextDateError)
+    setError(bannerMessage)
   }
 
   const updateLine = (index: number, field: keyof InvoiceLine, value: any) => {
@@ -227,10 +345,19 @@ export default function NewInvoicePage() {
             </p>
           </div>
 
-          {error && (
+          {(error || fieldErrors.general.length > 0) && (
             <div className="p-6 bg-red-50 border-b border-red-200">
-              <p className="text-red-800">Error: {error}</p>
-              {error.includes('logged in') && (
+              {error && (
+                <p className="text-red-800 font-medium">Error: {error}</p>
+              )}
+              {fieldErrors.general.length > 0 && (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+                  {fieldErrors.general.map((message, index) => (
+                    <li key={`${message}-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
+              {error && error.includes('logged in') && (
                 <p className="text-red-600 text-sm mt-2">
                   Please sign out and sign back in, then try again.
                 </p>
@@ -252,7 +379,9 @@ export default function NewInvoicePage() {
                     clientId: e.target.value,
                     appointmentId: '' // Clear appointment when client changes
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-invalid={Boolean(fieldErrors.clientId)}
+                  aria-describedby={fieldErrors.clientId ? 'client-error' : undefined}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.clientId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 >
                   <option value="">Select a client</option>
                   {clients.map((client) => (
@@ -261,6 +390,11 @@ export default function NewInvoicePage() {
                     </option>
                   ))}
                 </select>
+                {fieldErrors.clientId && (
+                  <p id="client-error" className="mt-2 text-sm text-red-600">
+                    {fieldErrors.clientId}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -270,7 +404,9 @@ export default function NewInvoicePage() {
                 <select
                   value={formData.appointmentId}
                   onChange={(e) => setFormData({ ...formData, appointmentId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-invalid={Boolean(fieldErrors.appointmentId)}
+                  aria-describedby={fieldErrors.appointmentId ? 'appointment-error' : undefined}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.appointmentId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                 >
                   <option value="">No appointment</option>
                   {appointments
@@ -279,8 +415,13 @@ export default function NewInvoicePage() {
                     <option key={appointment.id} value={appointment.id}>
                       {appointment.Service.name} ({new Date(appointment.start).toLocaleDateString('de-AT')} {new Date(appointment.start).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })})
                     </option>
-                  ))}
+                    ))}
                 </select>
+                {fieldErrors.appointmentId && (
+                  <p id="appointment-error" className="mt-2 text-sm text-red-600">
+                    {fieldErrors.appointmentId}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -317,6 +458,13 @@ export default function NewInvoicePage() {
                 {formData.lines.map((line, index) => (
                   <div key={index} className="border border-gray-200 rounded-md p-4">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                      {fieldErrors.lines[index]?._root && (
+                        <div className="md:col-span-5">
+                          <p className="text-sm text-red-600">
+                            {fieldErrors.lines[index]?._root}
+                          </p>
+                        </div>
+                      )}
                       <div className="md:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           Description
@@ -326,9 +474,16 @@ export default function NewInvoicePage() {
                           required
                           value={line.description}
                           onChange={(e) => updateLine(index, 'description', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          aria-invalid={Boolean(fieldErrors.lines[index]?.description)}
+                          aria-describedby={fieldErrors.lines[index]?.description ? `line-${index}-description-error` : undefined}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.lines[index]?.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                           placeholder="Service description"
                         />
+                        {fieldErrors.lines[index]?.description && (
+                          <p id={`line-${index}-description-error`} className="mt-1 text-xs text-red-600">
+                            {fieldErrors.lines[index]?.description}
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -341,8 +496,15 @@ export default function NewInvoicePage() {
                           min="1"
                           value={line.quantity}
                           onChange={(e) => updateLine(index, 'quantity', parseInt(e.target.value))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          aria-invalid={Boolean(fieldErrors.lines[index]?.quantity)}
+                          aria-describedby={fieldErrors.lines[index]?.quantity ? `line-${index}-quantity-error` : undefined}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.lines[index]?.quantity ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                         />
+                        {fieldErrors.lines[index]?.quantity && (
+                          <p id={`line-${index}-quantity-error`} className="mt-1 text-xs text-red-600">
+                            {fieldErrors.lines[index]?.quantity}
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -356,8 +518,15 @@ export default function NewInvoicePage() {
                           step="0.01"
                           value={line.unitPriceCents / 100}
                           onChange={(e) => updateLine(index, 'unitPriceCents', Math.round(parseFloat(e.target.value) * 100))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          aria-invalid={Boolean(fieldErrors.lines[index]?.unitPriceCents)}
+                          aria-describedby={fieldErrors.lines[index]?.unitPriceCents ? `line-${index}-unitPriceCents-error` : undefined}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.lines[index]?.unitPriceCents ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                         />
+                        {fieldErrors.lines[index]?.unitPriceCents && (
+                          <p id={`line-${index}-unitPriceCents-error`} className="mt-1 text-xs text-red-600">
+                            {fieldErrors.lines[index]?.unitPriceCents}
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -367,13 +536,20 @@ export default function NewInvoicePage() {
                         <select
                           value={line.vatRate}
                           onChange={(e) => updateLine(index, 'vatRate', e.target.value as any)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          aria-invalid={Boolean(fieldErrors.lines[index]?.vatRate)}
+                          aria-describedby={fieldErrors.lines[index]?.vatRate ? `line-${index}-vatRate-error` : undefined}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.lines[index]?.vatRate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                         >
                           <option value="KLEINUNTERNEHMER">Kleinunternehmer (0%)</option>
                           <option value="UST_10">10% USt</option>
                           <option value="UST_13">13% USt</option>
                           <option value="UST_20">20% USt</option>
                         </select>
+                        {fieldErrors.lines[index]?.vatRate && (
+                          <p id={`line-${index}-vatRate-error`} className="mt-1 text-xs text-red-600">
+                            {fieldErrors.lines[index]?.vatRate}
+                          </p>
+                        )}
                       </div>
                     </div>
 
