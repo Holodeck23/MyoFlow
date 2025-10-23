@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge, EncryptionBadge } from '@/components/ui/Badge'
 import { formatAustrianPhoneNumber, formatAustrianDate } from '@/lib/austrian-formatting'
 import { useTranslation } from '@myoflow/lib'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Client {
   id: string
@@ -30,6 +31,9 @@ export default function ClientsPage() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [selectedTag, setSelectedTag] = useState('')
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const allTags = clients.reduce((tags: string[], client) => {
     client.tags.forEach(tag => {
@@ -67,21 +71,33 @@ export default function ClientsPage() {
     }
   }, [status, router, fetchClients])
 
-  const handleDeleteClient = async (clientId: string, clientName: string) => {
-    if (!confirm(`${t('clients.deleteConfirm')} ${clientName}${t('clients.deleteConfirmContinue')}`)) {
-      return
-    }
+  const handleDeleteClient = (clientId: string, clientName: string) => {
+    setPendingDelete({ id: clientId, name: clientName })
+    setActionError(null)
+  }
+
+  const confirmDeleteClient = async () => {
+    if (!pendingDelete) return
+    setDeleteLoading(true)
+    setActionError(null)
 
     try {
-      const response = await fetch(`/api/clients/${clientId}`, {
+      const response = await fetch(`/api/clients/${pendingDelete.id}`, {
         method: 'DELETE'
       })
       
-      if (!response.ok) throw new Error(t('clients.deleteError'))
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const message = errorData?.error || t('clients.deleteError')
+        throw new Error(message)
+      }
       
-      setClients(clients.filter(client => client.id !== clientId))
+      setClients((prev) => prev.filter(client => client.id !== pendingDelete.id))
+      setPendingDelete(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : t('clients.deleteError'))
+      setActionError(err instanceof Error ? err.message : t('clients.deleteError'))
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -118,6 +134,12 @@ export default function ClientsPage() {
           </Link>
         </Button>
       </div>
+
+      {actionError && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {actionError}
+        </div>
+      )}
 
       {/* Search and Filter Section */}
       <Card className="shadow-sm border-0">
@@ -295,6 +317,26 @@ export default function ClientsPage() {
               ))}
             </div>
           )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={t('clients.deleteDialogTitle', 'Delete client')}
+        description={
+          pendingDelete
+            ? `${t('clients.deleteConfirm', 'Are you sure you want to delete')} ${pendingDelete.name}${t('clients.deleteConfirmContinue', '? This action cannot be undone.')}`
+            : ''
+        }
+        confirmLabel={t('common.delete', 'Delete')}
+        cancelLabel={t('common.cancel', 'Cancel')}
+        tone="danger"
+        loading={deleteLoading}
+        onConfirm={confirmDeleteClient}
+        onCancel={() => {
+          if (deleteLoading) return
+          setPendingDelete(null)
+          setActionError(null)
+        }}
+      />
     </div>
   )
 }
