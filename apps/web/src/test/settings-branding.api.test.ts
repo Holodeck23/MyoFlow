@@ -14,6 +14,14 @@ const mockPrisma = vi.hoisted(() => ({
     update: vi.fn(),
     create: vi.fn(),
   },
+  service: {
+    count: vi.fn().mockResolvedValue(1),
+    create: vi.fn(),
+  },
+  location: {
+    count: vi.fn().mockResolvedValue(1),
+    create: vi.fn(),
+  },
 }))
 
 vi.mock('next-auth', () => ({

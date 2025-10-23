@@ -17,9 +17,13 @@ const mockPrisma = vi.hoisted(() => ({
   },
   service: {
     findFirst: vi.fn(),
+    count: vi.fn().mockResolvedValue(1),
+    create: vi.fn(),
   },
   location: {
     findFirst: vi.fn(),
+    count: vi.fn().mockResolvedValue(1),
+    create: vi.fn(),
   },
   appointment: {
     findFirst: vi.fn(),

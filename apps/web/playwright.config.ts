@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: 'html',
   
   use: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -30,15 +30,15 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm --filter @myoflow/web dev --port 3001',
-    url: 'http://localhost:3001',
+    command: 'pnpm --filter @myoflow/web dev',
+    url: 'http://localhost:3000',
     timeout: 180_000, // 3 minutes for server startup - fixes timeout issues
     reuseExistingServer: !process.env.CI,
     env: {
-      DATABASE_URL: process.env.CI 
+      DATABASE_URL: process.env.CI
         ? 'postgresql://postgres:postgres@localhost:5432/myoflow'
         : process.env.DATABASE_URL || 'postgresql://ZOD@localhost:5432/myoflow',
-      NEXTAUTH_URL: 'http://localhost:3001',
+      NEXTAUTH_URL: 'http://localhost:3000',
       NEXTAUTH_SECRET: 'test-secret-for-e2e',
       NODE_ENV: 'test',
       AUTH_ENABLE_DEMO: 'true',
