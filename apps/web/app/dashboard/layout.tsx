@@ -33,8 +33,8 @@ export default function DashboardLayout({
                 </span>
               </div>
               <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">
-                  {session?.user?.name || (translationLoading ? 'Therapist' : t('dashboardLayout.user.fallbackName', 'Therapist'))}
+                <div className="text-sm font-medium text-gray-900" suppressHydrationWarning>
+                  {session?.user?.name || t('dashboardLayout.user.fallbackName', 'Therapist')}
                 </div>
                 <div className="text-xs text-gray-500">
                   {session?.user?.email}

@@ -43,7 +43,11 @@ describe('auth callbacks', () => {
         id: 'user-1',
         role: 'SUPER_ADMIN',
         accountType: AccountType.ADMIN,
-        Therapist: { id: 'therapist-42' },
+        Therapist: {
+          id: 'therapist-42',
+          businessName: 'Test Practice',
+          profileCompletionScore: 85,
+        },
       })
 
       const token = await authConfig.callbacks?.jwt?.({
@@ -53,7 +57,15 @@ describe('auth callbacks', () => {
 
       expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        include: { Therapist: { select: { id: true } } },
+        include: {
+          Therapist: {
+            select: {
+              id: true,
+              businessName: true,
+              profileCompletionScore: true,
+            }
+          }
+        },
       })
       expect(token?.accountType).toBe(AccountType.ADMIN)
       expect(token?.isAdmin).toBe(true)

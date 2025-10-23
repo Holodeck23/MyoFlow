@@ -217,16 +217,28 @@ export const authConfig: NextAuthConfig = {
         },
       }
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (!token?.sub && !user?.id) return token
+
       const id = token?.sub ?? user?.id
+
+      // Always verify user exists for security (deleted/demoted accounts)
+      // SECURITY: This ensures revoked privileges are detected immediately
       const dbUser = await prisma.user.findUnique({
         where: { id },
-        // &lt;-- required by the test: include Therapist id
-        include: { Therapist: { select: { id: true } } },
+        include: {
+          Therapist: {
+            select: {
+              id: true,
+              businessName: true,
+              profileCompletionScore: true,
+            }
+          }
+        },
       })
 
       if (!dbUser) {
+        // User deleted or missing - default to TEST account for safety
         token.accountType = AccountType.TEST
         token.isTestAccount = true
         token.isAdmin = false
@@ -234,10 +246,16 @@ export const authConfig: NextAuthConfig = {
         return token
       }
 
+      // Update token with current database values
+      // This ensures role changes/demotions are reflected immediately
       token.accountType = dbUser.accountType
+      token.role = dbUser.role
       token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
       token.isTestAccount = false
       token.therapistId = dbUser.Therapist?.id ?? null
+      token.therapistBusinessName = dbUser.Therapist?.businessName ?? null
+      token.therapistProfileCompletionScore = dbUser.Therapist?.profileCompletionScore ?? null
+
       return token
     },
   },
