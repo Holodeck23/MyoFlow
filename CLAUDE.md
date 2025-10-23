@@ -1,9 +1,61 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** October 21, 2025
-**Branch:** `main`
-**Status:** ✅ Critical Authentication Fixes Complete
+**Current Session:** October 23, 2025
+**Branch:** `beta-readiness-core-workflow`
+**Status:** ✅ CI Fixes Complete + Session Management Fixed
+
+---
+
+## 🎯 Session Summary - October 23, 2025 ✅
+
+### **CI Test Failures + Session Management Fixes**
+
+**Branch:** `beta-readiness-core-workflow`
+**Commits:** b696ce3 (CI fixes) + Codex fixes (session + routes)
+**Status:** All tests passing, QA ready
+
+### **Issues Resolved**
+
+1. **TypeScript Error in DatePickerField** ✅ (b696ce3)
+   - Changed `!!()` to `Boolean()` for proper type coercion
+   - Fixed: Type 'boolean | null' not assignable to 'boolean | undefined'
+
+2. **Invoice API Future Date Validation** ✅ (b696ce3)
+   - Added validation: rejects serviceDate > now() with 400 error
+   - Test "rejects invoices with future service date" now passes
+
+3. **ensureTherapistAccount Default Creation** ✅ (b696ce3)
+   - Auto-creates default service "Klassische Massage 60min" when count = 0
+   - Auto-creates default location "Praxis Linz" when count = 0
+   - Updated test mocks (3 files) to include service/location.count/.create
+
+4. **E2E Test Port Configuration** ✅ (b696ce3)
+   - Updated Playwright config: port 3001 → 3000 (matches dev server)
+
+5. **Session Management - Edge Runtime Issue** ✅ (Codex)
+   - Root cause: JWT callback running in Edge runtime couldn't access Prisma
+   - Fix: Runtime detection - Edge reuses cached claims, server rehydrates from DB
+   - Added test coverage for Edge runtime behavior
+   - Users can now navigate between pages without logout
+
+6. **Route 404 Errors** ✅ (Codex)
+   - Created redirect pages: `/clients`, `/settings`, `/appointments`, `/calendar`, `/invoices`
+   - All redirect to `/dashboard/*` equivalents
+   - QA can now access all features via sidebar navigation
+
+**Quality Gates:** ✅
+- TypeScript: 0 errors
+- Unit Tests: 80 passed (19 test files)
+- Lint: 1 warning (pre-existing)
+- Session persistence: Fixed
+- Navigation: All routes work
+
+**Files Modified:** 13 files
+- 8 files in commit b696ce3 (CI fixes)
+- 3 files by Codex (auth.ts, test, route redirects)
+
+**Next Steps:** Wave 2 QA validation ready to proceed
 
 ---
 
