@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@myoflow/db'
+import { prisma, ServiceCategory, VatStatus, LocationType } from '@myoflow/db'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
@@ -150,6 +150,44 @@ export async function ensureTherapistAccount(emailOrRequest: string | NextReques
         suffix += 1
       }
     }
+  }
+
+  // Create default service if none exist
+  const serviceCount = await prisma.service.count({
+    where: { therapistId: therapist.id }
+  })
+
+  if (serviceCount === 0) {
+    await prisma.service.create({
+      data: {
+        therapistId: therapist.id,
+        name: 'Klassische Massage 60min',
+        category: ServiceCategory.MASSAGE,
+        durationMin: 60,
+        priceCents: 8000,
+        vatRate: VatStatus.KLEINUNTERNEHMER,
+        active: true
+      }
+    })
+  }
+
+  // Create default location if none exist
+  const locationCount = await prisma.location.count({
+    where: { therapistId: therapist.id }
+  })
+
+  if (locationCount === 0) {
+    await prisma.location.create({
+      data: {
+        therapistId: therapist.id,
+        name: 'Praxis Linz',
+        type: LocationType.CLINIC,
+        street: 'Hauptstraße 1',
+        postalCode: '4020',
+        city: 'Linz',
+        country: 'Austria'
+      }
+    })
   }
 
   return { therapist, user }
