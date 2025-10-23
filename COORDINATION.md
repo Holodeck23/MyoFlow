@@ -317,3 +317,14 @@ Good luck. Let's get this done. 🎯
 - **Issues Found:** None
 - **UX Features:** Locale-aware (EN/DE), real-time validation, clear error messages, responsive layout
 - **Next Task:** 3 (BR-2.2 - Invoice Validation & Errors) - **CLEARED TO PROCEED**
+
+### ✅ Task 3 Complete: BR-2.2 - Invoice Validation & Errors
+- **Files Modified:** `apps/web/app/dashboard/invoices/new/page.tsx`
+- **Implementation:**
+  - Added structured field error state for client, appointment, and line items with inline rendering
+  - Mapped API validation responses (Zod + compliance errors) back to specific inputs and DatePicker
+  - Highlighted invalid controls with accessibility attributes and contextual helper text
+  - Surfaced general API errors in a visible alert with detailed bullet list
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES
+- **Issues Found:** None
+- **Next Task:** 4 (BR-3.2 - Fix Client Note Payload)
