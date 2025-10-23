@@ -328,3 +328,15 @@ Good luck. Let's get this done. 🎯
 - **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES
 - **Issues Found:** None
 - **Next Task:** 4 (BR-3.2 - Fix Client Note Payload)
+
+### ✅ Task 4 Complete: BR-3.2 - Fix Client Note Payload
+- **Files Modified:** `apps/web/app/dashboard/clients/[id]/page.tsx`
+- **Implementation:**
+  - Updated client note types/rendering to consume decrypted `body` field from API responses
+  - POST requests now send `body` payload; normalized responses ensure consistent state shape
+  - Added inline success/error banners for note submissions with resilient error parsing
+  - Swapped legacy alerts for accessible form feedback and graceful fallback when note body missing
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES
+- **Issues Found:** None
+- **UX Improvements:** Inline success banners, clear error messages, no more silent failures
+- **Next Task:** 5 (BR-3.3 - Reusable ConfirmDialog) - **CLEARED TO PROCEED**
