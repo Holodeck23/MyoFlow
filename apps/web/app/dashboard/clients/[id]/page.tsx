@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Note {
   id: string
@@ -52,6 +53,9 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
   const [addingNote, setAddingNote] = useState(false)
   const [noteSuccess, setNoteSuccess] = useState<string | null>(null)
   const [noteError, setNoteError] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const fetchClient = useCallback(async () => {
     try {
@@ -84,21 +88,35 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
     }
   }, [status, router, fetchClient])
 
-  const handleDeleteClient = async () => {
-    if (!client || !confirm(`Are you sure you want to delete ${client.name}? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteClient = () => {
+    if (!client) return
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteClient = async () => {
+    if (!client) return
+    setDeleteLoading(true)
+    setDeleteError(null)
 
     try {
       const response = await fetch(`/api/clients/${client.id}`, {
         method: 'DELETE'
       })
       
-      if (!response.ok) throw new Error('Failed to delete client')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const message = errorData?.error || 'Failed to delete client'
+        throw new Error(message)
+      }
       
+      setDeleteDialogOpen(false)
       router.push('/dashboard/clients')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete client')
+      setDeleteDialogOpen(false)
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete client')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -224,6 +242,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
       </nav>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {deleteError && (
+          <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {deleteError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow">
@@ -424,6 +447,25 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete client"
+        description={
+          client
+            ? `Are you sure you want to delete ${client.name}? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        tone="danger"
+        loading={deleteLoading}
+        onConfirm={confirmDeleteClient}
+        onCancel={() => {
+          if (deleteLoading) return
+          setDeleteDialogOpen(false)
+        }}
+      />
     </div>
   )
 }

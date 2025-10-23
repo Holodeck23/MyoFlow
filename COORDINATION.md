@@ -340,3 +340,38 @@ Good luck. Let's get this done. 🎯
 - **Issues Found:** None
 - **UX Improvements:** Inline success banners, clear error messages, no more silent failures
 - **Next Task:** 5 (BR-3.3 - Reusable ConfirmDialog) - **CLEARED TO PROCEED**
+
+### ✅ Task 5 Complete: BR-3.3 - Reusable ConfirmDialog
+- **Files Modified:** `apps/web/app/dashboard/clients/page.tsx`, `apps/web/app/dashboard/clients/[id]/page.tsx`
+- **Implementation:**
+  - Replaced browser `confirm` prompts with the shared `ConfirmDialog` modal, including danger styling and loading safeguards
+  - Added tracked deletion state (pending target, spinner control) with optimistic client list updates and inline error banners on failure
+  - Client detail view reuses the modal flow, closes on success, and surfaces API errors without collapsing the page layout
+  - Existing DELETE API routes continue emitting audit logs, so confirmations now feed the same backend trail
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES
+- **Issues Found:** None
+- **Next Task:** 6 (BR-3.4 - Navigation Link Audit)
+
+### ✅ Task 6 Complete: BR-3.4 - Navigation Link Audit
+- **Files Modified:** `apps/web/app/components/Sidebar.tsx`, `apps/web/app/dashboard/clients/page.tsx`, `apps/web/app/dashboard/clients/[id]/page.tsx`, `packages/lib/i18n/dictionaries/en.json`, `packages/lib/i18n/dictionaries/de.json`
+- **Implementation:**
+  - Sidebar now distinguishes available vs. upcoming entries without `href="#"`, using disabled buttons, tooltips, and localized "Coming soon" messaging
+  - Active route styling preserved while collapsed mode shows tooltip text for upcoming features
+  - Added inline error banner for failed client deletions to keep nav feedback consistent
+  - Extended i18n dictionaries with reusable strings for coming-soon badges/tooltips
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES (after Claude t() signature fix)
+- **Issues Found:** Minor TypeScript error in t() call - fixed by Claude
+- **Claude Fix:** Corrected t('sidebar.comingSoonTooltip') to use string fallback instead of object
+- **Next Task:** QA Testing - Wave 2 Complete! 🎉
+
+---
+
+## 🎉 WAVE 2 COMPLETE - READY FOR QA TESTING
+
+**Wave 2 Tasks (3/3 Complete):**
+- ✅ Task 4: Client Note Payload - Inline success/error feedback
+- ✅ Task 5: Reusable ConfirmDialog - Professional modals replace window.confirm
+- ✅ Task 6: Navigation Link Audit - No dead links, clear "Coming Soon" indicators
+
+**Status:** All Wave 1 + Wave 2 improvements implemented and tested
+**Next Step:** QA Agent to execute comprehensive user flow testing per `.agent-os/tasks/qa-wave2-user-flow-test.md`

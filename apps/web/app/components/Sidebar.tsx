@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Calendar,
   Users2,
-  ClipboardList,
   FileText,
   DollarSign,
   Package2,
@@ -16,7 +15,6 @@ import {
   MessageCircle,
   Globe2,
   Settings,
-  Bug,
   Menu,
   ChevronLeft
 } from 'lucide-react'
@@ -46,18 +44,18 @@ export function Sidebar() {
       available: true
     },
     {
-      name: t('sidebar.sessions', 'Sessions & Notes'),
-      href: '/dashboard/sessions',
-      icon: FileText,
-      available: false,
-      comingSoon: 'v1.7'
-    },
-    {
       name: t('sidebar.invoices', 'Invoices & Payments'),
       href: '/dashboard/invoices',
       icon: DollarSign,
       available: true,
       badge: 3
+    },
+    {
+      name: t('sidebar.sessions', 'Sessions & Notes'),
+      href: '/dashboard/sessions',
+      icon: FileText,
+      available: false,
+      comingSoon: 'v1.7'
     },
     {
       name: t('sidebar.products', 'Products & Packages'),
@@ -131,46 +129,64 @@ export function Sidebar() {
           const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/dashboard')
           const IconComponent = item.icon
           const isAvailable = item.available
+          const baseClasses = `group flex items-center ${isCollapsed ? 'px-2 justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-lg transition-colors duration-200`
+          const stateClasses = isAvailable
+            ? isActive
+              ? 'bg-[#1565C0] text-white'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : 'text-gray-400 cursor-not-allowed'
+          const comingSoonLabel = item.comingSoon
+            ? t('sidebar.comingSoonBadge', 'Coming soon')
+            : null
+          const disabledTooltip = item.comingSoon
+            ? t('sidebar.comingSoonTooltip', 'Coming in a future version')
+            : t('sidebar.unavailable', 'This feature is not available yet.')
+
+          const content = (
+            <>
+              <IconComponent size={20} className={`flex-shrink-0 ${!isCollapsed && 'mr-3'}`} />
+              {!isCollapsed && (
+                <span className="flex-1 min-w-0 overflow-hidden">
+                  <span className="block truncate text-ellipsis whitespace-nowrap">
+                    {item.name}
+                  </span>
+                </span>
+              )}
+
+              {item.badge && isAvailable && !isCollapsed && (
+                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                  {item.badge}
+                </span>
+              )}
+
+              {!isAvailable && item.comingSoon && !isCollapsed && (
+                <span className="ml-2 bg-gray-200 text-gray-600 text-xs rounded-full px-2 py-0.5">
+                  {comingSoonLabel} • {item.comingSoon}
+                </span>
+              )}
+            </>
+          )
 
           return (
             <div key={item.name} className="relative">
-              <Link
-                href={isAvailable ? item.href : '#'}
-                className={`
-                  group flex items-center ${isCollapsed ? 'px-2 justify-center' : 'px-3'} py-2.5 text-sm font-medium rounded-lg transition-colors duration-200
-                  ${isActive && isAvailable
-                    ? 'bg-[#1565C0] text-white'
-                    : isAvailable
-                    ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    : 'text-gray-400 cursor-not-allowed'
-                  }
-                `}
-                onClick={!isAvailable ? (e) => e.preventDefault() : undefined}
-                title={isCollapsed ? item.name : undefined}
-              >
-                <IconComponent size={20} className={`flex-shrink-0 ${!isCollapsed && 'mr-3'}`} />
-                {!isCollapsed && (
-                  <span className="flex-1 min-w-0 overflow-hidden">
-                    <span className="block truncate text-ellipsis whitespace-nowrap">
-                      {item.name}
-                    </span>
-                  </span>
-                )}
-
-                {/* Notification Badge */}
-                {item.badge && !isCollapsed && (
-                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                    {item.badge}
-                  </span>
-                )}
-
-                {/* Coming Soon Badge */}
-                {!isAvailable && item.comingSoon && !isCollapsed && (
-                  <span className="ml-2 bg-gray-200 text-gray-600 text-xs rounded-full px-2 py-0.5">
-                    {item.comingSoon}
-                  </span>
-                )}
-              </Link>
+              {isAvailable ? (
+                <Link
+                  href={item.href}
+                  className={`${baseClasses} ${stateClasses}`}
+                  title={isCollapsed ? item.name : undefined}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className={`${baseClasses} ${stateClasses}`}
+                  title={disabledTooltip}
+                  aria-disabled
+                >
+                  {content}
+                </button>
+              )}
             </div>
           )
         })}
