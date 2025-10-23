@@ -7,13 +7,13 @@ import { logAudit } from '@myoflow/db'
 import { requireTherapist, ensureTherapistAccount } from '@/lib/shared-helpers'
 
 const CreateClientSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional(),
-  street: z.string().optional(),
-  postalCode: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().email().trim().optional().or(z.literal('')),
+  phone: z.string().trim().optional(),
+  street: z.string().trim().min(1, 'Street is required'),
+  postalCode: z.string().trim().min(1, 'Postal code is required'),
+  city: z.string().trim().min(1, 'City is required'),
+  country: z.string().trim().min(1, 'Country is required'),
   tags: z.array(z.string()).optional(),
   healthFlags: z.string().optional(),
 })

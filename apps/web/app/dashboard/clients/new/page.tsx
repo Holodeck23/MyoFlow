@@ -5,25 +5,92 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+type ClientFormField = 'name' | 'email' | 'phone' | 'street' | 'postalCode' | 'city' | 'country'
+
+type ClientFormData = {
+  name: string
+  email: string
+  phone: string
+  street: string
+  postalCode: string
+  city: string
+  country: string
+  tags: string[]
+}
+
+const initialFormData: ClientFormData = {
+  name: '',
+  email: '',
+  phone: '',
+  street: '',
+  postalCode: '',
+  city: '',
+  country: '',
+  tags: []
+}
+
 export default function NewClientPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    tags: [] as string[]
-  })
+  const [formData, setFormData] = useState<ClientFormData>(initialFormData)
+  const [formErrors, setFormErrors] = useState<Partial<Record<ClientFormField, string>>>({})
   
   const [tagInput, setTagInput] = useState('')
 
+  const updateFormField = (field: ClientFormField, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value
+    }))
+
+    setFormErrors((prev) => {
+      if (!prev[field]) return prev
+      const { [field]: _removed, ...rest } = prev
+      return rest
+    })
+  }
+
+  const validateForm = (data: ClientFormData) => {
+    const nextErrors: Partial<Record<ClientFormField, string>> = {}
+    const requiredFields: ClientFormField[] = ['name', 'street', 'postalCode', 'city', 'country']
+
+    requiredFields.forEach((field) => {
+      if (!data[field].trim()) {
+        nextErrors[field] = 'This field is required.'
+      }
+    })
+
+    if (data.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+      nextErrors.email = 'Please enter a valid email address.'
+    }
+
+    return nextErrors
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+    const trimmedData: ClientFormData = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      street: formData.street.trim(),
+      postalCode: formData.postalCode.trim(),
+      city: formData.city.trim(),
+      country: formData.country.trim(),
+      tags: formData.tags
+    }
+
+    const validationErrors = validateForm(trimmedData)
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors)
+      return
+    }
+
+    setLoading(true)
+    setFormErrors({})
 
     try {
       const response = await fetch('/api/clients', {
@@ -32,14 +99,26 @@ export default function NewClientPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...formData,
-          email: formData.email || undefined,
-          phone: formData.phone || undefined
+          ...trimmedData,
+          email: trimmedData.email || undefined,
+          phone: trimmedData.phone || undefined
         })
       })
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (errorData?.details && Array.isArray(errorData.details)) {
+          const apiErrors: Partial<Record<ClientFormField, string>> = {}
+          for (const detail of errorData.details) {
+            const field = detail?.path?.[0]
+            if (typeof field === 'string' && (['name', 'email', 'phone', 'street', 'postalCode', 'city', 'country'] as ClientFormField[]).includes(field as ClientFormField)) {
+              apiErrors[field as ClientFormField] = detail.message
+            }
+          }
+          if (Object.keys(apiErrors).length > 0) {
+            setFormErrors(apiErrors)
+          }
+        }
         throw new Error(errorData.error || 'Failed to create client')
       }
 
@@ -57,20 +136,20 @@ export default function NewClientPage() {
       e.preventDefault()
       const tag = tagInput.trim()
       if (tag && !formData.tags.includes(tag)) {
-        setFormData({
-          ...formData,
-          tags: [...formData.tags, tag]
-        })
+        setFormData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, tag]
+        }))
         setTagInput('')
       }
     }
   }
 
   const removeTag = (tagToRemove: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter(tag => tag !== tagToRemove)
-    })
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }))
   }
 
   if (status === 'loading') {
@@ -135,10 +214,17 @@ export default function NewClientPage() {
                   id="name"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => updateFormField('name', e.target.value)}
+                  aria-invalid={Boolean(formErrors.name)}
+                  aria-describedby={formErrors.name ? 'name-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
                   placeholder="Enter client's full name"
                 />
+                {formErrors.name && (
+                  <p id="name-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.name}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -149,10 +235,17 @@ export default function NewClientPage() {
                   type="email"
                   id="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => updateFormField('email', e.target.value)}
+                  aria-invalid={Boolean(formErrors.email)}
+                  aria-describedby={formErrors.email ? 'email-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
                   placeholder="client@example.com"
                 />
+                {formErrors.email && (
+                  <p id="email-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.email}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -163,10 +256,105 @@ export default function NewClientPage() {
                   type="tel"
                   id="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(e) => updateFormField('phone', e.target.value)}
+                  aria-invalid={Boolean(formErrors.phone)}
+                  aria-describedby={formErrors.phone ? 'phone-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
                   placeholder="+43 1 234 5678"
                 />
+                {formErrors.phone && (
+                  <p id="phone-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.phone}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="street" className="block text-sm font-medium text-gray-700">
+                  Street Address *
+                </label>
+                <input
+                  type="text"
+                  id="street"
+                  required
+                  value={formData.street}
+                  onChange={(e) => updateFormField('street', e.target.value)}
+                  aria-invalid={Boolean(formErrors.street)}
+                  aria-describedby={formErrors.street ? 'street-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.street ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
+                  placeholder="Mariahilfer Straße 1"
+                />
+                {formErrors.street && (
+                  <p id="street-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.street}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
+                  Postal Code *
+                </label>
+                <input
+                  type="text"
+                  id="postalCode"
+                  required
+                  value={formData.postalCode}
+                  onChange={(e) => updateFormField('postalCode', e.target.value)}
+                  aria-invalid={Boolean(formErrors.postalCode)}
+                  aria-describedby={formErrors.postalCode ? 'postalCode-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.postalCode ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
+                  placeholder="1070"
+                />
+                {formErrors.postalCode && (
+                  <p id="postalCode-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.postalCode}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  required
+                  value={formData.city}
+                  onChange={(e) => updateFormField('city', e.target.value)}
+                  aria-invalid={Boolean(formErrors.city)}
+                  aria-describedby={formErrors.city ? 'city-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
+                  placeholder="Vienna"
+                />
+                {formErrors.city && (
+                  <p id="city-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.city}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                  Country *
+                </label>
+                <input
+                  type="text"
+                  id="country"
+                  required
+                  value={formData.country}
+                  onChange={(e) => updateFormField('country', e.target.value)}
+                  aria-invalid={Boolean(formErrors.country)}
+                  aria-describedby={formErrors.country ? 'country-error' : undefined}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${formErrors.country ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}`}
+                  placeholder="Austria"
+                />
+                {formErrors.country && (
+                  <p id="country-error" className="mt-1 text-sm text-red-600">
+                    {formErrors.country}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -217,7 +405,14 @@ export default function NewClientPage() {
               </Link>
               <button
                 type="submit"
-                disabled={loading || !formData.name}
+                disabled={
+                  loading ||
+                  !formData.name.trim() ||
+                  !formData.street.trim() ||
+                  !formData.postalCode.trim() ||
+                  !formData.city.trim() ||
+                  !formData.country.trim()
+                }
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md font-medium"
               >
                 {loading ? 'Creating...' : 'Create Client'}

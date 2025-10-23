@@ -76,6 +76,7 @@
     "deleteConfirm": "Are you sure you want to delete",
     "deleteConfirmContinue": "? This action cannot be undone.",
     "deleteError": "Failed to delete client",
+    "deleteDialogTitle": "Delete client",
     "fetchError": "Failed to fetch clients",
     "loadError": "Failed to load clients",
     "name": "Name",
@@ -193,7 +194,10 @@
     "reports": "Reports",
     "messaging": "Messaging",
     "booking": "Booking Page",
-    "settings": "Settings"
+    "settings": "Settings",
+    "comingSoonBadge": "Coming soon",
+    "comingSoonTooltip": "Launching in {{version}}",
+    "unavailable": "This feature is not available yet."
   },
   "calendarPage": {
     "heading": "Calendar & Appointments",

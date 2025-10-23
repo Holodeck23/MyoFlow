@@ -165,6 +165,22 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data
 
+    // Validate service date is not in the future
+    if (data.serviceDate) {
+      const serviceDate = new Date(data.serviceDate)
+      const now = new Date()
+
+      if (serviceDate > now) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Service date cannot be in the future'
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     // Get therapist details for invoice
     const therapist = await prisma.therapist.findUnique({
       where: { id: therapistId },

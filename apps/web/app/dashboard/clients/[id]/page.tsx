@@ -5,10 +5,11 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Note {
   id: string
-  bodyEnc: string
+  body: string | null
   createdAt: string
 }
 
@@ -31,6 +32,10 @@ interface Client {
   name: string
   email: string | null
   phone: string | null
+  street: string | null
+  postalCode: string | null
+  city: string | null
+  country: string | null
   tags: string[]
   createdAt: string
   updatedAt: string
@@ -46,6 +51,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
   const [error, setError] = useState<string | null>(null)
   const [newNote, setNewNote] = useState('')
   const [addingNote, setAddingNote] = useState(false)
+  const [noteSuccess, setNoteSuccess] = useState<string | null>(null)
+  const [noteError, setNoteError] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const fetchClient = useCallback(async () => {
     try {
@@ -78,21 +88,35 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
     }
   }, [status, router, fetchClient])
 
-  const handleDeleteClient = async () => {
-    if (!client || !confirm(`Are you sure you want to delete ${client.name}? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteClient = () => {
+    if (!client) return
+    setDeleteError(null)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteClient = async () => {
+    if (!client) return
+    setDeleteLoading(true)
+    setDeleteError(null)
 
     try {
       const response = await fetch(`/api/clients/${client.id}`, {
         method: 'DELETE'
       })
       
-      if (!response.ok) throw new Error('Failed to delete client')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const message = errorData?.error || 'Failed to delete client'
+        throw new Error(message)
+      }
       
+      setDeleteDialogOpen(false)
       router.push('/dashboard/clients')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete client')
+      setDeleteDialogOpen(false)
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete client')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -101,6 +125,8 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
     if (!newNote.trim() || !client) return
 
     setAddingNote(true)
+    setNoteError(null)
+    setNoteSuccess(null)
     try {
       const response = await fetch(`/api/clients/${client.id}/notes`, {
         method: 'POST',
@@ -108,20 +134,36 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          bodyEnc: newNote.trim()
+          body: newNote.trim()
         })
       })
 
-      if (!response.ok) throw new Error('Failed to add note')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const message =
+          errorData?.details?.[0]?.message ??
+          errorData?.error ??
+          'Failed to add note'
+        throw new Error(message)
+      }
 
       const note = await response.json()
-      setClient({
-        ...client,
-        Notes: [note, ...client.Notes]
+      setClient((prev) => {
+        if (!prev) return prev
+        const normalizedNote: Note = {
+          id: note.id,
+          body: typeof note.body === 'string' ? note.body : newNote.trim(),
+          createdAt: note.createdAt
+        }
+        return {
+          ...prev,
+          Notes: [normalizedNote, ...prev.Notes]
+        }
       })
       setNewNote('')
+      setNoteSuccess('Note saved successfully.')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to add note')
+      setNoteError(err instanceof Error ? err.message : 'Failed to add note')
     } finally {
       setAddingNote(false)
     }
@@ -200,6 +242,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
       </nav>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {deleteError && (
+          <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {deleteError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow">
@@ -240,6 +287,18 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                     <h3 className="text-sm font-medium text-gray-500">Phone</h3>
                     <p className="mt-1 text-sm text-gray-900">
                       {client.phone || <span className="text-gray-400">Not provided</span>}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <h3 className="text-sm font-medium text-gray-500">Address</h3>
+                    <p className="mt-1 text-sm text-gray-900 whitespace-pre-line">
+                      {client.street || client.postalCode || client.city || client.country ? (
+                        [client.street, [client.postalCode, client.city].filter(Boolean).join(' ').trim(), client.country]
+                          .filter(Boolean)
+                          .join('\n')
+                      ) : (
+                        <span className="text-gray-400">Not provided</span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -306,6 +365,16 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
               <h2 className="text-lg font-medium text-gray-900 mb-4">Notes</h2>
               
               <form onSubmit={handleAddNote} className="mb-6">
+                {noteSuccess && (
+                  <div className="mb-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                    {noteSuccess}
+                  </div>
+                )}
+                {noteError && (
+                  <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {noteError}
+                  </div>
+                )}
                 <textarea
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
@@ -335,7 +404,9 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                 <div className="space-y-3">
                   {client.Notes.map(note => (
                     <div key={note.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{note.bodyEnc}</p>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                        {note.body || <span className="text-gray-400 italic">Note content unavailable</span>}
+                      </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(note.createdAt).toLocaleString()}
                       </p>
@@ -376,6 +447,25 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete client"
+        description={
+          client
+            ? `Are you sure you want to delete ${client.name}? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        tone="danger"
+        loading={deleteLoading}
+        onConfirm={confirmDeleteClient}
+        onCancel={() => {
+          if (deleteLoading) return
+          setDeleteDialogOpen(false)
+        }}
+      />
     </div>
   )
 }
