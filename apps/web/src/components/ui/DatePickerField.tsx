@@ -336,7 +336,7 @@ export function DatePickerField({
           <div className="mt-2 grid grid-cols-7 gap-1">
             {calendarDays.map((day) => {
               const normalized = normalizeDate(day)
-              const isDisabled = !!(
+              const isDisabled = Boolean(
                 (minBoundary && isBefore(normalized, minBoundary)) ||
                 (maxBoundary && isAfter(normalized, maxBoundary))
               )
