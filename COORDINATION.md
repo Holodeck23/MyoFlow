@@ -295,3 +295,10 @@ You are implementing the remaining beta readiness tasks. Claude has planned the 
 **START WITH:** Task 1 (BR-3.1 - Client Address Fields)
 
 Good luck. Let's get this done. 🎯
+
+### ✅ Task 1 Complete: BR-3.1 - Client Address Fields
+- **Files Modified:** `apps/web/app/api/clients/route.ts`, `apps/web/app/api/clients/[id]/route.ts`, `apps/web/app/dashboard/clients/new/page.tsx`, `apps/web/app/dashboard/clients/[id]/edit/page.tsx`, `apps/web/app/dashboard/clients/[id]/page.tsx`
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES (after Claude fix)
+- **Issues Found:** TypeScript type error in DatePickerField.tsx:361 (boolean | null → boolean) - **FIXED by Claude**
+- **Fix Applied:** Wrapped `isDisabled` computation with `!!` to coerce `Date | null` comparisons to strict boolean
+- **Next Task:** 2 (BR-2.1 - Invoice Date Picker) - **CLEARED TO PROCEED**
