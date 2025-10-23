@@ -1,101 +1,297 @@
-# Multi-Agent Coordination Strategy
+# 🤖 AGENT COORDINATION STATUS
 
-**Last Updated:** October 4, 2025
-
-## Current Workflow
-
-### Single-Agent Development (Primary)
-- **Active Workspace:** `/Users/ZOD/Documents/GitHub/MyoFlow/`
-- **Current Branch:** `main`
-- **Agent:** Claude Code
-- **Status:** Systematic sprint-based development
-
-### Sprint-Based Approach
-Each sprint runs on a focused branch:
-1. Create sprint branch (e.g., `runtime-performance-sprint`)
-2. Implement sprint objectives
-3. Pass quality gates (typecheck/lint/build)
-4. Merge to main via PR
-5. Update CLAUDE.md with progress
-
-## Quality Gates
-
-### Before Every Commit
-```bash
-pnpm typecheck && pnpm lint && pnpm build
-```
-
-### Sprint Completion Checklist
-- [ ] All sprint objectives complete
-- [ ] Quality gates passing
-- [ ] Documentation updated (CLAUDE.md)
-- [ ] PR created and merged to main
-- [ ] Sprint progress tracker updated
-
-## Multi-Agent Sessions (When Needed)
-
-### Git Worktree Setup
-```bash
-# Create separate workspaces to prevent conflicts
-git worktree add ../MyoFlow-claude main
-git worktree add ../MyoFlow-codex main
-```
-
-### Workspace Structure
-```
-/Users/ZOD/Documents/GitHub/
-├── MyoFlow/          # Primary workspace
-├── MyoFlow-claude/   # Claude's dedicated workspace (if parallel)
-└── MyoFlow-codex/    # Codex's dedicated workspace (if parallel)
-```
-
-### Database Coordination
-- Same `.env` file shared across worktrees
-- Migrations coordinated before context switching
-- Use `prisma db pull` to synchronize schema
-
-## Session Handoff Protocol
-
-### Ending a Session
-1. Complete current sprint items or mark as blocked
-2. Commit and push changes
-3. Update `CLAUDE.md` with work completed
-4. Document decisions in `DECISION_LOG.md`
-
-### Starting a Session
-1. Review `CLAUDE.md` for current status
-2. Check sprint progress in 7-Sprint Plan
-3. Verify quality gates before new work
-4. Continue from last in-progress sprint
-
-## Sprint Plan Progress (7 Sprints)
-
-1. ✅ **Hardening (5d)** - Complete (Oct 4, 2025)
-2. **Runtime Performance (6d)** - NEXT
-3. **UX + i18n Cleanup (5d)** - Pending
-4. **Settings Completion (7d)** - Pending
-5. **Compliance & Reporting (6d)** - Pending
-6. **E2E Reliability (5d)** - Pending
-7. **Polish & Launch Prep (4d)** - Pending
-
-## Lessons Learned
-
-### Calendar Rescue Session (Sept 18, 2025)
-- Schema synchronization must be coordinated
-- Single environment >> Parallel session chaos
-- Git worktrees prevent branch conflicts
-- Systematic debugging rescues disasters
-
-### Performance Optimization (Sept 23, 2025)
-- Modular architecture prevents bloat
-- Lazy loading critical for large components
-- Quality gates catch regressions early
-
-### Security Hardening (Oct 4, 2025)
-- Systematic remediation > ad-hoc fixes
-- Production hardening requires dedicated sprint
-- All 11 items completed in structured approach
+**Mission:** Beta Readiness - Core Workflow Completion
+**Updated:** October 23, 2025 (Grant Interview Sprint)
+**Branch:** `beta-readiness-core-workflow`
+**Deadline:** 7 days (Grant interview prep)
 
 ---
 
-**Next Session:** Begin Sprint 2 (Runtime Performance)
+## 🎯 MISSION OBJECTIVE
+
+**Goal:** Complete end-to-end user workflow for grant interview demo:
+```
+New User → Sign Up → Onboarding Wizard → Create Client (with address)
+→ Schedule Appointment → Create Invoice → Download PDF → Success
+```
+
+**Success Criteria:**
+- All core features functional (no broken flows)
+- Critical security vulnerabilities patched
+- QA agent can complete full workflow without errors
+- Ready for deployment demo
+
+---
+
+## 🟩 CLAUDE STATUS: LEAD DEVELOPER & GIT MANAGER
+
+**Role:** Planning, coordination, git operations, code review
+**Current Focus:** Strategic planning and Codex coordination
+**Availability:** Continuous oversight
+
+### Recent Accomplishments:
+- ✅ Fixed critical Edge Runtime auth crash (JWT callback)
+- ✅ Fixed E2E test login helper (pressSequentially)
+- ✅ Fixed dashboard hydration warnings
+- ✅ Committed and pushed `beta-readiness-appointments` branch
+- ✅ Created execution plan for Phase 2-5
+
+---
+
+## 🟦 CODEX STATUS: IMPLEMENTATION LEAD
+
+**Branch:** `beta-readiness-core-workflow` (clean slate)
+**Assignment:** Execute Phase 2-5 implementation tasks
+**Priority:** HIGH - 7-day deadline
+
+### Mission Briefing for Codex:
+
+You are implementing the remaining beta readiness tasks. Claude has planned the work, you execute. Follow this order:
+
+---
+
+## 📋 EXECUTION PLAN (12 Tasks)
+
+### **WAVE 1: Core Workflow Blockers** (Days 1-2)
+**Critical Path - These MUST work for demo**
+
+#### Task 1: BR-3.1 - Client Address Fields ⚡ START HERE
+**File:** `apps/web/app/dashboard/clients/[id]/page.tsx` (or client form component)
+**Requirements:**
+- Add fields: `street`, `postalCode`, `city`, `country`
+- Map to existing API (already supports these fields)
+- Mark as required (invoices need complete addresses)
+- Show validation errors inline
+- Test: Create client → Edit client → Verify data persists
+
+**Time Estimate:** 2 hours
+**Dependencies:** None
+**Acceptance:** Can create/edit client with full address, data persists
+
+---
+
+#### Task 2: BR-2.1 - Invoice Date Picker
+**File:** `apps/web/app/dashboard/invoices/new/page.tsx`
+**Requirements:**
+- Replace static date input with `DatePickerField` component (already exists at `apps/web/src/components/ui/DatePickerField.tsx`)
+- Default to today's date
+- Enforce max date = today (reject future dates with message)
+- Locale-aware formatting (EN/DE support)
+- Test: Create invoice → Select date → Verify validation
+
+**Time Estimate:** 1.5 hours
+**Dependencies:** None
+**Acceptance:** Date picker works, future dates rejected, invoices create successfully
+
+---
+
+#### Task 3: BR-2.2 - Invoice Validation & Errors
+**File:** `apps/web/app/dashboard/invoices/new/page.tsx`
+**Requirements:**
+- Surface API validation errors inline (not just toast)
+- Field-level errors if available from API response
+- Show error details (don't hide them)
+- Fallback to toast with full error message if field-level not possible
+- Test: Try invalid invoice → See clear error messages
+
+**Time Estimate:** 1.5 hours
+**Dependencies:** Task 2
+**Acceptance:** Clear, actionable error messages when invoice creation fails
+
+---
+
+### **WAVE 2: UX Polish** (Days 3-4)
+**Important but not blocking core flow**
+
+#### Task 4: BR-3.2 - Fix Client Note Payload
+**File:** Client notes component
+**Requirements:**
+- Ensure notes use `body` field (not `bodyEnc`)
+- Show success confirmation after saving
+- Show error message if save fails
+- Test: Add note → Save → Verify persists
+
+**Time Estimate:** 1 hour
+**Dependencies:** None
+**Acceptance:** Notes save correctly and show feedback
+
+---
+
+#### Task 5: BR-3.3 - Reusable ConfirmDialog
+**File:** `apps/web/src/components/ui/ConfirmDialog.tsx` (already exists!)
+**Requirements:**
+- Replace `window.confirm` usage with ConfirmDialog component
+- Key locations: Client delete, appointment delete
+- Integrate with audit logging (`logAudit` where applicable)
+- Test: Delete client → See modal → Cancel/Confirm works
+
+**Time Estimate:** 2 hours
+**Dependencies:** None
+**Acceptance:** Professional confirmation dialogs replace window.confirm
+
+---
+
+#### Task 6: BR-4.1 - Navigation Link Audit
+**Files:** `apps/web/app/components/Sidebar.tsx`, footer components
+**Requirements:**
+- Remove all `href="#"` placeholders
+- Future features: Add `disabled` class with tooltip
+- Active routes: Ensure highlight matches current page
+- Test: Click all sidebar items → Verify navigation works
+
+**Time Estimate:** 1.5 hours
+**Dependencies:** None
+**Acceptance:** No dead navigation links, clear indication of disabled features
+
+---
+
+### **WAVE 3: Dashboard & Translations** (Day 5)
+**Nice-to-have but enhances demo quality**
+
+#### Task 7: BR-4.2 - Dashboard Metrics
+**File:** `apps/web/app/dashboard/page.tsx`
+**Requirements:**
+- Replace placeholder metrics with real data
+- Suggested metrics: Total clients, appointments today, revenue this month
+- Use existing API endpoints or create simple aggregation queries
+- Test: Create appointment → See count update
+
+**Time Estimate:** 2 hours
+**Dependencies:** None
+**Acceptance:** Dashboard shows real numbers, not placeholders
+
+---
+
+#### Task 8: BR-4.3 - Translation Sweep
+**Files:** Dictionary files, nav components, error messages
+**Requirements:**
+- Audit navigation labels (sidebar/footer) for missing translation keys
+- Fix error messages showing keys instead of translated text
+- Verify both EN/DE render without fallbacks
+- Test: Switch language → Verify all text translates
+
+**Time Estimate:** 2 hours
+**Dependencies:** None
+**Acceptance:** No raw translation keys visible in EN or DE
+
+---
+
+### **WAVE 4: Testing & Security** (Days 6-7)
+
+#### Task 9: BR-2.3 - E2E Invoice Test
+**File:** `apps/web/e2e/invoices.spec.ts` (already exists!)
+**Requirements:**
+- Extend existing test to cover full flow
+- Steps: Login → Create client → Create appointment → Create invoice → Download PDF
+- Verify PDF downloads successfully
+- Test runs in CI
+
+**Time Estimate:** 2 hours
+**Dependencies:** Tasks 1, 2, 3
+**Acceptance:** E2E test passes, covers full invoice workflow
+
+---
+
+#### Task 10: SECURITY - Next.js Upgrade
+**File:** `package.json`, `apps/web/package.json`
+**Requirements:**
+- Upgrade `next` from 14.2.13 to latest 14.x patch
+- Fix critical auth bypass vulnerability (GHSA-f82v-jwr5-mffw)
+- Run `pnpm install` and verify build passes
+- Test: Full app still works after upgrade
+
+**Time Estimate:** 30 minutes
+**Dependencies:** None (can run anytime)
+**Acceptance:** Vulnerability patched, app builds and runs
+
+---
+
+#### Task 11: BR-5.2 - Full QA Test
+**File:** Manual testing
+**Requirements:**
+- Run complete user flow: Signup → Wizard → Client → Appointment → Invoice → PDF
+- Test in both EN and DE
+- Document any issues found
+- Verify no console errors
+
+**Time Estimate:** 1 hour
+**Dependencies:** All previous tasks
+**Acceptance:** Clean end-to-end test with no errors
+
+---
+
+#### Task 12: DEPLOY - Production Prep
+**File:** `next.config.js`, `.env.production`
+**Requirements:**
+- Add Content-Security-Policy header
+- Configure `images.remotePatterns` for production domain
+- Verify environment variables documented
+- Test: Deployment build succeeds
+
+**Time Estimate:** 1 hour
+**Dependencies:** None
+**Acceptance:** Ready for Vercel deployment
+
+---
+
+## 🔄 PROGRESS UPDATES
+
+**Update COORDINATION.md after each task with:**
+```markdown
+### ✅ Task [Number] Complete: [Task Name]
+- **Files Modified:** [list]
+- **Testing:** [results]
+- **Issues Found:** [any blockers]
+- **Next Task:** [number]
+```
+
+---
+
+## 🚨 ESCALATION PROTOCOL
+
+**If you encounter blockers:**
+1. Document the issue clearly (error message, file, line)
+2. List what you tried
+3. Update COORDINATION.md with "🔴 BLOCKED:" status
+4. Continue with next independent task
+5. Claude will review and unblock
+
+**Critical blockers:** API changes needed, schema migrations, auth issues
+**Minor blockers:** TypeScript errors, missing translations, styling
+
+---
+
+## 🎯 SUCCESS METRICS
+
+**Definition of Done:**
+- [ ] All 12 tasks completed
+- [ ] Full user flow works end-to-end
+- [ ] No console errors in QA test
+- [ ] Security vulnerabilities patched
+- [ ] Code committed and pushed
+- [ ] Ready for grant interview demo
+
+**Timeline:** 7 days
+**Start:** October 23, 2025
+**Target Completion:** October 30, 2025
+
+---
+
+## 📞 QUICK REFERENCE
+
+**Branch:** `beta-readiness-core-workflow`
+**Working Directory:** `/Users/ZOD/Documents/GitHub/MyoFlow`
+**Test Command:** `pnpm --filter @myoflow/web test:e2e`
+**Build Command:** `pnpm build`
+**Dev Server:** `pnpm --filter @myoflow/web dev` (runs on port 3000)
+
+**Specs Reference:** `.agent-os/specs/2025-10-beta-readiness.md`
+**Tasks JSON:** `.agent-os/tasks/2025-10-beta-readiness.json`
+
+---
+
+## 🚀 CODEX: YOU ARE CLEARED FOR TAKEOFF
+
+**START WITH:** Task 1 (BR-3.1 - Client Address Fields)
+
+Good luck. Let's get this done. 🎯
