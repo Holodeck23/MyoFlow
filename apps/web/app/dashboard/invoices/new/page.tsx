@@ -2,8 +2,10 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { format } from 'date-fns'
+import { DatePickerField } from '@/components/ui/DatePickerField'
 
 interface Client {
   id: string
@@ -31,6 +33,13 @@ interface InvoiceLine {
   vatRate: 'KLEINUNTERNEHMER' | 'UST_10' | 'UST_13' | 'UST_20'
 }
 
+type InvoiceFormData = {
+  clientId: string
+  appointmentId: string
+  lines: InvoiceLine[]
+  serviceDate: string | null
+}
+
 export default function NewInvoicePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -40,17 +49,19 @@ export default function NewInvoicePage() {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState({
+  const [dateError, setDateError] = useState<string | null>(null)
+  const [formData, setFormData] = useState<InvoiceFormData>(() => ({
     clientId: '',
     appointmentId: '',
     lines: [{
       description: 'Klassische Massage 60min',
       quantity: 1,
       unitPriceCents: 8000,
-      vatRate: 'KLEINUNTERNEHMER' as const
-    }] as InvoiceLine[],
-    serviceDate: '2024-09-06' // Set to demo date for consistency with test data
-  })
+      vatRate: 'KLEINUNTERNEHMER'
+    }],
+    serviceDate: format(new Date(), 'yyyy-MM-dd')
+  }))
+  const today = useMemo(() => new Date(), [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -105,6 +116,11 @@ export default function NewInvoicePage() {
     setCreating(true)
     setError(null)
 
+    if (!formData.serviceDate || dateError) {
+      setCreating(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/invoices', {
         method: 'POST',
@@ -115,7 +131,7 @@ export default function NewInvoicePage() {
           clientId: formData.clientId,
           appointmentId: formData.appointmentId || undefined,
           lines: formData.lines,
-          serviceDate: formData.serviceDate + 'T12:00:00.000Z',
+          serviceDate: formData.serviceDate ? `${formData.serviceDate}T12:00:00.000Z` : undefined,
         }),
       })
 
@@ -270,13 +286,18 @@ export default function NewInvoicePage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Service Date
+                Service Date *
               </label>
-              <input
-                type="date"
+              <DatePickerField
+                id="serviceDate"
+                name="serviceDate"
                 value={formData.serviceDate}
-                onChange={(e) => setFormData({ ...formData, serviceDate: e.target.value })}
-                className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(value) => setFormData((prev) => ({ ...prev, serviceDate: value }))}
+                maxDate={today}
+                required
+                error={dateError}
+                onErrorChange={setDateError}
+                className="mt-1 w-full md:w-1/2"
               />
             </div>
 
@@ -393,7 +414,7 @@ export default function NewInvoicePage() {
               </Link>
               <button
                 type="submit"
-                disabled={creating || !formData.clientId}
+                disabled={creating || !formData.clientId || !formData.serviceDate || Boolean(dateError)}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creating ? 'Creating...' : 'Create Invoice'}

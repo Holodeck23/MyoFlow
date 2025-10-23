@@ -302,3 +302,18 @@ Good luck. Let's get this done. 🎯
 - **Issues Found:** TypeScript type error in DatePickerField.tsx:361 (boolean | null → boolean) - **FIXED by Claude**
 - **Fix Applied:** Wrapped `isDisabled` computation with `!!` to coerce `Date | null` comparisons to strict boolean
 - **Next Task:** 2 (BR-2.1 - Invoice Date Picker) - **CLEARED TO PROCEED**
+
+### ✅ Task 2 Complete: BR-2.1 - Invoice Date Picker
+- **Files Modified:** `apps/web/app/dashboard/invoices/new/page.tsx`
+- **Implementation:**
+  - Imported DatePickerField component
+  - Created InvoiceFormData type with `serviceDate: string | null`
+  - Defaults serviceDate to today's date in ISO format
+  - Integrated DatePickerField with `maxDate={today}` to block future dates
+  - Added inline date validation error tracking
+  - Submit validation blocks when date missing or invalid
+  - Submit button disabled when dateError present
+- **Testing:** `pnpm --filter @myoflow/web typecheck` ✅ PASSES
+- **Issues Found:** None
+- **UX Features:** Locale-aware (EN/DE), real-time validation, clear error messages, responsive layout
+- **Next Task:** 3 (BR-2.2 - Invoice Validation & Errors) - **CLEARED TO PROCEED**

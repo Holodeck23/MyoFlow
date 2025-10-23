@@ -31,6 +31,10 @@ interface Client {
   name: string
   email: string | null
   phone: string | null
+  street: string | null
+  postalCode: string | null
+  city: string | null
+  country: string | null
   tags: string[]
   createdAt: string
   updatedAt: string
@@ -240,6 +244,18 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                     <h3 className="text-sm font-medium text-gray-500">Phone</h3>
                     <p className="mt-1 text-sm text-gray-900">
                       {client.phone || <span className="text-gray-400">Not provided</span>}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <h3 className="text-sm font-medium text-gray-500">Address</h3>
+                    <p className="mt-1 text-sm text-gray-900 whitespace-pre-line">
+                      {client.street || client.postalCode || client.city || client.country ? (
+                        [client.street, [client.postalCode, client.city].filter(Boolean).join(' ').trim(), client.country]
+                          .filter(Boolean)
+                          .join('\n')
+                      ) : (
+                        <span className="text-gray-400">Not provided</span>
+                      )}
                     </p>
                   </div>
                 </div>
