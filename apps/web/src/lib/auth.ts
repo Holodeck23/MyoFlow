@@ -220,42 +220,42 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, trigger }) {
       if (!token?.sub && !user?.id) return token
 
-      // Only fetch from database on initial sign-in or when explicitly updating
-      // This prevents Prisma calls in Edge Runtime (middleware)
-      if (user || trigger === 'update') {
-        const id = token?.sub ?? user?.id
-        const dbUser = await prisma.user.findUnique({
-          where: { id },
-          include: {
-            Therapist: {
-              select: {
-                id: true,
-                businessName: true,
-                profileCompletionScore: true,
-              }
+      const id = token?.sub ?? user?.id
+
+      // Always verify user exists for security (deleted/demoted accounts)
+      // SECURITY: This ensures revoked privileges are detected immediately
+      const dbUser = await prisma.user.findUnique({
+        where: { id },
+        include: {
+          Therapist: {
+            select: {
+              id: true,
+              businessName: true,
+              profileCompletionScore: true,
             }
-          },
-        })
+          }
+        },
+      })
 
-        if (!dbUser) {
-          token.accountType = AccountType.TEST
-          token.isTestAccount = true
-          token.isAdmin = false
-          token.therapistId = null
-          return token
-        }
-
-        // Store everything in the token so middleware doesn't need Prisma
-        token.accountType = dbUser.accountType
-        token.role = dbUser.role
-        token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
-        token.isTestAccount = false
-        token.therapistId = dbUser.Therapist?.id ?? null
-        token.therapistBusinessName = dbUser.Therapist?.businessName ?? null
-        token.therapistProfileCompletionScore = dbUser.Therapist?.profileCompletionScore ?? null
+      if (!dbUser) {
+        // User deleted or missing - default to TEST account for safety
+        token.accountType = AccountType.TEST
+        token.isTestAccount = true
+        token.isAdmin = false
+        token.therapistId = null
+        return token
       }
 
-      // On subsequent requests (like middleware checks), just return the cached token
+      // Update token with current database values
+      // This ensures role changes/demotions are reflected immediately
+      token.accountType = dbUser.accountType
+      token.role = dbUser.role
+      token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
+      token.isTestAccount = false
+      token.therapistId = dbUser.Therapist?.id ?? null
+      token.therapistBusinessName = dbUser.Therapist?.businessName ?? null
+      token.therapistProfileCompletionScore = dbUser.Therapist?.profileCompletionScore ?? null
+
       return token
     },
   },
