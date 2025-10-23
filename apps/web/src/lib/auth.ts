@@ -217,27 +217,45 @@ export const authConfig: NextAuthConfig = {
         },
       }
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (!token?.sub && !user?.id) return token
-      const id = token?.sub ?? user?.id
-      const dbUser = await prisma.user.findUnique({
-        where: { id },
-        // &lt;-- required by the test: include Therapist id
-        include: { Therapist: { select: { id: true } } },
-      })
 
-      if (!dbUser) {
-        token.accountType = AccountType.TEST
-        token.isTestAccount = true
-        token.isAdmin = false
-        token.therapistId = null
-        return token
+      // Only fetch from database on initial sign-in or when explicitly updating
+      // This prevents Prisma calls in Edge Runtime (middleware)
+      if (user || trigger === 'update') {
+        const id = token?.sub ?? user?.id
+        const dbUser = await prisma.user.findUnique({
+          where: { id },
+          include: {
+            Therapist: {
+              select: {
+                id: true,
+                businessName: true,
+                profileCompletionScore: true,
+              }
+            }
+          },
+        })
+
+        if (!dbUser) {
+          token.accountType = AccountType.TEST
+          token.isTestAccount = true
+          token.isAdmin = false
+          token.therapistId = null
+          return token
+        }
+
+        // Store everything in the token so middleware doesn't need Prisma
+        token.accountType = dbUser.accountType
+        token.role = dbUser.role
+        token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
+        token.isTestAccount = false
+        token.therapistId = dbUser.Therapist?.id ?? null
+        token.therapistBusinessName = dbUser.Therapist?.businessName ?? null
+        token.therapistProfileCompletionScore = dbUser.Therapist?.profileCompletionScore ?? null
       }
 
-      token.accountType = dbUser.accountType
-      token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
-      token.isTestAccount = false
-      token.therapistId = dbUser.Therapist?.id ?? null
+      // On subsequent requests (like middleware checks), just return the cached token
       return token
     },
   },
