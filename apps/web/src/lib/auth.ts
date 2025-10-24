@@ -265,6 +265,13 @@ export const authConfig: NextAuthConfig = {
         return token
       }
 
+      // For regular session checks (not sign-in, not explicit update),
+      // return cached token to avoid 10+ second database queries on every API call
+      if (!user && trigger !== 'update') {
+        return token
+      }
+
+      // Only do database lookups on sign-in or explicit session update
       try {
         const context = await resolveAccountContext(userId)
 
