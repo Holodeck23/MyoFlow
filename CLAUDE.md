@@ -1,9 +1,178 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** October 21, 2025
-**Branch:** `main`
-**Status:** ✅ Critical Authentication Fixes Complete
+**Current Session:** October 24, 2025
+**Branch:** `beta-readiness-core-workflow`
+**Status:** ✅ CRITICAL PERFORMANCE FIX + QA VALIDATED
+
+---
+
+## 🎯 Session Summary - October 24, 2025 ✅
+
+### **CRITICAL: Performance Emergency + Complete Resolution**
+
+**Branch:** `beta-readiness-core-workflow`
+**Commits:** 61d4e52, f2277e5 (2 commits)
+**Status:** ✅ All quality gates passing, QA validated, production ready
+
+### **Issues Discovered & Resolved**
+
+#### **1. Performance Catastrophe - 10+ Second Page Loads** 🚨 → ✅
+- **Problem:** QA reported all pages stuck loading 15-20+ seconds after Oct 23 session
+- **Root Cause:** Previous commit (61d4e52) fixed Edge runtime but broke Node.js runtime
+  - JWT callback querying Prisma on EVERY API request (99% of traffic)
+  - Should have been using cached JWT tokens
+- **Impact:** Application completely unusable - DEMO BLOCKER
+- **Fix Applied (commit f2277e5):** Added token caching check before DB lookup
+  ```typescript
+  // For regular session checks (not sign-in, not explicit update),
+  // return cached token to avoid 10+ second database queries
+  if (!user && trigger !== 'update') {
+    return token
+  }
+  ```
+- **Result:**
+  - API calls: 10+ seconds → < 500ms ✅
+  - Page loads: 15-20 seconds → < 3 seconds ✅
+  - Application: Unusable → Fully functional ✅
+
+#### **2. Client Form UX Improvements** ✅ (commit 61d4e52)
+- **Default Country Value:** Changed empty string → "Austria"
+- **Validation Error Summary:** Amber alert box at top of form
+- **Auto-scroll to Error:** Smooth scroll + focus on first invalid field
+- **Better Disabled Button:** Tooltip + clearer visual feedback
+
+#### **3. Admin System Hardening** ✅ (commit 61d4e52)
+- Improved error handling and logging in admin login
+- Overloaded `setAdminTokenCookie()` for custom payloads
+- Added admin redirect E2E test with 60s timeouts
+- Auto-create admin user in seed (admin@myoflow.at)
+
+#### **4. Invoice PDF Error Handling** ✅ (commit 61d4e52)
+- Graceful 400 error display when profile incomplete
+- Shows amber warning with missing fields
+- Actionable "Go to Settings" link
+
+### **QA Validation Results**
+
+**Tester:** Comet (Oct 24, 7:14 PM CEST)
+**Environment:** http://localhost:3000 with fresh cache
+**Credentials:** maria.huber.oct24@example.at / demo
+
+**Performance Metrics:**
+- ✅ API calls: < 500ms (target met)
+- ✅ Page loads: < 3 seconds (target met)
+- ✅ Session persistence: Perfect - no logouts during navigation
+- ✅ JWT caching: Working excellently
+
+**Issues Tested:**
+- ✅ Issue #2 (Client notes): Working perfectly
+- ✅ Issue #4 (Form validation): Working correctly
+- ✅ Session loss during navigation: FIXED
+- ⚠️ Issue #1 (Appointment dropdowns): Expected behavior - no services/locations in test account
+
+**QA Conclusion:** ✅ **READY FOR PRODUCTION**
+
+### **Quality Gates** ✅
+
+- ✅ TypeScript: 0 errors (FULL TURBO)
+- ✅ ESLint: 2 warnings (pre-existing, unrelated)
+- ✅ Unit Tests: 83/83 passing + 3 skipped
+- ✅ Build: Success (3m14s)
+- ✅ Performance: Validated by QA agent
+- ✅ Manual Testing: All critical flows working
+
+### **Files Modified (11 total)**
+
+**Commit 61d4e52:**
+- `.env.example` - Clarified ENCRYPTION_KEY_B64 usage
+- `apps/web/app/api/admin/login/route.ts` - Better error handling
+- `apps/web/app/dashboard/clients/new/page.tsx` - Client form UX improvements
+- `apps/web/app/dashboard/invoices/[id]/page.tsx` - PDF error handling
+- `apps/web/e2e/admin.spec.ts` - Admin redirect test
+- `apps/web/src/lib/admin-auth.ts` - Overloaded setAdminTokenCookie
+- `apps/web/src/lib/auth.ts` - Session config enhancements
+- `apps/web/src/test/auth.session.test.ts` - Test updates
+- `packages/db/seed.ts` - Auto-create admin user
+
+**Commit f2277e5:**
+- `apps/web/src/lib/auth.ts` - CRITICAL JWT caching fix
+- `apps/web/src/test/auth.session.test.ts` - Added caching test
+
+### **Technical Details**
+
+**Performance Fix Explanation:**
+The previous commit only protected Edge runtime (<1% of requests) from Prisma calls. Node.js runtime (99% of requests) was still hitting the database on every JWT validation. The fix adds a cache check that returns the existing token unless it's a sign-in or explicit update request.
+
+**Test Coverage:**
+- Added test: "skips database lookups for regular session checks (cached token)"
+- Updated test: "defaults to TEST account" to simulate sign-in correctly
+- All 5 auth session tests passing
+
+**Build Output:**
+- 38 pages generated
+- Middleware: 108 KB
+- Settings bundle: 184 KB
+- Total build time: 3m14s
+
+### **Next Steps**
+- ✅ Documentation updated
+- ✅ Changes committed
+- ⏳ Push to remote
+- ⏳ Create PR to main
+- 📋 Consider adding services/locations to test account seed data
+
+---
+
+## 🎯 Session Summary - October 23, 2025 ✅
+
+### **CI Test Failures + Session Management Fixes**
+
+**Branch:** `beta-readiness-core-workflow`
+**Commits:** b696ce3 (CI fixes) + Codex fixes (session + routes)
+**Status:** All tests passing, QA ready
+
+### **Issues Resolved**
+
+1. **TypeScript Error in DatePickerField** ✅ (b696ce3)
+   - Changed `!!()` to `Boolean()` for proper type coercion
+   - Fixed: Type 'boolean | null' not assignable to 'boolean | undefined'
+
+2. **Invoice API Future Date Validation** ✅ (b696ce3)
+   - Added validation: rejects serviceDate > now() with 400 error
+   - Test "rejects invoices with future service date" now passes
+
+3. **ensureTherapistAccount Default Creation** ✅ (b696ce3)
+   - Auto-creates default service "Klassische Massage 60min" when count = 0
+   - Auto-creates default location "Praxis Linz" when count = 0
+   - Updated test mocks (3 files) to include service/location.count/.create
+
+4. **E2E Test Port Configuration** ✅ (b696ce3)
+   - Updated Playwright config: port 3001 → 3000 (matches dev server)
+
+5. **Session Management - Edge Runtime Issue** ✅ (Codex)
+   - Root cause: JWT callback running in Edge runtime couldn't access Prisma
+   - Fix: Runtime detection - Edge reuses cached claims, server rehydrates from DB
+   - Added test coverage for Edge runtime behavior
+   - Users can now navigate between pages without logout
+
+6. **Route 404 Errors** ✅ (Codex)
+   - Created redirect pages: `/clients`, `/settings`, `/appointments`, `/calendar`, `/invoices`
+   - All redirect to `/dashboard/*` equivalents
+   - QA can now access all features via sidebar navigation
+
+**Quality Gates:** ✅
+- TypeScript: 0 errors
+- Unit Tests: 80 passed (19 test files)
+- Lint: 1 warning (pre-existing)
+- Session persistence: Fixed
+- Navigation: All routes work
+
+**Files Modified:** 13 files
+- 8 files in commit b696ce3 (CI fixes)
+- 3 files by Codex (auth.ts, test, route redirects)
+
+**Next Steps:** Wave 2 QA validation ready to proceed
 
 ---
 
