@@ -63,8 +63,12 @@ async function resolveAccountContext(userId: string) {
     if (!userRecord) {
       return {
         accountType: DEFAULT_ACCOUNT_TYPE,
-        role: 'OWNER',
+        role: 'OWNER' as const,
         therapistId: undefined,
+        therapistProfile: undefined,
+        email: undefined,
+        isAdmin: false,
+        isTestAccount: true,
       } as const
     }
 
@@ -79,10 +83,14 @@ async function resolveAccountContext(userId: string) {
         })
       : null
 
+    const accountType = userRecord.accountType ?? DEFAULT_ACCOUNT_TYPE
+    const role = (userRecord.role as MyoFlowToken['role']) || 'OWNER'
+    const therapistId = userRecord.Therapist?.id
+
     return {
-      accountType: userRecord.accountType ?? DEFAULT_ACCOUNT_TYPE,
-      role: (userRecord.role as MyoFlowToken['role']) || 'OWNER',
-      therapistId: userRecord.Therapist?.id,
+      accountType,
+      role,
+      therapistId,
       therapistProfile: therapistRecord
         ? {
             id: therapistRecord.id,
@@ -90,6 +98,9 @@ async function resolveAccountContext(userId: string) {
             profileCompletionScore: therapistRecord.profileCompletionScore ?? 0,
           }
         : undefined,
+      email: userRecord.email ?? undefined,
+      isAdmin: role === 'SUPER_ADMIN' || role === 'OWNER' || accountType === AccountType.ADMIN,
+      isTestAccount: accountType === AccountType.TEST,
     } as const
   } catch (error) {
     console.error('Failed to resolve account context', error)
@@ -98,13 +109,35 @@ async function resolveAccountContext(userId: string) {
       role: 'OWNER' as const,
       therapistId: undefined,
       therapistProfile: undefined,
+      email: undefined,
+      isAdmin: false,
+      isTestAccount: true,
     } as const
   }
 }
 
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax', // Required for localhost navigation
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   providers: [
@@ -211,50 +244,54 @@ export const authConfig: NextAuthConfig = {
                 profileCompletionScore:
                   typeof typedToken.therapistProfileCompletionScore === 'number'
                     ? typedToken.therapistProfileCompletionScore
-                    : null,
+                  : null,
               }
             : undefined,
         },
       }
     },
     async jwt({ token, user, trigger }) {
-      if (!token?.sub && !user?.id) return token
-
-      const id = token?.sub ?? user?.id
-
-      // Always verify user exists for security (deleted/demoted accounts)
-      // SECURITY: This ensures revoked privileges are detected immediately
-      const dbUser = await prisma.user.findUnique({
-        where: { id },
-        include: {
-          Therapist: {
-            select: {
-              id: true,
-              businessName: true,
-              profileCompletionScore: true,
-            }
-          }
-        },
-      })
-
-      if (!dbUser) {
-        // User deleted or missing - default to TEST account for safety
-        token.accountType = AccountType.TEST
-        token.isTestAccount = true
-        token.isAdmin = false
-        token.therapistId = null
+      const userId = user?.id ?? token?.sub
+      if (!userId) {
         return token
       }
 
-      // Update token with current database values
-      // This ensures role changes/demotions are reflected immediately
-      token.accountType = dbUser.accountType
-      token.role = dbUser.role
-      token.isAdmin = dbUser.role === 'SUPER_ADMIN' || dbUser.role === 'OWNER'
-      token.isTestAccount = false
-      token.therapistId = dbUser.Therapist?.id ?? null
-      token.therapistBusinessName = dbUser.Therapist?.businessName ?? null
-      token.therapistProfileCompletionScore = dbUser.Therapist?.profileCompletionScore ?? null
+      const runningInEdgeRuntime =
+        (typeof globalThis !== 'undefined' && 'EdgeRuntime' in globalThis) ||
+        (typeof process !== 'undefined' && process.env?.NEXT_RUNTIME === 'edge')
+
+      // In Edge runtime, ALWAYS skip Prisma - use cached token claims
+      if (runningInEdgeRuntime) {
+        return token
+      }
+
+      // For regular session checks (not sign-in, not explicit update),
+      // return cached token to avoid 10+ second database queries on every API call
+      if (!user && trigger !== 'update') {
+        return token
+      }
+
+      // Only do database lookups on sign-in or explicit session update
+      try {
+        const context = await resolveAccountContext(userId)
+
+        token.sub = userId
+        if (user?.email) {
+          token.email = user.email
+        } else if (!token.email && context.email) {
+          token.email = context.email
+        }
+
+        token.accountType = context.accountType
+        token.role = context.role
+        token.isAdmin = context.isAdmin
+        token.isTestAccount = context.isTestAccount
+        token.therapistId = context.therapistId ?? undefined
+        token.therapistBusinessName = context.therapistProfile?.businessName ?? null
+        token.therapistProfileCompletionScore = context.therapistProfile?.profileCompletionScore ?? null
+      } catch (error) {
+        console.error('Failed to refresh JWT session state', error)
+      }
 
       return token
     },

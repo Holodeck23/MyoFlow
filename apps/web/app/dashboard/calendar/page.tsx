@@ -8,6 +8,12 @@ import { useTranslation } from '@myoflow/lib'
 import { Calendar, CalendarEvent, Button, TravelRouteMap } from '@/components/ui'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
+import {
+  AppointmentModal,
+  type ClientOption,
+  type ServiceOption,
+  type LocationOption,
+} from './components/AppointmentModal'
 
 interface Appointment {
   id: string
@@ -59,6 +65,16 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalInitialDate, setModalInitialDate] = useState<Date | null>(null)
+
+  // Reference data for modal
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [services, setServices] = useState<ServiceOption[]>([])
+  const [locations, setLocations] = useState<LocationOption[]>([])
+  const [referenceDataLoading, setReferenceDataLoading] = useState(false)
+
   const fetchAppointments = useCallback(async () => {
     try {
       const response = await fetch('/api/appointments')
@@ -73,6 +89,36 @@ export default function CalendarPage() {
       setLoading(false)
     }
   }, [t])
+
+  const fetchReferenceData = useCallback(async () => {
+    setReferenceDataLoading(true)
+    try {
+      const [clientsRes, servicesRes, locationsRes] = await Promise.all([
+        fetch('/api/clients'),
+        fetch('/api/services'),
+        fetch('/api/locations'),
+      ])
+
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json()
+        setClients(Array.isArray(clientsData) ? clientsData : [])
+      }
+
+      if (servicesRes.ok) {
+        const servicesData = await servicesRes.json()
+        setServices(Array.isArray(servicesData) ? servicesData : [])
+      }
+
+      if (locationsRes.ok) {
+        const locationsData = await locationsRes.json()
+        setLocations(Array.isArray(locationsData) ? locationsData : [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch reference data:', err)
+    } finally {
+      setReferenceDataLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -124,15 +170,34 @@ export default function CalendarPage() {
   const handleDateClick = (date: Date) => {
     setSelectedDate(date)
     console.log(`Filtering appointments for: ${date.toDateString()}`)
+    // Open appointment modal with selected date
+    handleOpenAppointmentModal(date)
   }
 
   // Handle double-click - open day detail view (15-minute blocks)
   const handleDayDoubleClick = (date: Date) => {
     console.log(`Opening day detail view for: ${date.toDateString()}`)
-    // TODO: Open modal with 15-minute time blocks for editing
-    alert(
-      `${t('calendarPage.dayDetailTitle')}: ${format(date, 'dd.MM.yyyy', { locale: de })}\n${t('calendarPage.dayDetailHint')}`
-    )
+    handleOpenAppointmentModal(date)
+  }
+
+  // Open appointment modal
+  const handleOpenAppointmentModal = (date?: Date) => {
+    setModalInitialDate(date || new Date())
+    setModalOpen(true)
+    // Always fetch fresh reference data when opening modal
+    // This ensures we get latest data even if previous fetch failed
+    fetchReferenceData()
+  }
+
+  // Handle modal close
+  const handleModalClose = () => {
+    setModalOpen(false)
+    setModalInitialDate(null)
+  }
+
+  // Handle appointment created
+  const handleAppointmentCreated = async () => {
+    await fetchAppointments()
   }
 
   // Handle availability blocking
@@ -213,6 +278,7 @@ export default function CalendarPage() {
             <Button
               variant="default"
               size="sm"
+              onClick={() => handleOpenAppointmentModal()}
               className="h-8 hidden sm:block"
             >
               {t('calendarPage.newAppointment')}
@@ -220,6 +286,7 @@ export default function CalendarPage() {
             <Button
               variant="default"
               size="sm"
+              onClick={() => handleOpenAppointmentModal()}
               className="h-8 sm:hidden"
             >
               +
@@ -483,6 +550,25 @@ export default function CalendarPage() {
           </div>
         </div>
       </main>
+
+      {/* Appointment Modal */}
+      <AppointmentModal
+        open={modalOpen}
+        mode="create"
+        onClose={handleModalClose}
+        initialDate={modalInitialDate}
+        clients={clients}
+        services={services}
+        locations={locations}
+        loading={referenceDataLoading}
+        missingData={{
+          clients: clients.length === 0,
+          services: services.length === 0,
+          locations: locations.length === 0,
+        }}
+        onRefreshReference={fetchReferenceData}
+        onCreated={handleAppointmentCreated}
+      />
       </div>
     </div>
   )

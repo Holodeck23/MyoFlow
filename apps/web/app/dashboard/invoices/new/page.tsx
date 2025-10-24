@@ -24,6 +24,9 @@ interface Appointment {
     name: string
     priceCents: number
   }
+  travelDistanceKm?: number | null
+  travelCostCents?: number | null
+  estimatedTravelTimeMin?: number | null
 }
 
 interface InvoiceLine {
@@ -59,6 +62,7 @@ export default function NewInvoicePage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [includeTravelCharges, setIncludeTravelCharges] = useState(false)
 
   const [dateError, setDateError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<InvoiceFieldErrors>({
@@ -88,6 +92,47 @@ export default function NewInvoicePage() {
       fetchData()
     }
   }, [status, router])
+
+  // Manage travel line item based on checkbox and selected appointment
+  useEffect(() => {
+    if (!includeTravelCharges || !formData.appointmentId) {
+      // Remove travel line if checkbox unchecked or no appointment selected
+      setFormData(prev => ({
+        ...prev,
+        lines: prev.lines.filter(line => !line.description.startsWith('Anfahrt'))
+      }))
+      return
+    }
+
+    const selectedAppointment = appointments.find(apt => apt.id === formData.appointmentId)
+    if (!selectedAppointment?.travelCostCents || selectedAppointment.travelCostCents <= 0) {
+      return
+    }
+
+    // Check if travel line already exists
+    const hasTravelLine = formData.lines.some(line => line.description.startsWith('Anfahrt'))
+    if (hasTravelLine) {
+      return
+    }
+
+    // Add travel line
+    const travelDescription = selectedAppointment.travelDistanceKm
+      ? `Anfahrt (${selectedAppointment.travelDistanceKm.toFixed(1)} km)`
+      : 'Anfahrt'
+
+    setFormData(prev => ({
+      ...prev,
+      lines: [
+        ...prev.lines,
+        {
+          description: travelDescription,
+          quantity: 1,
+          unitPriceCents: selectedAppointment.travelCostCents || 0,
+          vatRate: 'KLEINUNTERNEHMER' // Will be adjusted based on therapist settings
+        }
+      ]
+    }))
+  }, [includeTravelCharges, formData.appointmentId, appointments])
 
   const fetchData = async () => {
     try {
@@ -403,7 +448,22 @@ export default function NewInvoicePage() {
                 </label>
                 <select
                   value={formData.appointmentId}
-                  onChange={(e) => setFormData({ ...formData, appointmentId: e.target.value })}
+                  onChange={(e) => {
+                    const appointmentId = e.target.value
+                    setFormData({ ...formData, appointmentId })
+
+                    // Auto-enable travel charges if appointment has travel costs
+                    if (appointmentId) {
+                      const selectedAppointment = appointments.find(apt => apt.id === appointmentId)
+                      if (selectedAppointment?.travelCostCents && selectedAppointment.travelCostCents > 0) {
+                        setIncludeTravelCharges(true)
+                      } else {
+                        setIncludeTravelCharges(false)
+                      }
+                    } else {
+                      setIncludeTravelCharges(false)
+                    }
+                  }}
                   aria-invalid={Boolean(fieldErrors.appointmentId)}
                   aria-describedby={fieldErrors.appointmentId ? 'appointment-error' : undefined}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${fieldErrors.appointmentId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
@@ -441,6 +501,36 @@ export default function NewInvoicePage() {
                 className="mt-1 w-full md:w-1/2"
               />
             </div>
+
+            {/* Travel Charges Toggle */}
+            {formData.appointmentId && appointments.find(apt => apt.id === formData.appointmentId)?.travelCostCents && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeTravelCharges}
+                    onChange={(e) => setIncludeTravelCharges(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-900">
+                      Include Travel Charges
+                    </span>
+                    {(() => {
+                      const apt = appointments.find(a => a.id === formData.appointmentId)
+                      if (!apt) return null
+                      const distance = apt.travelDistanceKm ? ` (${apt.travelDistanceKm.toFixed(1)} km)` : ''
+                      const cost = apt.travelCostCents ? ` - €${(apt.travelCostCents / 100).toFixed(2)}` : ''
+                      return (
+                        <p className="text-sm text-gray-600">
+                          This appointment includes travel{distance}{cost}
+                        </p>
+                      )
+                    })()}
+                  </div>
+                </label>
+              </div>
+            )}
 
             <div>
               <div className="flex justify-between items-center mb-4">

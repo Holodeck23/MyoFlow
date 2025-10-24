@@ -59,8 +59,13 @@ export async function verifyAdminToken(token: string): Promise<AdminUser | null>
 /**
  * Set admin token as httpOnly cookie
  */
-export function setAdminTokenCookie(token: string): NextResponse {
-  const response = NextResponse.json({ success: true })
+export function setAdminTokenCookie(token: string): NextResponse
+export function setAdminTokenCookie<T extends Record<string, unknown>>(token: string, payload: T): NextResponse
+export function setAdminTokenCookie(
+  token: string,
+  payload: Record<string, unknown> = { success: true }
+): NextResponse {
+  const response = NextResponse.json(payload)
 
   response.cookies.set(ADMIN_TOKEN_COOKIE, token, {
     httpOnly: true,
