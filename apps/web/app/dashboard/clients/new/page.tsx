@@ -25,7 +25,7 @@ const initialFormData: ClientFormData = {
   street: '',
   postalCode: '',
   city: '',
-  country: '',
+  country: 'Austria', // Default to Austria for Austrian therapy practice
   tags: []
 }
 
@@ -86,6 +86,13 @@ export default function NewClientPage() {
     const validationErrors = validateForm(trimmedData)
     if (Object.keys(validationErrors).length > 0) {
       setFormErrors(validationErrors)
+      // Scroll to first error for better UX
+      const firstErrorField = Object.keys(validationErrors)[0]
+      const element = document.getElementById(firstErrorField)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.focus()
+      }
       return
     }
 
@@ -201,6 +208,19 @@ export default function NewClientPage() {
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
                 {error}
+              </div>
+            )}
+
+            {Object.keys(formErrors).length > 0 && (
+              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-md">
+                <p className="font-medium">Please fix the following errors:</p>
+                <ul className="mt-2 list-disc list-inside space-y-1">
+                  {Object.entries(formErrors).map(([field, message]) => (
+                    <li key={field} className="text-sm">
+                      {message}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
@@ -413,7 +433,16 @@ export default function NewClientPage() {
                   !formData.city.trim() ||
                   !formData.country.trim()
                 }
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md font-medium"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-60 text-white rounded-md font-medium transition-all"
+                title={
+                  !formData.name.trim() ||
+                  !formData.street.trim() ||
+                  !formData.postalCode.trim() ||
+                  !formData.city.trim() ||
+                  !formData.country.trim()
+                    ? 'Please fill in all required fields'
+                    : undefined
+                }
               >
                 {loading ? 'Creating...' : 'Create Client'}
               </button>

@@ -68,6 +68,11 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pdfError, setPdfError] = useState<{
+    message: string
+    missingFields?: string[]
+    profileUrl?: string
+  } | null>(null)
 
   const fetchInvoice = useCallback(async () => {
     try {
@@ -163,7 +168,10 @@ MyoFlow - Austrian Therapy Practice Management`
 
   const handleDownloadPDF = async () => {
     if (!invoice) return
-    
+
+    // Clear previous PDF errors
+    setPdfError(null)
+
     try {
       const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
         method: 'GET',
@@ -174,7 +182,28 @@ MyoFlow - Austrian Therapy Practice Management`
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF')
+        // Handle validation errors (400)
+        if (response.status === 400) {
+          try {
+            const errorData = await response.json()
+            setPdfError({
+              message: errorData.error || 'Profile information incomplete',
+              missingFields: errorData.missingFields,
+              profileUrl: errorData.profileUrl || '/dashboard/settings?tab=profile',
+            })
+            return
+          } catch {
+            // Fallback if JSON parsing fails
+            setPdfError({
+              message: 'Profile information incomplete. Please complete your profile before generating invoices.',
+              profileUrl: '/dashboard/settings?tab=profile',
+            })
+            return
+          }
+        }
+
+        // Handle other errors
+        throw new Error(`Server returned ${response.status}`)
       }
 
       const blob = await response.blob()
@@ -189,7 +218,9 @@ MyoFlow - Austrian Therapy Practice Management`
       document.body.removeChild(a)
     } catch (error) {
       console.error('PDF download error:', error)
-      alert('PDF-Erstellung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+      setPdfError({
+        message: 'Failed to generate PDF. Please try again.',
+      })
     }
   }
 
@@ -301,6 +332,64 @@ MyoFlow - Austrian Therapy Practice Management`
       </nav>
 
       <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* PDF Error Display */}
+        {pdfError && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 print:hidden">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-amber-800">PDF Generation Failed</h3>
+                <div className="mt-2 text-sm text-amber-700">
+                  <p>{pdfError.message}</p>
+                  {pdfError.missingFields && pdfError.missingFields.length > 0 && (
+                    <ul className="mt-2 list-disc list-inside">
+                      {pdfError.missingFields.map((field, index) => (
+                        <li key={index}>Missing: {field}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {pdfError.profileUrl && (
+                  <div className="mt-3">
+                    <Link
+                      href={pdfError.profileUrl}
+                      className="inline-flex items-center rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+                    >
+                      Complete Profile Settings
+                      <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setPdfError(null)}
+                  className="inline-flex rounded-md bg-amber-50 p-1.5 text-amber-500 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-amber-50"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="mb-6 flex justify-between items-center print:hidden">
           <div>

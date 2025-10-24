@@ -11,8 +11,12 @@ import {
   ExportType,
   TransportMethod,
   Locale,
-  Currency
+  Currency,
+  SubscriptionStatus,
+  AccountType,
+  Role,
 } from '@prisma/client'
+import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -39,6 +43,35 @@ async function main() {
   })
 
   console.log('✅ Created user:', testUser.email)
+
+  // Ensure platform admin exists for admin interface smoke tests
+  const adminEmail = process.env.ADMIN_SEED_EMAIL ?? 'admin@myoflow.at'
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? 'admin123'
+  const hashedAdminPassword = await hash(adminPassword, 10)
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      role: Role.SUPER_ADMIN,
+      accountType: AccountType.ADMIN,
+      password: hashedAdminPassword,
+      subscriptionStatus: SubscriptionStatus.ACTIVE,
+      trialEndsAt: null,
+      trialStarted: null,
+    },
+    create: {
+      email: adminEmail,
+      name: 'Platform Admin',
+      role: Role.SUPER_ADMIN,
+      accountType: AccountType.ADMIN,
+      password: hashedAdminPassword,
+      subscriptionStatus: SubscriptionStatus.ACTIVE,
+      trialEndsAt: null,
+      trialStarted: null,
+    },
+  })
+
+  console.log('✅ Ensured admin user:', adminUser.email)
 
   // Create therapist profile
   const testTherapist = await prisma.therapist.upsert({
