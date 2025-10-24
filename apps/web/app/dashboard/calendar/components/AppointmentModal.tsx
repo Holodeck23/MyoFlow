@@ -127,8 +127,9 @@ export function AppointmentModal({
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const blockingMissingData =
-    mode === 'create' && (missingData.clients || missingData.services || missingData.locations)
+  // Only block while loading, not after load completes (even if empty)
+  // This allows users to proceed if fetch fails or to use the warning links to create data
+  const blockingMissingData = mode === 'create' && loading
 
   useEffect(() => {
     if (open) {
