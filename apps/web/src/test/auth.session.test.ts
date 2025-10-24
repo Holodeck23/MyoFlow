@@ -39,38 +39,71 @@ describe('auth callbacks', () => {
 
   describe('jwt callback', () => {
     it('hydrates token with account type and admin flags on sign-in', async () => {
-      mockFindUnique.mockResolvedValue({
-        id: 'user-1',
-        role: 'SUPER_ADMIN',
-        accountType: AccountType.ADMIN,
-        Therapist: {
+      mockFindUnique
+        .mockResolvedValueOnce({
+          id: 'user-1',
+          role: 'SUPER_ADMIN',
+          accountType: AccountType.ADMIN,
+          email: 'owner@example.com',
+          Therapist: {
+            id: 'therapist-42',
+          },
+        })
+        .mockResolvedValueOnce({
           id: 'therapist-42',
           businessName: 'Test Practice',
           profileCompletionScore: 85,
-        },
-      })
+        })
 
       const token = await authConfig.callbacks?.jwt?.({
         token: { sub: 'user-1' } as unknown as MyoFlowToken,
         user: { id: 'user-1' } as any,
       } as any)
 
-      expect(mockFindUnique).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenNthCalledWith(1, {
         where: { id: 'user-1' },
         include: {
           Therapist: {
             select: {
               id: true,
-              businessName: true,
-              profileCompletionScore: true,
-            }
-          }
+            },
+          },
+        },
+      })
+      expect(mockFindUnique).toHaveBeenNthCalledWith(2, {
+        where: { id: 'therapist-42' },
+        select: {
+          id: true,
+          businessName: true,
+          profileCompletionScore: true,
         },
       })
       expect(token?.accountType).toBe(AccountType.ADMIN)
       expect(token?.isAdmin).toBe(true)
       expect(token?.isTestAccount).toBe(false)
       expect(token?.therapistId).toBe('therapist-42')
+    })
+
+    it('skips database lookups in edge runtime and retains token claims', async () => {
+      const tokenSnapshot: MyoFlowToken = {
+        sub: 'user-1',
+        role: 'OWNER',
+        accountType: AccountType.TEST,
+        isAdmin: false,
+        isTestAccount: true,
+      } as MyoFlowToken
+
+      const originalEnv = process.env.NEXT_RUNTIME
+      process.env.NEXT_RUNTIME = 'edge'
+
+      const token = await authConfig.callbacks?.jwt?.({
+        token: tokenSnapshot,
+      } as any)
+
+      expect(mockFindUnique).not.toHaveBeenCalled()
+      expect(token).toMatchObject(tokenSnapshot)
+
+      process.env.NEXT_RUNTIME = originalEnv
     })
 
     it('defaults to TEST account when user missing in database', async () => {
