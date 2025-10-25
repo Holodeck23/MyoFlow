@@ -246,13 +246,25 @@ export function OverviewTab({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
-              <FileText className="w-4 h-4 mr-2" />
-              {t('settings.help.documentation', 'Dokumentation')}
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              asChild
+            >
+              <a href="/docs/user-guide.md" target="_blank" rel="noopener noreferrer">
+                <FileText className="w-4 h-4 mr-2" />
+                {t('settings.help.documentation', 'Dokumentation')}
+              </a>
             </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Languages className="w-4 h-4 mr-2" />
-              {t('settings.help.support', 'Support kontaktieren')}
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              asChild
+            >
+              <a href="mailto:support@myoflow.at">
+                <Languages className="w-4 h-4 mr-2" />
+                {t('settings.help.support', 'Support kontaktieren')}
+              </a>
             </Button>
           </CardContent>
         </Card>
