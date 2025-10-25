@@ -205,18 +205,6 @@ export default function InvoicesPage() {
             )}
           </div>
         </div>
-
-        <div className="mt-6 bg-green-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-green-800 mb-2">
-            🇦🇹 Sprint 1.4 Complete
-          </h3>
-          <div className="text-sm text-green-700">
-            <p>✅ Austrian-compliant invoice API with VAT handling</p>
-            <p>✅ Kleinunternehmer and regular VAT support</p>
-            <p>✅ Sequential invoice numbering (YYYY-NNN format)</p>
-            <p>🔄 Next: PDF generation & invoice creation interface</p>
-          </div>
-        </div>
       </main>
     </div>
   )

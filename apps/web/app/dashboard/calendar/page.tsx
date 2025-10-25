@@ -106,12 +106,12 @@ export default function CalendarPage() {
 
       if (servicesRes.ok) {
         const servicesData = await servicesRes.json()
-        setServices(Array.isArray(servicesData) ? servicesData : [])
+        setServices(Array.isArray(servicesData.services) ? servicesData.services : [])
       }
 
       if (locationsRes.ok) {
         const locationsData = await locationsRes.json()
-        setLocations(Array.isArray(locationsData) ? locationsData : [])
+        setLocations(Array.isArray(locationsData.locations) ? locationsData.locations : [])
       }
     } catch (err) {
       console.error('Failed to fetch reference data:', err)
