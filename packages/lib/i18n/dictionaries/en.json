@@ -455,18 +455,26 @@
       "description": "Please confirm your practice address. This information will appear on invoices and documents.",
       "labels": {
         "businessName": "Practice Name",
+        "businessEmail": "Business Email",
+        "iban": "Austrian IBAN",
         "businessAddress": "Street and Number",
         "businessPostalCode": "Postal Code",
         "businessCity": "City",
         "businessCountry": "Country"
       },
       "placeholders": {
+        "businessEmail": "practice@example.com",
+        "iban": "AT611904300234573201",
         "businessAddress": "Example: Main Street 12",
         "businessPostalCode": "1010",
         "businessCity": "City"
       },
       "errors": {
         "businessNameRequired": "Practice name is required",
+        "emailRequired": "Business email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "ibanRequired": "IBAN is required",
+        "ibanInvalid": "Please enter a valid Austrian IBAN (starts with AT)",
         "addressRequired": "Address is required",
         "addressPlaceholder": "Please enter your actual practice address",
         "postalCodeRequired": "Postal code is required",

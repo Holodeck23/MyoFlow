@@ -15,10 +15,12 @@ import type { ProfileSnapshot, WizardFormValues } from './types'
 
 const DEFAULT_VALUES: WizardFormValues = {
   businessName: '',
+  businessEmail: '',
   businessAddress: '',
   businessPostalCode: '',
   businessCity: '',
   businessCountry: 'Austria',
+  iban: '',
   designation: 'HEILMASSEUR',
   vatStatus: 'KLEINUNTERNEHMER',
   chamberRegistration: '',
@@ -27,6 +29,8 @@ const DEFAULT_VALUES: WizardFormValues = {
 
 const STEP1_FIELDS: Array<keyof WizardFormValues> = [
   'businessName',
+  'businessEmail',
+  'iban',
   'businessAddress',
   'businessPostalCode',
   'businessCity',
@@ -42,6 +46,8 @@ function extractProfileSnapshot(raw: any | null | undefined): ProfileSnapshot {
   if (!raw || typeof raw !== 'object') {
     return {
       businessName: null,
+      businessEmail: null,
+      iban: null,
       businessAddress: null,
       businessCity: null,
       businessPostalCode: null,
@@ -58,6 +64,8 @@ function extractProfileSnapshot(raw: any | null | undefined): ProfileSnapshot {
 
   return {
     businessName: typeof raw.businessName === 'string' ? raw.businessName : null,
+    businessEmail: typeof raw.businessEmail === 'string' ? raw.businessEmail : null,
+    iban: typeof raw.iban === 'string' ? raw.iban : null,
     businessAddress: typeof raw.businessAddress === 'string' ? raw.businessAddress : null,
     businessCity: typeof travel?.baseCity === 'string' ? travel.baseCity : null,
     businessPostalCode: typeof travel?.basePostalCode === 'string' ? travel.basePostalCode : null,
@@ -136,6 +144,8 @@ export default function OnboardingPage() {
 
         form.reset({
           businessName: snapshot.businessName ?? '',
+          businessEmail: snapshot.businessEmail ?? '',
+          iban: snapshot.iban ?? '',
           businessAddress: snapshot.businessAddress ?? '',
           businessPostalCode: snapshot.businessPostalCode ?? '',
           businessCity: snapshot.businessCity ?? '',
@@ -178,6 +188,8 @@ export default function OnboardingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             businessName: values.businessName.trim(),
+            businessEmail: values.businessEmail.trim(),
+            iban: values.iban.trim(),
             businessAddress: values.businessAddress.trim(),
             businessPostalCode: values.businessPostalCode.trim(),
             businessCity: values.businessCity.trim(),
