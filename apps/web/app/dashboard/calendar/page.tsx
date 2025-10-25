@@ -535,20 +535,6 @@ export default function CalendarPage() {
             </div>
           </div>
         </div>
-
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">
-            {t('calendarPage.releaseNotes.title')}
-          </h3>
-          <div className="text-sm text-blue-700">
-            <p>{t('calendarPage.releaseNotes.item1')}</p>
-            <p>{t('calendarPage.releaseNotes.item2')}</p>
-            <p>{t('calendarPage.releaseNotes.item3')}</p>
-            <p>{t('calendarPage.releaseNotes.item4')}</p>
-            <p>{t('calendarPage.releaseNotes.item5')}</p>
-            <p>{t('calendarPage.releaseNotes.next')}</p>
-          </div>
-        </div>
       </main>
 
       {/* Appointment Modal */}
