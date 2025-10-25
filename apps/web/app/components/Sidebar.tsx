@@ -86,9 +86,9 @@ export function Sidebar() {
   return (
     <div className={`flex min-h-screen ${isCollapsed ? 'w-16' : 'w-64'} flex-col bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0`}>
       {/* Professional Branding Header */}
-      <div className={`flex h-20 shrink-0 items-center border-b border-gray-100 ${isCollapsed ? 'px-3 justify-center' : 'px-6'}`}>
-        <div className="flex items-center justify-between w-full">
-          {!isCollapsed && (
+      <div className={`flex h-20 shrink-0 items-center border-b border-gray-100 ${isCollapsed ? 'px-3 justify-center' : 'px-6'} relative`}>
+        {!isCollapsed && (
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <Image
                 src="/shield-logo.png"
@@ -99,35 +99,30 @@ export function Sidebar() {
                 priority
               />
             </div>
-          )}
-          {isCollapsed && (
-            <div className="flex items-center justify-center">
-              <Image
-                src="/shield-logo.png"
-                alt="MyoFlow"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
-                priority
-              />
-            </div>
-          )}
-          {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ChevronLeft size={20} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
         {isCollapsed && (
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute top-6 right-2 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <Menu size={20} />
-          </button>
+          <>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="flex items-center justify-center w-full"
+            >
+              <Image
+                src="/shield-icon.png"
+                alt="MyoFlow"
+                width={48}
+                height={48}
+                className="h-12 w-12 object-contain hover:scale-105 transition-transform"
+                priority
+              />
+            </button>
+          </>
         )}
       </div>
 
