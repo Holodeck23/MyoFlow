@@ -1,9 +1,11 @@
 export interface WizardFormValues {
   businessName: string
+  businessEmail: string
   businessAddress: string
   businessPostalCode: string
   businessCity: string
   businessCountry: string
+  iban: string
   designation: string
   vatStatus: string
   chamberRegistration: string
@@ -12,6 +14,8 @@ export interface WizardFormValues {
 
 export interface ProfileSnapshot {
   businessName: string | null
+  businessEmail: string | null
+  iban: string | null
   businessAddress: string | null
   businessCity: string | null
   businessPostalCode: string | null

@@ -455,18 +455,26 @@
       "description": "Bitte bestätigen Sie Ihre Praxisadresse. Diese Angaben erscheinen auf Rechnungen und Dokumenten.",
       "labels": {
         "businessName": "Praxisname",
+        "businessEmail": "Geschäfts-E-Mail",
+        "iban": "Österreichische IBAN",
         "businessAddress": "Straße und Hausnummer",
         "businessPostalCode": "Postleitzahl",
         "businessCity": "Stadt",
         "businessCountry": "Land"
       },
       "placeholders": {
+        "businessEmail": "praxis@beispiel.at",
+        "iban": "AT611904300234573201",
         "businessAddress": "Beispiel: Hauptstraße 12",
         "businessPostalCode": "1010",
         "businessCity": "Ort"
       },
       "errors": {
         "businessNameRequired": "Praxisname ist erforderlich",
+        "emailRequired": "Geschäfts-E-Mail ist erforderlich",
+        "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+        "ibanRequired": "IBAN ist erforderlich",
+        "ibanInvalid": "Bitte geben Sie eine gültige österreichische IBAN ein (beginnt mit AT)",
         "addressRequired": "Adresse ist erforderlich",
         "addressPlaceholder": "Bitte geben Sie Ihre tatsächliche Praxisadresse ein",
         "postalCodeRequired": "Postleitzahl ist erforderlich",
