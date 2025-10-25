@@ -536,5 +536,45 @@
       "loading": "Onboarding wird geladen...",
       "loadError": "Profil konnte nicht geladen werden"
     }
+  },
+  "calendarAppointment": {
+    "title": "Neuer Termin",
+    "editTitle": "Termin bearbeiten",
+    "close": "Schließen",
+    "clientLabel": "Klient",
+    "clientPlaceholder": "Klienten auswählen",
+    "serviceLabel": "Leistung",
+    "servicePlaceholder": "Leistung auswählen",
+    "locationLabel": "Standort",
+    "locationPlaceholder": "Standort auswählen",
+    "dateLabel": "Datum",
+    "startTimeLabel": "Startzeit",
+    "endTimeLabel": "Endzeit",
+    "notesLabel": "Notizen",
+    "notesPlaceholder": "Notizen zu diesem Termin hinzufügen...",
+    "submitButton": "Termin erstellen",
+    "updateButton": "Termin aktualisieren",
+    "cancelButton": "Abbrechen",
+    "loadingOptions": "Optionen werden geladen...",
+    "errors": {
+      "clientRequired": "Bitte wählen Sie einen Klienten aus",
+      "serviceRequired": "Bitte wählen Sie eine Leistung aus",
+      "locationRequired": "Bitte wählen Sie einen Standort aus",
+      "dateRequired": "Bitte wählen Sie ein Datum aus",
+      "startTimeRequired": "Bitte geben Sie eine Startzeit ein",
+      "endTimeRequired": "Bitte geben Sie eine Endzeit ein",
+      "endAfterStart": "Endzeit muss nach der Startzeit liegen"
+    },
+    "errorConflict": "Dieser Termin steht im Konflikt mit einem bestehenden Termin",
+    "errorGeneric": "Termin konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "missingData": {
+      "title": "Fehlende erforderliche Daten:",
+      "clients": "Keine Klienten gefunden.",
+      "clientsCta": "Klienten erstellen",
+      "services": "Keine Leistungen konfiguriert.",
+      "servicesCta": "Leistungen konfigurieren",
+      "locations": "Keine Standorte konfiguriert.",
+      "locationsCta": "Standorte konfigurieren"
+    }
   }
 }
