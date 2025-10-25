@@ -536,5 +536,45 @@
       "loading": "Loading onboarding...",
       "loadError": "Could not load profile"
     }
+  },
+  "calendarAppointment": {
+    "title": "New Appointment",
+    "editTitle": "Edit Appointment",
+    "close": "Close",
+    "clientLabel": "Client",
+    "clientPlaceholder": "Select a client",
+    "serviceLabel": "Service",
+    "servicePlaceholder": "Select a service",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Select a location",
+    "dateLabel": "Date",
+    "startTimeLabel": "Start Time",
+    "endTimeLabel": "End Time",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Add any notes about this appointment...",
+    "submitButton": "Create Appointment",
+    "updateButton": "Update Appointment",
+    "cancelButton": "Cancel",
+    "loadingOptions": "Loading options...",
+    "errors": {
+      "clientRequired": "Please select a client",
+      "serviceRequired": "Please select a service",
+      "locationRequired": "Please select a location",
+      "dateRequired": "Please select a date",
+      "startTimeRequired": "Please enter a start time",
+      "endTimeRequired": "Please enter an end time",
+      "endAfterStart": "End time must be after start time"
+    },
+    "errorConflict": "This appointment conflicts with an existing appointment",
+    "errorGeneric": "Failed to save appointment. Please try again.",
+    "missingData": {
+      "title": "Missing required data:",
+      "clients": "No clients found.",
+      "clientsCta": "Create a client",
+      "services": "No services configured.",
+      "servicesCta": "Configure services",
+      "locations": "No locations configured.",
+      "locationsCta": "Configure locations"
+    }
   }
 }
