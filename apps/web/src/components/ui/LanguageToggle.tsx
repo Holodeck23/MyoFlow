@@ -43,7 +43,7 @@ export function LanguageToggle() {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center space-x-2 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
+      className="flex items-center space-x-2 border-gray-300 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-400"
       title="Switch language"
     >
       <Globe className="w-4 h-4" />
