@@ -115,7 +115,7 @@ export function OverviewTab({
                 .map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-lg border cursor-pointer hover:border-blue-300 transition-colors"
+                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors"
                     onClick={() => onQuickAction(item.tab)}
                   >
                     <div className="flex items-center space-x-3">
@@ -144,7 +144,7 @@ export function OverviewTab({
                 <Card
                   key={action.tab}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-md",
+                    "cursor-pointer transition-all duration-200 hover:shadow-md border-gray-200",
                     action.available
                       ? "hover:border-blue-300"
                       : "opacity-50 cursor-not-allowed"
@@ -172,7 +172,7 @@ export function OverviewTab({
       {/* Sidebar */}
       <div className="space-y-6">
         {/* System Status */}
-        <Card>
+        <Card className="border-gray-200">
           <CardHeader>
             <CardTitle className="text-lg">
               {t('settings.status.title', 'System-Status')}
@@ -239,7 +239,7 @@ export function OverviewTab({
         </Card>
 
         {/* Help & Support */}
-        <Card>
+        <Card className="border-gray-200">
           <CardHeader>
             <CardTitle className="text-lg">
               {t('settings.help.title', 'Hilfe & Support')}
@@ -248,17 +248,17 @@ export function OverviewTab({
           <CardContent className="space-y-3">
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start border-gray-200"
               asChild
             >
-              <a href="/docs/user-guide.md" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/yourusername/MyoFlow/blob/main/docs/user-guide.md" target="_blank" rel="noopener noreferrer">
                 <FileText className="w-4 h-4 mr-2" />
                 {t('settings.help.documentation', 'Dokumentation')}
               </a>
             </Button>
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start border-gray-200"
               asChild
             >
               <a href="mailto:support@myoflow.at">
