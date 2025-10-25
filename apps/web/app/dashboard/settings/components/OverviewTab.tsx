@@ -16,7 +16,6 @@ import {
   AlertCircle,
   ChevronRight,
   Euro,
-  Download,
   FileText,
   Languages
 } from 'lucide-react'
@@ -61,13 +60,6 @@ export function OverviewTab({
       description: t('settings.quickActions.pricingDesc', 'Behandlungspreise verwalten'),
       tab: 'pricing',
       available: true
-    },
-    {
-      icon: Download,
-      title: t('settings.quickActions.export', 'Daten exportieren'),
-      description: t('settings.quickActions.exportDesc', 'BMD/RZL Export erstellen'),
-      tab: 'export',
-      available: false
     }
   ]
 
