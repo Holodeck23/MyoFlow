@@ -420,7 +420,9 @@
     "completion": {
       "title": "Profile Completeness",
       "description": "Complete your profile for optimal usage",
-      "missingTitle": "Still to do:"
+      "missingTitle": "Still to do:",
+      "percentComplete": "{{percent}}% complete",
+      "areasCompleted": "{{completed}} of {{total}} areas completed"
     },
     "status": {
       "title": "System Status",

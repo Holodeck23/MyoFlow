@@ -35,6 +35,7 @@ interface OverviewTabProps {
   onQuickAction: (tab: string) => void
   systemStatus: any
   overviewData: any
+  isLoading?: boolean
 }
 
 export function OverviewTab({
@@ -42,7 +43,8 @@ export function OverviewTab({
   completionPercentage,
   onQuickAction,
   systemStatus,
-  overviewData
+  overviewData,
+  isLoading = false
 }: OverviewTabProps) {
   const { t } = useTranslation()
 
@@ -94,13 +96,30 @@ export function OverviewTab({
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{completionPercentage}% vollständig</p>
-                <p className="text-sm text-gray-600">
-                  {overviewData ?
-                    `${overviewData.profileCompletion.completedItems} von ${overviewData.profileCompletion.totalItems} Bereichen abgeschlossen` :
-                    `${profileCompletion.filter(item => item.completed).length} von ${profileCompletion.length} Bereichen abgeschlossen`
-                  }
-                </p>
+                {isLoading ? (
+                  <>
+                    <div className="h-8 bg-gray-200 rounded animate-pulse mb-2 w-48"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-64"></div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {t('settings.completion.percentComplete', '{{percent}}% vollständig', { percent: completionPercentage })}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {overviewData ?
+                        t('settings.completion.areasCompleted', '{{completed}} von {{total}} Bereichen abgeschlossen', {
+                          completed: overviewData.profileCompletion.completedItems,
+                          total: overviewData.profileCompletion.totalItems
+                        }) :
+                        t('settings.completion.areasCompleted', '{{completed}} von {{total}} Bereichen abgeschlossen', {
+                          completed: profileCompletion.filter(item => item.completed).length,
+                          total: profileCompletion.length
+                        })
+                      }
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
