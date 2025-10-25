@@ -421,7 +421,6 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
               <div className="space-y-3">
                 <Button
                   asChild
-                  variant="secondary"
                   className="w-full"
                   size="sm"
                 >
@@ -436,7 +435,6 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                 </Button>
                 <Button
                   asChild
-                  variant="secondary"
                   className="w-full"
                   size="sm"
                 >
