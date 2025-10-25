@@ -220,6 +220,7 @@ export default function SettingsClient() {
               onQuickAction={handleQuickAction}
               systemStatus={systemStatus}
               overviewData={overviewData}
+              isLoading={isDataLoading}
             />
           </Suspense>
         </TabsContent>

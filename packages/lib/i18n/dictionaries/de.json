@@ -420,7 +420,9 @@
     "completion": {
       "title": "Profilvollständigkeit",
       "description": "Vervollständigen Sie Ihr Profil für optimale Nutzung",
-      "missingTitle": "Noch zu erledigen:"
+      "missingTitle": "Noch zu erledigen:",
+      "percentComplete": "{{percent}}% vollständig",
+      "areasCompleted": "{{completed}} von {{total}} Bereichen abgeschlossen"
     },
     "status": {
       "title": "Systemstatus",
