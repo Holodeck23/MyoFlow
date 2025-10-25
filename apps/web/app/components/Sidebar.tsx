@@ -8,12 +8,7 @@ import {
   LayoutDashboard,
   Calendar,
   Users2,
-  FileText,
   DollarSign,
-  Package2,
-  BarChart3,
-  MessageCircle,
-  Globe2,
   Settings,
   Menu,
   ChevronLeft
@@ -49,48 +44,6 @@ export function Sidebar() {
       icon: DollarSign,
       available: true,
       badge: 3
-    },
-    {
-      name: t('sidebar.sessions', 'Sessions & Notes'),
-      href: '/dashboard/sessions',
-      icon: FileText,
-      available: false,
-      comingSoon: 'v1.7'
-    },
-    {
-      name: t('sidebar.products', 'Products & Packages'),
-      href: '/dashboard/products',
-      icon: Package2,
-      available: false,
-      comingSoon: 'v1.8'
-    },
-    {
-      name: t('sidebar.reports', 'Reports'),
-      href: '/dashboard/reports',
-      icon: BarChart3,
-      available: false,
-      comingSoon: 'v1.7'
-    },
-    {
-      name: t('sidebar.messaging', 'Messaging'),
-      href: '/dashboard/messaging',
-      icon: MessageCircle,
-      available: false,
-      comingSoon: 'v1.8',
-      badge: 2
-    },
-    {
-      name: t('sidebar.booking', 'Booking Page'),
-      href: '/dashboard/booking',
-      icon: Globe2,
-      available: false,
-      comingSoon: 'v1.9'
-    },
-    {
-      name: t('sidebar.settings', 'Settings'),
-      href: '/dashboard/settings',
-      icon: Settings,
-      available: true
     },
   ]
 
