@@ -12,7 +12,7 @@ const serviceRateSchema = z.object({
   durationMin: z.number().int().min(15).max(480),
   priceCents: z.number().int().min(500).max(50000),
   vatRate: z.enum(['KLEINUNTERNEHMER', 'UST_10', 'UST_13', 'UST_20']),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).nullable().optional(),
   isDefault: z.boolean().optional(),
   travelRateCents: z.number().int().min(0).max(10000).optional(),
   travelIncluded: z.boolean().optional(),
