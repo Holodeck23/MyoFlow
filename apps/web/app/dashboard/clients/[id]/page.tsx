@@ -326,7 +326,7 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                   <div className="text-center py-8">
                     <p className="text-gray-500">No appointments found</p>
                     <p className="text-sm text-gray-400 mt-1">
-                      Appointment scheduling will be available in Sprint 1.3
+                      Schedule your first appointment using Quick Actions
                     </p>
                   </div>
                 ) : (
@@ -420,12 +420,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
               <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <Button
-                  disabled
-                  variant="secondary"
+                  asChild
                   className="w-full"
                   size="sm"
                 >
-                  Schedule Appointment (Sprint 1.3)
+                  <Link href="/dashboard/calendar">Schedule Appointment</Link>
                 </Button>
                 <Button
                   onClick={() => document.querySelector('textarea')?.focus()}
@@ -435,12 +434,11 @@ export default function ClientProfilePage({ params }: { params: { id: string } }
                   Add Note
                 </Button>
                 <Button
-                  disabled
-                  variant="secondary"
+                  asChild
                   className="w-full"
                   size="sm"
                 >
-                  Generate Invoice (Sprint 1.4)
+                  <Link href="/dashboard/invoices/new">Generate Invoice</Link>
                 </Button>
               </div>
             </div>

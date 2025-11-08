@@ -67,6 +67,48 @@ export function Step1BusinessInfo({
           </div>
 
           <div className="space-y-1.5">
+            <label htmlFor="businessEmail" className="text-sm font-medium text-slate-800">
+              {t('onboarding.step1.labels.businessEmail', 'Business Email')}
+            </label>
+            <Input
+              id="businessEmail"
+              type="email"
+              autoComplete="email"
+              placeholder={t('onboarding.step1.placeholders.businessEmail', 'practice@example.com')}
+              {...register('businessEmail', {
+                required: t('onboarding.step1.errors.emailRequired', 'Business email is required'),
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: t('onboarding.step1.errors.emailInvalid', 'Please enter a valid email address'),
+                },
+              })}
+            />
+            {errors.businessEmail && (
+              <p className="text-sm text-red-600">{errors.businessEmail.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="iban" className="text-sm font-medium text-slate-800">
+              {t('onboarding.step1.labels.iban', 'Austrian IBAN')}
+            </label>
+            <Input
+              id="iban"
+              placeholder={t('onboarding.step1.placeholders.iban', 'AT611904300234573201')}
+              {...register('iban', {
+                required: t('onboarding.step1.errors.ibanRequired', 'IBAN is required'),
+                pattern: {
+                  value: /^AT\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/,
+                  message: t('onboarding.step1.errors.ibanInvalid', 'Please enter a valid Austrian IBAN (starts with AT)'),
+                },
+              })}
+            />
+            {errors.iban && (
+              <p className="text-sm text-red-600">{errors.iban.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
             <label htmlFor="businessAddress" className="text-sm font-medium text-slate-800">
               {t('onboarding.step1.labels.businessAddress', 'Street and Number')}
             </label>
