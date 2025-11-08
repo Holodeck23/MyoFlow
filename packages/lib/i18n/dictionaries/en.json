@@ -420,7 +420,9 @@
     "completion": {
       "title": "Profile Completeness",
       "description": "Complete your profile for optimal usage",
-      "missingTitle": "Still to do:"
+      "missingTitle": "Still to do:",
+      "percentComplete": "{{percent}}% complete",
+      "areasCompleted": "{{completed}} of {{total}} areas completed"
     },
     "status": {
       "title": "System Status",
@@ -453,18 +455,26 @@
       "description": "Please confirm your practice address. This information will appear on invoices and documents.",
       "labels": {
         "businessName": "Practice Name",
+        "businessEmail": "Business Email",
+        "iban": "Austrian IBAN",
         "businessAddress": "Street and Number",
         "businessPostalCode": "Postal Code",
         "businessCity": "City",
         "businessCountry": "Country"
       },
       "placeholders": {
+        "businessEmail": "practice@example.com",
+        "iban": "AT611904300234573201",
         "businessAddress": "Example: Main Street 12",
         "businessPostalCode": "1010",
         "businessCity": "City"
       },
       "errors": {
         "businessNameRequired": "Practice name is required",
+        "emailRequired": "Business email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "ibanRequired": "IBAN is required",
+        "ibanInvalid": "Please enter a valid Austrian IBAN (starts with AT)",
         "addressRequired": "Address is required",
         "addressPlaceholder": "Please enter your actual practice address",
         "postalCodeRequired": "Postal code is required",
@@ -535,6 +545,46 @@
     "common": {
       "loading": "Loading onboarding...",
       "loadError": "Could not load profile"
+    }
+  },
+  "calendarAppointment": {
+    "title": "New Appointment",
+    "editTitle": "Edit Appointment",
+    "close": "Close",
+    "clientLabel": "Client",
+    "clientPlaceholder": "Select a client",
+    "serviceLabel": "Service",
+    "servicePlaceholder": "Select a service",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Select a location",
+    "dateLabel": "Date",
+    "startTimeLabel": "Start Time",
+    "endTimeLabel": "End Time",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Add any notes about this appointment...",
+    "submitButton": "Create Appointment",
+    "updateButton": "Update Appointment",
+    "cancelButton": "Cancel",
+    "loadingOptions": "Loading options...",
+    "errors": {
+      "clientRequired": "Please select a client",
+      "serviceRequired": "Please select a service",
+      "locationRequired": "Please select a location",
+      "dateRequired": "Please select a date",
+      "startTimeRequired": "Please enter a start time",
+      "endTimeRequired": "Please enter an end time",
+      "endAfterStart": "End time must be after start time"
+    },
+    "errorConflict": "This appointment conflicts with an existing appointment",
+    "errorGeneric": "Failed to save appointment. Please try again.",
+    "missingData": {
+      "title": "Missing required data:",
+      "clients": "No clients found.",
+      "clientsCta": "Create a client",
+      "services": "No services configured.",
+      "servicesCta": "Configure services",
+      "locations": "No locations configured.",
+      "locationsCta": "Configure locations"
     }
   }
 }

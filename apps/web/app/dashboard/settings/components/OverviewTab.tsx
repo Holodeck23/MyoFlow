@@ -16,7 +16,6 @@ import {
   AlertCircle,
   ChevronRight,
   Euro,
-  Download,
   FileText,
   Languages
 } from 'lucide-react'
@@ -36,6 +35,7 @@ interface OverviewTabProps {
   onQuickAction: (tab: string) => void
   systemStatus: any
   overviewData: any
+  isLoading?: boolean
 }
 
 export function OverviewTab({
@@ -43,7 +43,8 @@ export function OverviewTab({
   completionPercentage,
   onQuickAction,
   systemStatus,
-  overviewData
+  overviewData,
+  isLoading = false
 }: OverviewTabProps) {
   const { t } = useTranslation()
 
@@ -61,13 +62,6 @@ export function OverviewTab({
       description: t('settings.quickActions.pricingDesc', 'Behandlungspreise verwalten'),
       tab: 'pricing',
       available: true
-    },
-    {
-      icon: Download,
-      title: t('settings.quickActions.export', 'Daten exportieren'),
-      description: t('settings.quickActions.exportDesc', 'BMD/RZL Export erstellen'),
-      tab: 'export',
-      available: false
     }
   ]
 
@@ -102,13 +96,29 @@ export function OverviewTab({
                 </div>
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{completionPercentage}% vollständig</p>
-                <p className="text-sm text-gray-600">
-                  {overviewData ?
-                    `${overviewData.profileCompletion.completedItems} von ${overviewData.profileCompletion.totalItems} Bereichen abgeschlossen` :
-                    `${profileCompletion.filter(item => item.completed).length} von ${profileCompletion.length} Bereichen abgeschlossen`
-                  }
-                </p>
+                {isLoading ? (
+                  <>
+                    <div className="h-8 bg-gray-200 rounded animate-pulse mb-2 w-48"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-64"></div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {completionPercentage}% {t('settings.completion.complete', 'vollständig')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {overviewData ? (
+                        <>
+                          {overviewData.profileCompletion.completedItems} {t('settings.completion.of', 'von')} {overviewData.profileCompletion.totalItems} {t('settings.completion.areasCompleted', 'Bereichen abgeschlossen')}
+                        </>
+                      ) : (
+                        <>
+                          {profileCompletion.filter(item => item.completed).length} {t('settings.completion.of', 'von')} {profileCompletion.length} {t('settings.completion.areasCompleted', 'Bereichen abgeschlossen')}
+                        </>
+                      )}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -123,7 +133,7 @@ export function OverviewTab({
                 .map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-lg border cursor-pointer hover:border-blue-300 transition-colors"
+                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors"
                     onClick={() => onQuickAction(item.tab)}
                   >
                     <div className="flex items-center space-x-3">
@@ -152,7 +162,7 @@ export function OverviewTab({
                 <Card
                   key={action.tab}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-md",
+                    "cursor-pointer transition-all duration-200 hover:shadow-md border-gray-200",
                     action.available
                       ? "hover:border-blue-300"
                       : "opacity-50 cursor-not-allowed"
@@ -180,7 +190,7 @@ export function OverviewTab({
       {/* Sidebar */}
       <div className="space-y-6">
         {/* System Status */}
-        <Card>
+        <Card className="border-gray-200">
           <CardHeader>
             <CardTitle className="text-lg">
               {t('settings.status.title', 'System-Status')}
@@ -247,20 +257,32 @@ export function OverviewTab({
         </Card>
 
         {/* Help & Support */}
-        <Card>
+        <Card className="border-gray-200">
           <CardHeader>
             <CardTitle className="text-lg">
               {t('settings.help.title', 'Hilfe & Support')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
-              <FileText className="w-4 h-4 mr-2" />
-              {t('settings.help.documentation', 'Dokumentation')}
+            <Button
+              variant="outline"
+              className="w-full justify-start border-gray-200"
+              asChild
+            >
+              <a href="https://github.com/yourusername/MyoFlow/blob/main/docs/user-guide.md" target="_blank" rel="noopener noreferrer">
+                <FileText className="w-4 h-4 mr-2" />
+                {t('settings.help.documentation', 'Dokumentation')}
+              </a>
             </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Languages className="w-4 h-4 mr-2" />
-              {t('settings.help.support', 'Support kontaktieren')}
+            <Button
+              variant="outline"
+              className="w-full justify-start border-gray-200"
+              asChild
+            >
+              <a href="mailto:support@myoflow.at">
+                <Languages className="w-4 h-4 mr-2" />
+                {t('settings.help.support', 'Support kontaktieren')}
+              </a>
             </Button>
           </CardContent>
         </Card>
