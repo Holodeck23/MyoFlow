@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import auth from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { AccountType } from '@prisma/client'
 import type { MyoFlowSession } from '@/lib/auth'
 
