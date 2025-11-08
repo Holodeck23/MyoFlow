@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('@/lib/auth', () => ({
   __esModule: true,
   default: (handler: any) => handler,
+  authMiddleware: (handler: any) => handler,
 }))
 import { NextResponse } from 'next/server'
 import { middlewareLogic } from '../../middleware'
