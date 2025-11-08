@@ -11,7 +11,7 @@ const CreateClientSchema = z.object({
   email: z.string().email().trim().optional().or(z.literal('')),
   phone: z.string().trim().optional(),
   street: z.string().trim().min(1, 'Street is required'),
-  postalCode: z.string().trim().min(1, 'Postal code is required'),
+  postalCode: z.string().trim().min(1, 'Postal code is required').regex(/^[1-9]\d{3}$/, 'Please enter a valid Austrian postal code (1000-9999)'),
   city: z.string().trim().min(1, 'City is required'),
   country: z.string().trim().min(1, 'Country is required'),
   tags: z.array(z.string()).optional(),
