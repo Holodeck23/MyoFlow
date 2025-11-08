@@ -128,6 +128,19 @@ function shouldRepairToken(token: Partial<MyoFlowToken> | undefined): boolean {
   return missingCoreClaims || missingTherapistContext
 }
 
+function coalesceEmail(
+  userEmail?: string | null,
+  tokenEmail?: string | null,
+  contextEmail?: string | null
+) {
+  for (const candidate of [userEmail, tokenEmail, contextEmail]) {
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      return candidate
+    }
+  }
+  return ''
+}
+
 function evictExpiredCacheEntries() {
   if (jwtClaimCache.size <= JWT_CACHE_MAX_ENTRIES) {
     return
@@ -518,7 +531,7 @@ export const authConfig: NextAuthConfig = {
         })
 
         token.sub = userId
-        token.email = user?.email ?? token.email ?? context.email ?? ''
+        token.email = coalesceEmail(user?.email, token.email, context.email)
         token.accountType = context.accountType
         token.role = context.role
         token.isAdmin = context.isAdmin
@@ -546,10 +559,10 @@ export const authConfig: NextAuthConfig = {
 
 const { handlers, auth: baseAuth, signIn, signOut } = NextAuth(authConfig)
 
-const instrumentedAuth: AuthHandler = async (...args) => {
+const instrumentedAuth = async (...args: any[]) => {
   const start = nowMs()
   try {
-    return await baseAuth(...args)
+    return await (baseAuth as any)(...args)
   } finally {
     const duration = nowMs() - start
     recordAuthSample(duration)

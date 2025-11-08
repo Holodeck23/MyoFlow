@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { auth, authDiagnostics } from '@/lib/auth'
 
 export const runtime = 'nodejs' // Force Node.js runtime to ensure consistent behavior
 
@@ -18,6 +18,8 @@ export async function GET() {
     timings.total = Date.now() - timings.start
 
     const authDuration = timings.authEnd - timings.authStart
+    const averageMs = authDiagnostics.performance.averageMs
+    const p95Ms = authDiagnostics.performance.p95Ms
 
     return NextResponse.json({
       success: true,
@@ -26,6 +28,16 @@ export async function GET() {
       timings: {
         authCallMs: authDuration,
         totalMs: timings.total
+      },
+      diagnostics: {
+        lastAuthCallMs: authDiagnostics.performance.lastSampleMs,
+        avgAuthMs: Number(averageMs.toFixed(2)),
+        p95AuthMs: Number(p95Ms.toFixed(2)),
+        jwtCache: {
+          hits: authDiagnostics.jwtCache.cacheHits,
+          misses: authDiagnostics.jwtCache.cacheMisses,
+          repairs: authDiagnostics.jwtCache.cacheRepairs,
+        },
       },
       diagnosis: authDuration > 1000
         ? 'SLOW: Auth call took more than 1 second - investigate database queries or session validation'
