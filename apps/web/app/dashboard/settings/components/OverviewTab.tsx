@@ -104,19 +104,18 @@ export function OverviewTab({
                 ) : (
                   <>
                     <p className="text-2xl font-bold text-gray-900">
-                      {t('settings.completion.percentComplete', '{{percent}}% vollständig', { percent: completionPercentage })}
+                      {completionPercentage}% {t('settings.completion.complete', 'vollständig')}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {overviewData ?
-                        t('settings.completion.areasCompleted', '{{completed}} von {{total}} Bereichen abgeschlossen', {
-                          completed: overviewData.profileCompletion.completedItems,
-                          total: overviewData.profileCompletion.totalItems
-                        }) :
-                        t('settings.completion.areasCompleted', '{{completed}} von {{total}} Bereichen abgeschlossen', {
-                          completed: profileCompletion.filter(item => item.completed).length,
-                          total: profileCompletion.length
-                        })
-                      }
+                      {overviewData ? (
+                        <>
+                          {overviewData.profileCompletion.completedItems} {t('settings.completion.of', 'von')} {overviewData.profileCompletion.totalItems} {t('settings.completion.areasCompleted', 'Bereichen abgeschlossen')}
+                        </>
+                      ) : (
+                        <>
+                          {profileCompletion.filter(item => item.completed).length} {t('settings.completion.of', 'von')} {profileCompletion.length} {t('settings.completion.areasCompleted', 'Bereichen abgeschlossen')}
+                        </>
+                      )}
                     </p>
                   </>
                 )}
