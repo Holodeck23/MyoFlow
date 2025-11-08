@@ -66,6 +66,11 @@ export default function NewClientPage() {
       nextErrors.email = 'Please enter a valid email address.'
     }
 
+    // Austrian postal code validation (1000-9999)
+    if (data.postalCode.trim() && !/^[1-9]\d{3}$/.test(data.postalCode.trim())) {
+      nextErrors.postalCode = 'Please enter a valid Austrian postal code (1000-9999).'
+    }
+
     return nextErrors
   }
 

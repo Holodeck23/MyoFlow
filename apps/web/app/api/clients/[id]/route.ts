@@ -11,7 +11,7 @@ const UpdateClientSchema = z.object({
   email: z.string().email().trim().optional().or(z.literal('')),
   phone: z.string().trim().optional(),
   street: z.string().trim().min(1, 'Street is required').optional(),
-  postalCode: z.string().trim().min(1, 'Postal code is required').optional(),
+  postalCode: z.string().trim().min(1, 'Postal code is required').regex(/^[1-9]\d{3}$/, 'Please enter a valid Austrian postal code (1000-9999)').optional(),
   city: z.string().trim().min(1, 'City is required').optional(),
   country: z.string().trim().min(1, 'Country is required').optional(),
   tags: z.array(z.string()).optional(),
