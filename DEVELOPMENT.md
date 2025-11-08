@@ -135,7 +135,7 @@ All three must pass before merging to main.
 
 ## 🏗️ Development Workflow
 
-See `COORDINATION.md` for multi-agent workflow and `GIT_WORKFLOW.md` for branching strategy.
+See `COORDINATION.md` for multi-agent workflow and `docs/guides/git-workflow.md` for branching strategy.
 
 ### Sprint-Based Development
 1. Create sprint branch from main
@@ -166,6 +166,7 @@ pnpm prisma:generate
 ## 📚 Additional Documentation
 
 - **Project Status:** See `README.md`
-- **Roadmap:** See `ROADMAP.md`
-- **Decisions:** See `DECISION_LOG.md`
+- **Session Notes:** See `CLAUDE.md`
+- **Decisions:** See `docs/decisions/decision-log.md`
 - **Coordination:** See `COORDINATION.md`
+- **Documentation Index:** See `DOCS_INDEX.md`
