@@ -144,7 +144,7 @@ pnpm typecheck && pnpm lint && pnpm build
 - Do before launch: complete manual QA, fix critical issues; consider simple email verification and a basic onboarding tour.
 - Post-launch: appointment reminders automation, mini-websites, admin dashboard Phase 2, multi-user support, white-labeling.
 
-References: see `ROADMAP.md`, `CLAUDE.md`, and `LAUNCH_BLOCKERS.md` for timelines and priorities.
+References: see `CLAUDE.md` for current status and `archive/2025-10/ROADMAP.md` for historical planning.
 
 ---
 
