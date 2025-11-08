@@ -569,5 +569,6 @@ const instrumentedAuth = async (...args: any[]) => {
   }
 }
 
-export { handlers, instrumentedAuth as auth, signIn, signOut }
+// Export both the instrumented version (for API routes) and raw base (for middleware)
+export { handlers, instrumentedAuth as auth, baseAuth as authMiddleware, signIn, signOut }
 export default instrumentedAuth
