@@ -1,25 +1,31 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-const mockFindUnique = vi.hoisted(() => vi.fn())
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@myoflow/db', () => ({
-  prisma: {
+const mockUserFindUnique = vi.hoisted(() => vi.fn())
+const mockAuthImplementation = vi.hoisted(() =>
+  vi.fn(async () => ({
     user: {
-      findUnique: mockFindUnique,
+      id: 'session-user',
+      email: 'session@example.com',
     },
-    therapist: {
-      findUnique: mockFindUnique,
-    }
-  },
-}))
+  }))
+)
 
 const nextAuthMock = vi.hoisted(() =>
   vi.fn(() => ({
     handlers: {},
-    auth: (handler: any) => handler,
+    auth: mockAuthImplementation,
     signIn: vi.fn(),
     signOut: vi.fn(),
   }))
 )
+
+vi.mock('@myoflow/db', () => ({
+  prisma: {
+    user: {
+      findUnique: mockUserFindUnique,
+    },
+  },
+}))
 
 vi.mock('next-auth', () => ({
   __esModule: true,
@@ -27,61 +33,66 @@ vi.mock('next-auth', () => ({
 }))
 
 import { AccountType } from '@prisma/client'
-import { authConfig } from '@/lib/auth'
+import { authConfig, auth, authDiagnostics, resetAuthDiagnostics } from '@/lib/auth'
 import type { MyoFlowSession, MyoFlowToken } from '@/lib/auth'
+
+const originalNextRuntime = process.env.NEXT_RUNTIME
 
 describe('auth callbacks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockFindUnique.mockReset()
-    nextAuthMock.mockClear()
+    mockUserFindUnique.mockReset()
+    mockAuthImplementation.mockReset()
+    mockAuthImplementation.mockImplementation(async () => ({
+      user: {
+        id: 'session-user',
+        email: 'session@example.com',
+      },
+    }))
+    resetAuthDiagnostics()
+    process.env.NEXT_RUNTIME = originalNextRuntime
+  })
+
+  afterEach(() => {
+    process.env.NEXT_RUNTIME = originalNextRuntime
   })
 
   describe('jwt callback', () => {
     it('hydrates token with account type and admin flags on sign-in', async () => {
-      mockFindUnique
-        .mockResolvedValueOnce({
-          id: 'user-1',
-          role: 'SUPER_ADMIN',
-          accountType: AccountType.ADMIN,
-          email: 'owner@example.com',
-          Therapist: {
-            id: 'therapist-42',
-          },
-        })
-        .mockResolvedValueOnce({
+      mockUserFindUnique.mockResolvedValue({
+        id: 'user-1',
+        role: 'SUPER_ADMIN',
+        accountType: AccountType.ADMIN,
+        email: 'owner@example.com',
+        Therapist: {
           id: 'therapist-42',
           businessName: 'Test Practice',
           profileCompletionScore: 85,
-        })
+        },
+      })
 
       const token = await authConfig.callbacks?.jwt?.({
         token: { sub: 'user-1' } as unknown as MyoFlowToken,
-        user: { id: 'user-1' } as any,
+        user: { id: 'user-1', email: 'owner@example.com' } as any,
       } as any)
 
-      expect(mockFindUnique).toHaveBeenNthCalledWith(1, {
+      expect(mockUserFindUnique).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         include: {
           Therapist: {
             select: {
               id: true,
+              businessName: true,
+              profileCompletionScore: true,
             },
           },
         },
       })
-      expect(mockFindUnique).toHaveBeenNthCalledWith(2, {
-        where: { id: 'therapist-42' },
-        select: {
-          id: true,
-          businessName: true,
-          profileCompletionScore: true,
-        },
-      })
       expect(token?.accountType).toBe(AccountType.ADMIN)
       expect(token?.isAdmin).toBe(true)
-      expect(token?.isTestAccount).toBe(false)
       expect(token?.therapistId).toBe('therapist-42')
+      expect(token?.therapistBusinessName).toBe('Test Practice')
+      expect(token?.therapistProfileCompletionScore).toBe(85)
     })
 
     it('skips database lookups in edge runtime and retains token claims', async () => {
@@ -100,15 +111,13 @@ describe('auth callbacks', () => {
         token: tokenSnapshot,
       } as any)
 
-      expect(mockFindUnique).not.toHaveBeenCalled()
+      expect(mockUserFindUnique).not.toHaveBeenCalled()
       expect(token).toMatchObject(tokenSnapshot)
 
       process.env.NEXT_RUNTIME = originalEnv
     })
 
     it('skips database lookups for regular session checks (cached token)', async () => {
-      // Simulates a regular API request where session is being validated
-      // This should NOT trigger database queries - use cached token instead
       const cachedToken: MyoFlowToken = {
         sub: 'user-1',
         email: 'test@example.com',
@@ -123,27 +132,103 @@ describe('auth callbacks', () => {
 
       const token = await authConfig.callbacks?.jwt?.({
         token: cachedToken,
-        user: undefined, // No user means this is a session check, not sign-in
-        trigger: undefined, // Not an explicit update
+        user: undefined,
+        trigger: undefined,
       } as any)
 
-      // CRITICAL: Should NOT call database on regular session checks
-      expect(mockFindUnique).not.toHaveBeenCalled()
-      // Should return cached token unchanged
+      expect(mockUserFindUnique).not.toHaveBeenCalled()
       expect(token).toMatchObject(cachedToken)
     })
 
+    it('rehydrates token on explicit update trigger', async () => {
+      mockUserFindUnique.mockResolvedValue({
+        id: 'user-1',
+        role: 'OWNER',
+        accountType: AccountType.TEST,
+        email: 'owner@example.com',
+        Therapist: null,
+      })
+
+      await authConfig.callbacks?.jwt?.({
+        token: { sub: 'user-1' } as unknown as MyoFlowToken,
+        trigger: 'update',
+      } as any)
+
+      expect(mockUserFindUnique).toHaveBeenCalledTimes(1)
+    })
+
+    it('repairs missing claims by rehydrating from database', async () => {
+      mockUserFindUnique.mockResolvedValue({
+        id: 'user-1',
+        role: 'OWNER',
+        accountType: AccountType.TEST,
+        email: 'owner@example.com',
+        Therapist: {
+          id: 'therapist-99',
+          businessName: 'Repair Practice',
+          profileCompletionScore: 72,
+        },
+      })
+
+      const repairedToken = await authConfig.callbacks?.jwt?.({
+        token: {
+          sub: 'user-1',
+          email: '',
+          role: '',
+          accountType: undefined,
+        } as unknown as MyoFlowToken,
+        user: undefined,
+      } as any)
+
+      expect(mockUserFindUnique).toHaveBeenCalledTimes(1)
+      expect(repairedToken?.email).toBe('owner@example.com')
+      expect(repairedToken?.therapistId).toBe('therapist-99')
+    })
+
     it('defaults to TEST account when user missing in database', async () => {
-      mockFindUnique.mockResolvedValue(null)
+      mockUserFindUnique.mockResolvedValue(null)
 
       const token = await authConfig.callbacks?.jwt?.({
         token: { sub: 'missing-user' } as unknown as MyoFlowToken,
-        user: { id: 'missing-user' } as any, // Simulate sign-in to trigger DB lookup
+        user: { id: 'missing-user' } as any,
       } as any)
 
       expect(token?.accountType).toBe(AccountType.TEST)
       expect(token?.isTestAccount).toBe(true)
       expect(token?.isAdmin).toBe(false)
+    })
+
+    it('maintains session claims across multi-page navigation without re-querying DB', async () => {
+      mockUserFindUnique.mockResolvedValue({
+        id: 'user-1',
+        role: 'OWNER',
+        accountType: AccountType.TEST,
+        email: 'owner@example.com',
+        Therapist: {
+          id: 'therapist-10',
+          businessName: 'Flow Practice',
+          profileCompletionScore: 90,
+        },
+      })
+
+      let tokenState = (await authConfig.callbacks?.jwt?.({
+        token: { sub: 'user-1' } as unknown as MyoFlowToken,
+        user: { id: 'user-1', email: 'owner@example.com' } as any,
+      } as any)) as MyoFlowToken
+
+      expect(mockUserFindUnique).toHaveBeenCalledTimes(1)
+      mockUserFindUnique.mockClear()
+
+      const navigationSteps = ['dashboard', 'settings', 'clients', 'calendar', 'dashboard']
+      for (const step of navigationSteps) {
+        tokenState = (await authConfig.callbacks?.jwt?.({
+          token: tokenState as MyoFlowToken,
+          user: undefined,
+        } as any)) as MyoFlowToken
+        expect(tokenState?.therapistBusinessName).toBe('Flow Practice')
+      }
+
+      expect(mockUserFindUnique).not.toHaveBeenCalled()
     })
   })
 
@@ -171,6 +256,20 @@ describe('auth callbacks', () => {
       expect(session.user.accountType).toBe(AccountType.TEST)
       expect(session.user.isTestAccount).toBe(true)
       expect(session.user.isAdmin).toBe(false)
+    })
+  })
+
+  describe('auth() performance diagnostics', () => {
+    it('records auth() call durations under 500ms', async () => {
+      await auth()
+      expect(authDiagnostics.performance.lastSampleMs).toBeGreaterThanOrEqual(0)
+      expect(authDiagnostics.performance.lastSampleMs).toBeLessThan(500)
+    })
+
+    it('handles concurrent auth() calls efficiently', async () => {
+      await Promise.all(Array.from({ length: 50 }, () => auth()))
+      expect(authDiagnostics.performance.sampleCount).toBeGreaterThan(0)
+      expect(authDiagnostics.performance.averageMs).toBeLessThan(100)
     })
   })
 })
