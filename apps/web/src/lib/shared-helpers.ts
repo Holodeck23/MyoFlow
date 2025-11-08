@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { auth, obfuscateIdentifier } from '@/lib/auth'
 import { prisma, ServiceCategory, VatStatus, LocationType } from '@myoflow/db'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -16,6 +16,24 @@ export class AuthError extends Error {
   }
 }
 
+const SESSION_LOGGING_ENABLED = process.env.AUTH_LOG_LEVEL !== 'silent'
+
+function logSessionIssue(
+  level: 'warn' | 'error',
+  event: string,
+  details: Record<string, unknown>
+) {
+  if (!SESSION_LOGGING_ENABLED || process.env.NODE_ENV === 'test') {
+    return
+  }
+
+  console[level]('[AUTH][SESSION]', {
+    event,
+    ...details,
+    timestamp: new Date().toISOString(),
+  })
+}
+
 /**
  * Shared helper to require an authenticated therapist without side effects.
  * Throws AuthError if the therapist doesn't exist instead of creating one.
@@ -26,6 +44,10 @@ export class AuthError extends Error {
 export async function requireTherapist() {
   const session = await auth()
   if (!session?.user?.email) {
+    logSessionIssue('warn', 'missing-session', {
+      reason: 'NO_SESSION',
+      stage: 'auth()',
+    })
     throw new AuthError('Unauthorized - No active session', 401, 'NO_SESSION')
   }
 
@@ -37,6 +59,9 @@ export async function requireTherapist() {
   })
 
   if (!user) {
+    logSessionIssue('warn', 'user-not-found', {
+      email: obfuscateIdentifier(normalizedEmail),
+    })
     throw new AuthError('User account not found. Please complete setup first.', 404, 'USER_NOT_FOUND')
   }
 
@@ -45,6 +70,10 @@ export async function requireTherapist() {
   })
 
   if (!therapist) {
+    logSessionIssue('warn', 'therapist-not-found', {
+      userId: obfuscateIdentifier(user.id),
+      email: obfuscateIdentifier(normalizedEmail),
+    })
     throw new AuthError('Therapist profile not found. Please complete setup first.', 404, 'THERAPIST_NOT_FOUND')
   }
 

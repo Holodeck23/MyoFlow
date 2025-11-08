@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import auth from '@/lib/auth'
+import { authMiddleware } from '@/lib/auth'
 import { AccountType } from '@prisma/client'
 import type { MyoFlowSession } from '@/lib/auth'
 
@@ -41,7 +41,7 @@ export function middlewareLogic(req: NextRequest) {
   return NextResponse.next()
 }
 
-export default auth(middlewareLogic)
+export default authMiddleware(middlewareLogic)
 
 export const config = {
   matcher: ['/dashboard/:path*', '/admin/:path*', '/onboarding/:path*'],

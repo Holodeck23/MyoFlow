@@ -1,9 +1,65 @@
 # Claude Development Session Notes
 
 **Project:** MyoFlow - Austrian Therapy Practice Management
-**Current Session:** October 24, 2025
-**Branch:** `beta-readiness-core-workflow`
-**Status:** ✅ CRITICAL PERFORMANCE FIX + QA VALIDATED
+**Current Session:** November 8, 2025
+**Branch:** `main` (beta-readiness-core-workflow merged)
+**Status:** ✅ Pre-Grant Critical Fixes - Task Planning Phase
+
+---
+
+## 🎯 Session Summary - November 8, 2025 ✅
+
+### **Documentation Cleanup + Pre-Grant Task Planning**
+
+**Branch:** `main`
+**Status:** Documentation reorganized, task specs created, ready for Codex execution
+
+### **Work Completed**
+
+#### **1. Documentation Reorganization** ✅
+- Created organized directory structure:
+  - `docs/guides/` - Git workflow
+  - `docs/decisions/` - Decision log
+  - `docs/qa/` - QA test scripts and instructions
+  - `archive/2025-10/` - October sprint documentation
+- Archived 7 outdated documents:
+  - CODE_QUALITY_REMEDIATION_PLAN.md (Sprint 1 complete)
+  - LAUNCH_BLOCKERS.md (Sprint 1 complete)
+  - THIS_WEEK_ACTION_PLAN.md (outdated Oct 4)
+  - SPEC_STATUS.md (superseded by .agent-os/specs/)
+  - KNOWN_ISSUES.md (superseded by .agent-os/tasks/)
+  - AUDIT_REPORT.md (one-time audit)
+  - ROADMAP.md (superseded by CLAUDE.md)
+- Updated DOCS_INDEX.md with clear navigation structure
+- Created archive/2025-10/README.md documenting historical context
+
+**Files Kept in Root (9 essential docs):**
+- README.md, CLAUDE.md, DEVELOPMENT.md, COORDINATION.md, DOCS_INDEX.md
+- Plus moved files now in organized subdirectories
+
+#### **2. CI TypeScript Errors Fixed** ✅
+- Fixed type errors on beta-readiness-core-workflow branch
+- All quality gates passing
+- Merged beta branch to main
+
+#### **3. Pre-Grant Task Specifications Created** ✅
+- Created detailed task specs in `.agent-os/tasks/`:
+  - `CODEX-TASK-LIST.md` - 3 prioritized tasks with subtasks
+  - `codex-brief-task1-session-management.md` - Detailed technical brief
+- Task priorities:
+  1. **P0 - Session Management Fix** (2-3 hours)
+  2. **P1 - Appointment Dropdown Fix** (1-2 hours)
+  3. **P2 - Quick Win UX Fixes** (1 hour)
+
+### **Next Steps**
+- Codex to execute CODEX-TASK-LIST.md tasks
+- Target: Before tech2b grant interview
+- Branch strategy: Create `fix/session-management` from beta branch
+
+### **Key Decisions**
+- **COORDINATION.md remains in root** - Essential for multi-agent workflows, not duplicate of DEVELOPMENT.md
+- **ROADMAP.md archived** - Outdated October planning superseded by active session notes
+- **Documentation structure finalized** - Clear separation between active docs, guides, decisions, QA, and archive
 
 ---
 
@@ -802,7 +858,7 @@ When ending session:
 1. Complete current todo items or mark as blocked
 2. Commit and push any working changes
 3. Update `AGENT_ACTIVITY_LOG.md` with work completed and next steps
-4. Document any new decisions in `DECISION_LOG.md`
+4. Document any new decisions in `docs/decisions/decision-log.md`
 
 **Next Developer:**
 1. **IMMEDIATE PRIORITY:** Fix NextAuth v5 handlers export issue to restore authentication
@@ -817,14 +873,14 @@ When ending session:
 
 - **Architecture Overview:** See `README.md`
 - **Development Workflow:** See `DEVELOPMENT.md`
-- **Technical Roadmap:** See `ROADMAP.md`
-- **Decision History:** See `DECISION_LOG.md`
-- **Agent Coordination:** See `AGENT_ACTIVITY_LOG.md`
+- **Decision History:** See `docs/decisions/decision-log.md`
+- **Agent Coordination:** See `COORDINATION.md`
+- **Documentation Index:** See `DOCS_INDEX.md`
 
 ---
 
-**Last Updated:** October 4, 2025
-**Next Priority:** Sprint 3 - UX + i18n Cleanup
+**Last Updated:** November 8, 2025
+**Next Priority:** Pre-Grant Critical Fixes - Codex execution
 
 ---
 

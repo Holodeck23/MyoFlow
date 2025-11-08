@@ -57,7 +57,7 @@ MyoFlow is a **single-tenant** practice management platform specifically designe
 - ÖGK integration
 - Advanced analytics
 
-See `ROADMAP.md` for detailed sprint breakdown and `docs/archive/` for long-term planning.
+See `CLAUDE.md` for current sprint status and `archive/2025-10/ROADMAP.md` for historical planning.
 
 ---
 
