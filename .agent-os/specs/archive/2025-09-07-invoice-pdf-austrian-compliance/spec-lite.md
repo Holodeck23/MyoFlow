@@ -1,1 +1,0 @@
-Invoice PDFs: Austrian KU/VAT compliance, Leistungsdatum, professional layout; CSV exports: BMD/RZL/DATEV formats; ETag caching; German-only.

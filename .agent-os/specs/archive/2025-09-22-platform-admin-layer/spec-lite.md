@@ -1,3 +1,0 @@
-# Spec Summary (Lite)
-
-Implement a comprehensive platform administration system with SUPER_ADMIN, SUPPORT, and FINANCE roles for managing MyoFlow therapist accounts. The MVP includes admin authentication at /admin, user management interface, account impersonation with audit logging, basic analytics dashboard using existing invoice data, feature flags system, and system announcements. This Phase 1 implementation maintains Austrian GDPR Article 9 compliance and builds on existing NextAuth.js and Prisma infrastructure.

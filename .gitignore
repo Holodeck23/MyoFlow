@@ -123,3 +123,14 @@ Thumbs.db
 
 # Turborepo
 .turbo
+# Dev notes — stored in private dev-brain repo
+agent-os/
+.agent-os/
+.claude/
+BRAIN/
+BRAIN_DIGEST.md
+SWARM.md
+CLAUDE.md
+COORDINATION.md
+WARP.md
+DEVELOPMENT.md
