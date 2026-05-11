@@ -14,8 +14,8 @@ test.describe('Authentication', () => {
     await page.goto('/auth/sign-in');
     
     // Fill in demo credentials (using the documented demo credentials)
-    await page.getByRole('textbox', { name: /email/i }).fill('test@myoflow.at');
-    await page.getByRole('textbox', { name: /password/i }).fill('demo123');
+    await page.getByRole('textbox', { name: /email/i }).fill(process.env.E2E_DEMO_EMAIL || 'test@myoflow.at');
+    await page.getByRole('textbox', { name: /password/i }).fill(process.env.E2E_DEMO_PASSWORD || '');
     
     // Submit form
     await page.getByRole('button', { name: /sign in/i }).click();

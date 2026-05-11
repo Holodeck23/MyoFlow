@@ -8,8 +8,8 @@
 - **Company:** MyoFlow e.U.
 - **Document Version:** 1.0
 - **Date:** September 2025
-- **Prepared by:** David Di Lallo
-- **Location:** Upper Austria, Austria
+- **Prepared by:** MyoFlow
+- **Location:** Austria
 
 ---
 
@@ -1360,7 +1360,7 @@ Git Push → Automated Tests → Security Scan → Staging Deploy → Production
 
 ## Founder Profile & Leadership Team
 
-### David Di Lallo - Founder & CEO
+### Founder & CEO
 
 **Background:**
 - **Education:** Computer Science degree, specialization in healthcare IT
@@ -1426,7 +1426,7 @@ Git Push → Automated Tests → Security Scan → Staging Deploy → Production
 ### Current Structure (Phase 1: 0-12 Months)
 
 ```
-CEO/Founder (David Di Lallo)
+CEO/Founder
 ├── Development Team (2 Full-Stack Developers)
 ├── Customer Success (Part-time, Founder-led)
 ├── Sales & Marketing (Founder + Part-time Marketing Assistant)

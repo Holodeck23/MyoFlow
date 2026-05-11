@@ -246,13 +246,13 @@ SELECT * FROM "ExportLog" ORDER BY "exportedAt" DESC LIMIT 1;
 ## Testing Evidence
 
 **Successful Exports Generated:**
-1. `/Users/ZOD/Downloads/MyoFlow-BMD-Export-2025-10-01-2025-10-31-20251019-1045.csv`
+1. `~/Downloads/MyoFlow-BMD-Export-2025-10-01-2025-10-31-20251019-1045.csv`
    - 2 invoices (SENT + PAID)
    - Correct BMD format (11 columns)
    - UTF-8 BOM present
    - Austrian formatting verified
 
-2. `/Users/ZOD/Downloads/MyoFlow-DATEV-Export-2025-10-01-2025-10-31-20251019-1047.csv`
+2. `~/Downloads/MyoFlow-DATEV-Export-2025-10-01-2025-10-31-20251019-1047.csv`
    - 2 invoices (SENT + PAID)
    - Correct DATEV format (14 columns)
    - Date format: ddMMyyyy

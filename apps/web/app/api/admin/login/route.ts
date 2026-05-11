@@ -37,8 +37,8 @@ export async function POST(request: Request) {
     // Optional development backdoor - guard behind env flag and non-production
     if (
       allowDemoAuth &&
-      email === 'admin@myoflow.at' &&
-      password === 'admin123'
+      email === (process.env.ADMIN_DEMO_EMAIL ?? 'admin@myoflow.at') &&
+      password === (process.env.ADMIN_DEMO_PASSWORD ?? '')
     ) {
       if (!isProduction) {
         console.info('Admin demo credentials matched')

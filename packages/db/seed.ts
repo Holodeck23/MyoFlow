@@ -46,7 +46,7 @@ async function main() {
 
   // Ensure platform admin exists for admin interface smoke tests
   const adminEmail = process.env.ADMIN_SEED_EMAIL ?? 'admin@myoflow.at'
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? 'admin123'
+  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? 'change-me-before-seeding'
   const hashedAdminPassword = await hash(adminPassword, 10)
 
   const adminUser = await prisma.user.upsert({

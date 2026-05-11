@@ -280,7 +280,7 @@ You are implementing the remaining beta readiness tasks. Claude has planned the 
 ## 📞 QUICK REFERENCE
 
 **Branch:** `beta-readiness-core-workflow`
-**Working Directory:** `/Users/ZOD/Documents/GitHub/MyoFlow`
+**Working Directory:** `~/MyoFlow`
 **Test Command:** `pnpm --filter @myoflow/web test:e2e`
 **Build Command:** `pnpm build`
 **Dev Server:** `pnpm --filter @myoflow/web dev` (runs on port 3000)

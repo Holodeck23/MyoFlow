@@ -121,8 +121,8 @@ AUTH_ENABLE_DEMO=true  # Enables test users
 ```
 
 ### Demo Users (when AUTH_ENABLE_DEMO=true)
-- Test user: `test@myoflow.at` / `demo123`
-- Admin demo: `admin@myoflow.at` / `admin123`
+- Test user: `test@myoflow.at` — password via `E2E_DEMO_PASSWORD` env var
+- Admin demo: `admin@myoflow.at` — password via `E2E_ADMIN_PASSWORD` / `ADMIN_DEMO_PASSWORD` env var
 
 ## ✅ Quality Gates
 

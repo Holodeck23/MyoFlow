@@ -594,7 +594,7 @@ For each of the 7 scenarios:
 **Setup Required:**
 ```bash
 # Ensure dev server running on port 3000
-cd /Users/ZOD/Documents/GitHub/MyoFlow
+cd ~/MyoFlow
 pnpm dev
 
 # Open browser to http://localhost:3000

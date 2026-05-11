@@ -20,7 +20,7 @@
 ## 🟦 CODEX STATUS: PERFORMANCE OPTIMIZATION ASSIGNED
 
 **Branch:** `perf/settings-optimization`
-**Working Directory:** `/Users/ZOD/Documents/GitHub/MyoFlow-perf`
+**Working Directory:** `~/MyoFlow-perf`
 **Assignment:** Systematic Settings Performance Optimization
 **Priority:** HIGH - Address 12s+ rebuild times
 

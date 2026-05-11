@@ -4,8 +4,8 @@ test.describe('Appointments', () => {
   test.beforeEach(async ({ page }) => {
     // Sign in first
     await page.goto('/auth/sign-in');
-    await page.fill('input[name="email"]', 'test@myoflow.at');
-    await page.fill('input[name="password"]', 'demo123');
+    await page.fill('input[name="email"]', process.env.E2E_DEMO_EMAIL || 'test@myoflow.at');
+    await page.fill('input[name="password"]', process.env.E2E_DEMO_PASSWORD || '');
     
     // Wait for both navigation and sign-in to complete
     await Promise.all([

@@ -430,7 +430,7 @@ export const authConfig: NextAuthConfig = {
 
         // Optional demo password fallback (dev only)
         if (process.env.AUTH_ENABLE_DEMO === 'true' && process.env.NODE_ENV !== 'production') {
-          if (password === 'demo' || password === 'demo123') {
+          if (process.env.AUTH_DEMO_PASSWORD && password === process.env.AUTH_DEMO_PASSWORD) {
             const demoUser = await prisma.user.findUnique({
               where: { email },
               include: { Therapist: true },

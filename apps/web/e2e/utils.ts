@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test'
 
 const DEMO_EMAIL = process.env.E2E_DEMO_EMAIL || 'test@myoflow.at'
-const DEMO_PASSWORD = process.env.E2E_DEMO_PASSWORD || 'demo123'
+const DEMO_PASSWORD = process.env.E2E_DEMO_PASSWORD || ''
 
 export async function loginAsDemo(page: Page) {
   await page.goto('/auth/sign-in', { waitUntil: 'domcontentloaded' })

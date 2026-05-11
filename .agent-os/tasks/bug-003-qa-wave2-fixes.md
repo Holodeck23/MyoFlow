@@ -170,7 +170,7 @@ This corrupted state broke:
 
 **Nuclear cache clear:**
 ```bash
-rm -rf /Users/ZOD/Documents/GitHub/MyoFlow/apps/web/.next
+rm -rf ~/MyoFlow/apps/web/.next
 rm -rf node_modules/.cache
 pkill -f "next dev"
 pnpm dev  # Fresh restart

@@ -163,7 +163,7 @@ export default function SignIn() {
               </div>
               {demoEnabled && (
                 <p className="text-xs text-muted-foreground">
-                  Demo mode enabled for development: use password &quot;demo&quot; (or &quot;demo123&quot; for seeded test users).
+                  Demo mode enabled for development. Use credentials from your local .env file.
                 </p>
               )}
             </div>

@@ -50,12 +50,12 @@
 ### **Git Worktree Strategy**
 ```bash
 # Codex Workspace
-cd /Users/ZOD/Documents/GitHub/MyoFlow-codex
+cd ~/MyoFlow-codex
 git checkout main && git pull
 git checkout -b codex/language-system-cleanup
 
 # Claude Workspace
-cd /Users/ZOD/Documents/GitHub/MyoFlow
+cd ~/MyoFlow
 git checkout main && git pull
 git checkout -b claude/settings-tabs-completion
 ```
